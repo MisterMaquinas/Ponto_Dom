@@ -41,7 +41,7 @@ fins de controle de ponto.
     
     try {
       // Verificar se o navegador suporta Web Bluetooth
-      if (!navigator.bluetooth) {
+      if (!('bluetooth' in navigator)) {
         throw new Error('Bluetooth não suportado neste navegador');
       }
 

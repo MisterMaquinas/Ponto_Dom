@@ -25,7 +25,8 @@ const UserManagement = ({ onBack, userType, onLogout, userData }: UserManagement
     deleteUser,
     getAvailableRoles,
     getRoleLabel,
-    getRoleBadgeVariant
+    getRoleBadgeVariant,
+    filteredUsers
   } = useUserManagement(userType, userData);
 
   return (
@@ -55,7 +56,7 @@ const UserManagement = ({ onBack, userType, onLogout, userData }: UserManagement
         )}
 
         <UserList
-          users={users}
+          users={filteredUsers} // Usando usuários filtrados pela hierarquia
           userData={userData}
           onDeleteUser={deleteUser}
           getRoleLabel={getRoleLabel}

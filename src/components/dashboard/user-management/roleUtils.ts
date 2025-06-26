@@ -1,26 +1,17 @@
 
-export const canCreateRole = (userType: 'admin' | 'manager' | 'supervisor', role: string) => {
-  if (userType === 'admin') return true;
-  if (userType === 'manager') return ['supervisor', 'user'].includes(role);
-  if (userType === 'supervisor') return role === 'user';
-  return false;
+import { UserRole, canCreateRole, getAvailableRolesForUser } from './hierarchyUtils';
+
+export const canCreateRoleForUser = (userType: UserRole, role: string) => {
+  return canCreateRole(userType, role as UserRole);
 };
 
-export const getAvailableRoles = (userType: 'admin' | 'manager' | 'supervisor') => {
-  if (userType === 'admin') return [
-    { value: 'manager', label: 'Gerente' },
-    { value: 'supervisor', label: 'Supervisor' },
-    { value: 'user', label: 'Funcionário' }
-  ];
-  if (userType === 'manager') return [
-    { value: 'supervisor', label: 'Supervisor' },
-    { value: 'user', label: 'Funcionário' }
-  ];
-  return [{ value: 'user', label: 'Funcionário' }];
+export const getAvailableRoles = (userType: UserRole) => {
+  return getAvailableRolesForUser(userType);
 };
 
 export const getRoleLabel = (role: string) => {
   const roleMap = {
+    'master': 'Master',
     'admin': 'Administrador',
     'manager': 'Gerente',
     'supervisor': 'Supervisor',
@@ -31,8 +22,9 @@ export const getRoleLabel = (role: string) => {
 
 export const getRoleBadgeVariant = (role: string) => {
   const variantMap = {
-    'admin': 'bg-purple-100 text-purple-800',
-    'manager': 'bg-blue-100 text-blue-800',
+    'master': 'bg-purple-100 text-purple-800',
+    'admin': 'bg-blue-100 text-blue-800',
+    'manager': 'bg-indigo-100 text-indigo-800',
     'supervisor': 'bg-orange-100 text-orange-800',
     'user': 'bg-green-100 text-green-800'
   };
