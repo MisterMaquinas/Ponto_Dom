@@ -68,6 +68,7 @@ export const useUserManagement = (userType: 'admin' | 'manager' | 'supervisor', 
         role: 'user',
         face_data: undefined
       });
+      setFormData(prev => ({ ...prev, role: 'user' })); // Reset role to trigger limit refresh
       setShowForm(false);
     }
   };

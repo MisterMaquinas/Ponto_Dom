@@ -27,6 +27,47 @@ export type Database = {
         }
         Relationships: []
       }
+      company_limits: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          max_admins: number | null
+          max_managers: number | null
+          max_supervisors: number | null
+          max_users: number | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          max_admins?: number | null
+          max_managers?: number | null
+          max_supervisors?: number | null
+          max_users?: number | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          max_admins?: number | null
+          max_managers?: number | null
+          max_supervisors?: number | null
+          max_users?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_limits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       master_users: {
         Row: {
           created_at: string

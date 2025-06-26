@@ -1,11 +1,13 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Camera, Check, X } from 'lucide-react';
+import { Badge } from "@/components/ui/badge";
+import { Users, Camera, Check, X, AlertCircle } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
+import { useUserLimits } from "@/hooks/useUserLimits";
 
 interface UserFormData {
   name: string;
@@ -39,6 +41,12 @@ const UserForm = ({ formData, setFormData, onSubmit, onCancel, availableRoles, u
   const [hasFaceData, setHasFaceData] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const { 
+    canCreateUser, 
+    getLimitMessage, 
+    loading: limitsLoading 
+  } = useUserLimits(userData.companyId);
 
   const startFaceCapture = async () => {
     try {
@@ -98,6 +106,27 @@ const UserForm = ({ formData, setFormData, onSubmit, onCancel, availableRoles, u
     setIsCapturing(false);
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Verificar limite antes de submeter
+    if (!canCreateUser(formData.role)) {
+      toast({
+        title: "Limite atingido",
+        description: `Não é possível cadastrar mais usuários do tipo ${formData.role}. Limite da empresa atingido.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    onSubmit(e);
+  };
+
+  // Filtrar roles disponíveis baseado nos limites
+  const availableRolesWithLimits = availableRoles.filter(role => 
+    canCreateUser(role.value) || limitsLoading
+  );
+
   return (
     <Card className="mb-8 border-0 shadow-lg">
       <CardHeader>
@@ -107,7 +136,30 @@ const UserForm = ({ formData, setFormData, onSubmit, onCancel, availableRoles, u
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={onSubmit} className="space-y-6">
+        {/* Mostrar informações de limite */}
+        {!limitsLoading && (
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              Limites da Empresa
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+              {availableRoles.map(role => (
+                <div key={role.value} className="flex items-center justify-between">
+                  <span className="text-blue-700">{role.label}:</span>
+                  <Badge 
+                    variant={canCreateUser(role.value) ? "default" : "destructive"}
+                    className="text-xs"
+                  >
+                    {getLimitMessage(role.value)}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Dados Pessoais */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Dados Pessoais</h3>
@@ -275,18 +327,36 @@ const UserForm = ({ formData, setFormData, onSubmit, onCancel, availableRoles, u
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Cargo *
                 </label>
-                <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+                <Select 
+                  value={formData.role} 
+                  onValueChange={(value) => setFormData({ ...formData, role: value })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o cargo" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableRoles.map((role) => (
+                    {availableRolesWithLimits.map((role) => (
                       <SelectItem key={role.value} value={role.value}>
-                        {role.label}
+                        <div className="flex items-center justify-between w-full">
+                          <span>{role.label}</span>
+                          {!limitsLoading && (
+                            <Badge 
+                              variant={canCreateUser(role.value) ? "default" : "destructive"}
+                              className="ml-2 text-xs"
+                            >
+                              {getLimitMessage(role.value).split('(')[1]?.replace(')', '') || ''}
+                            </Badge>
+                          )}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {formData.role && !canCreateUser(formData.role) && (
+                  <p className="text-red-600 text-sm mt-1">
+                    ⚠️ Limite atingido para este cargo
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -358,7 +428,11 @@ const UserForm = ({ formData, setFormData, onSubmit, onCancel, availableRoles, u
           </div>
 
           <div className="flex gap-4 pt-4">
-            <Button type="submit" className="bg-green-500 hover:bg-green-600">
+            <Button 
+              type="submit" 
+              className="bg-green-500 hover:bg-green-600"
+              disabled={formData.role && !canCreateUser(formData.role)}
+            >
               Cadastrar Usuário
             </Button>
             <Button type="button" onClick={onCancel} variant="outline">
