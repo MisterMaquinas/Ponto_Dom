@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -302,7 +303,7 @@ const GeneralSettings = ({ onBack, userData, onLogout }: GeneralSettingsProps) =
 
               <Button onClick={handleSave} disabled={saving} className="w-full bg-purple-500 hover:bg-purple-600">
                 <Save className="w-4 h-4 mr-2" />
-                {saving ? 'Salvar Configurações Gerais'}
+                {saving ? 'Salvando...' : 'Salvar Configurações Gerais'}
               </Button>
             </CardContent>
           </Card>
