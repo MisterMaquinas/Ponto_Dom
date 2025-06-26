@@ -8,8 +8,8 @@ interface User {
   name: string;
   username: string;
   role: string;
-  createdBy: string;
-  companyId: string;
+  created_by: string;
+  company_id: string;
   cpf: string;
   rg: string;
   birth_date: string;
