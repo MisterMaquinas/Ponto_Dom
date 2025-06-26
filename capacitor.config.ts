@@ -15,6 +15,16 @@ const config: CapacitorConfig = {
       backgroundColor: '#1e40af',
       showSpinner: false
     }
+  },
+  android: {
+    minWebViewVersion: 60,
+    allowMixedContent: true,
+    captureInput: true,
+    webContentsDebuggingEnabled: true
+  },
+  ios: {
+    scheme: 'BioPonto Face',
+    contentInset: 'automatic'
   }
 };
 
