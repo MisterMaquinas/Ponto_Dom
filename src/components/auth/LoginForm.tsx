@@ -113,10 +113,12 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
               <p className="text-sm font-bold text-gray-800">
                 DOM LIMA TECNOLOGIA
               </p>
+              <p className="text-xs text-gray-500 mb-2">
+                CNPJ: 49.335.000/0001-31
+              </p>
               <div className="text-xs text-gray-500 space-y-1">
-                <p>📧 contato@domlima.tech</p>
-                <p>📱 (11) 99999-9999</p>
-                <p>🌐 www.domlima.tech</p>
+                <p>📱 (81) 98642-4175</p>
+                <p>🌐 www.domlimatecnologia.com.br</p>
               </div>
             </div>
           </div>
