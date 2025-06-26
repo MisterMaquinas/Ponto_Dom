@@ -50,8 +50,12 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <Card className="w-full max-w-md mx-4 shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
         <CardHeader className="text-center pb-8">
-          <div className="mx-auto w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4">
-            <span className="text-2xl font-bold text-white">BP</span>
+          <div className="mx-auto mb-6">
+            <img 
+              src="/lovable-uploads/a30e2daf-b16c-4217-b819-2a70f12af50d.png" 
+              alt="BioPonto Logo" 
+              className="w-32 h-32 mx-auto object-contain"
+            />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             BioPonto
@@ -97,6 +101,23 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
               <div>Gerente: Gerente1 / Gerente1</div>
               <div>Supervisor: Supervisor1 / Supervisor1</div>
               <div>Funcionário: Usuario1 / Usuario1</div>
+            </div>
+          </div>
+          
+          {/* Créditos e Contato */}
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="text-center space-y-2">
+              <p className="text-xs text-gray-600 font-medium">
+                Desenvolvido por
+              </p>
+              <p className="text-sm font-bold text-gray-800">
+                DOM LIMA TECNOLOGIA
+              </p>
+              <div className="text-xs text-gray-500 space-y-1">
+                <p>📧 contato@domlima.tech</p>
+                <p>📱 (11) 99999-9999</p>
+                <p>🌐 www.domlima.tech</p>
+              </div>
             </div>
           </div>
         </CardContent>
