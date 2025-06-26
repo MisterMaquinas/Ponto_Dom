@@ -1,0 +1,169 @@
+
+import React, { useState } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Printer, Share, Bluetooth, MessageCircle, X } from 'lucide-react';
+import { toast } from "@/hooks/use-toast";
+
+interface ReceiptActionsProps {
+  punchData: {
+    name: string;
+    timestamp: string;
+    hash: string;
+  };
+}
+
+const ReceiptActions = ({ punchData }: ReceiptActionsProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const generateReceiptText = () => {
+    const date = new Date(punchData.timestamp);
+    const formattedDate = date.toLocaleDateString('pt-BR');
+    const formattedTime = date.toLocaleTimeString('pt-BR');
+    
+    return `
+COMPROVANTE DE PONTO
+════════════════════
+Funcionário: ${punchData.name}
+Data: ${formattedDate}
+Horário: ${formattedTime}
+Hash: ${punchData.hash}
+════════════════════
+Este comprovante é válido para
+fins de controle de ponto.
+    `.trim();
+  };
+
+  const handleBluetoothPrint = async () => {
+    setIsConnecting(true);
+    
+    try {
+      // Verificar se o navegador suporta Web Bluetooth
+      if (!navigator.bluetooth) {
+        throw new Error('Bluetooth não suportado neste navegador');
+      }
+
+      toast({
+        title: "Conectando...",
+        description: "Procurando impressoras Bluetooth...",
+      });
+
+      // Simular conexão Bluetooth (implementação real requer Web Bluetooth API)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const receiptText = generateReceiptText();
+      console.log('Enviando para impressora:', receiptText);
+      
+      toast({
+        title: "Impresso com sucesso!",
+        description: "Comprovante enviado para a impressora",
+      });
+      
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Erro ao imprimir:', error);
+      toast({
+        title: "Erro na impressão",
+        description: "Não foi possível conectar à impressora Bluetooth",
+        variant: "destructive",
+      });
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const handleWhatsAppShare = () => {
+    const receiptText = generateReceiptText();
+    const encodedText = encodeURIComponent(receiptText);
+    const whatsappUrl = `https://wa.me/?text=${encodedText}`;
+    
+    // Abrir WhatsApp em nova aba
+    window.open(whatsappUrl, '_blank');
+    
+    toast({
+      title: "WhatsApp aberto",
+      description: "Comprovante pronto para compartilhar",
+    });
+    
+    setIsOpen(false);
+  };
+
+  const handleCopyReceipt = () => {
+    const receiptText = generateReceiptText();
+    navigator.clipboard.writeText(receiptText).then(() => {
+      toast({
+        title: "Copiado!",
+        description: "Comprovante copiado para a área de transferência",
+      });
+    }).catch(() => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível copiar o comprovante",
+        variant: "destructive",
+      });
+    });
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <button className="flex items-center justify-center text-green-600 hover:text-green-700 transition-colors cursor-pointer">
+          <Printer className="w-4 h-4 mr-1" />
+          <span className="text-xs underline">Comprovante impresso</span>
+        </button>
+      </DialogTrigger>
+      
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Printer className="w-5 h-5" />
+            Opções do Comprovante
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          <Card className="bg-gray-50">
+            <CardContent className="p-4">
+              <div className="text-sm text-gray-700 whitespace-pre-line font-mono">
+                {generateReceiptText()}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <div className="grid grid-cols-1 gap-3">
+            <Button
+              onClick={handleBluetoothPrint}
+              disabled={isConnecting}
+              className="flex items-center justify-center gap-2 h-12"
+              variant="outline"
+            >
+              <Bluetooth className="w-5 h-5" />
+              {isConnecting ? 'Conectando...' : 'Imprimir via Bluetooth'}
+            </Button>
+            
+            <Button
+              onClick={handleWhatsAppShare}
+              className="flex items-center justify-center gap-2 h-12 bg-green-500 hover:bg-green-600 text-white"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Compartilhar no WhatsApp
+            </Button>
+            
+            <Button
+              onClick={handleCopyReceipt}
+              variant="outline"
+              className="flex items-center justify-center gap-2 h-12"
+            >
+              <Share className="w-5 h-5" />
+              Copiar Comprovante
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default ReceiptActions;

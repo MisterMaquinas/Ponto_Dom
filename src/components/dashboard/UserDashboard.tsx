@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Clock, User, Printer, CheckCircle } from 'lucide-react';
+import { Camera, Clock, User, CheckCircle } from 'lucide-react';
 import FaceRecognition from './FaceRecognition';
+import ReceiptActions from './ReceiptActions';
 import { toast } from "@/hooks/use-toast";
 
 interface UserDashboardProps {
@@ -15,10 +16,16 @@ interface UserDashboardProps {
 const UserDashboard = ({ userData, onLogout }: UserDashboardProps) => {
   const [showCamera, setShowCamera] = useState(false);
   const [lastPunchTime, setLastPunchTime] = useState<Date | null>(null);
+  const [lastPunchData, setLastPunchData] = useState<any>(null);
 
   const handlePunchSuccess = (faceData: any) => {
     const now = new Date();
     setLastPunchTime(now);
+    setLastPunchData({
+      name: userData.name,
+      timestamp: now.toISOString(),
+      hash: faceData.hash
+    });
     setShowCamera(false);
     
     // Simulate printing receipt
@@ -107,18 +114,17 @@ const UserDashboard = ({ userData, onLogout }: UserDashboardProps) => {
                 Registrar Ponto
               </Button>
 
-              {lastPunchTime && (
+              {lastPunchTime && lastPunchData && (
                 <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-center justify-center mb-2">
                     <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
                     <span className="text-green-800 font-medium">Último registro</span>
                   </div>
-                  <p className="text-green-700 text-sm">
+                  <p className="text-green-700 text-sm mb-2">
                     {lastPunchTime.toLocaleString('pt-BR')}
                   </p>
-                  <div className="flex items-center justify-center mt-2 text-green-600">
-                    <Printer className="w-4 h-4 mr-1" />
-                    <span className="text-xs">Comprovante impresso</span>
+                  <div className="flex items-center justify-center">
+                    <ReceiptActions punchData={lastPunchData} />
                   </div>
                 </div>
               )}
