@@ -66,6 +66,13 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
 
       if (companiesError) {
         console.error('Erro ao carregar empresas:', companiesError);
+        setCompanies([]);
+        setStats({
+          totalCompanies: 0,
+          totalAdmins: 0,
+          totalEmployees: 0,
+          activeCompanies: 0
+        });
         return;
       }
 
@@ -109,6 +116,13 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
       setStats(newStats);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
+      setCompanies([]);
+      setStats({
+        totalCompanies: 0,
+        totalAdmins: 0,
+        totalEmployees: 0,
+        activeCompanies: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -190,10 +204,17 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
                 <CardContent>
                   <div className="space-y-4">
                     {companies.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Building className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500 mb-2">Nenhuma empresa cadastrada ainda</p>
-                        <p className="text-sm text-gray-400">Comece cadastrando sua primeira empresa</p>
+                      <div className="text-center py-12">
+                        <Building className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500 mb-2 text-lg">Nenhuma empresa cadastrada ainda</p>
+                        <p className="text-sm text-gray-400 mb-4">Comece cadastrando sua primeira empresa</p>
+                        <Button
+                          onClick={() => setActiveTab('admins')}
+                          className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Cadastrar Primeira Empresa
+                        </Button>
                       </div>
                     ) : (
                       companies.map((company) => (

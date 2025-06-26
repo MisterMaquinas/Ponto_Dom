@@ -61,6 +61,7 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
           description: "Erro ao carregar empresas",
           variant: "destructive",
         });
+        setCompanies([]);
       } else {
         setCompanies(companiesData || []);
       }
@@ -86,6 +87,7 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
           description: "Erro ao carregar administradores",
           variant: "destructive",
         });
+        setAdmins([]);
       } else {
         setAdmins(adminsData || []);
       }
@@ -96,6 +98,8 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
         description: "Erro inesperado ao carregar dados",
         variant: "destructive",
       });
+      setCompanies([]);
+      setAdmins([]);
     } finally {
       setLoading(false);
     }
@@ -367,10 +371,17 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
             ) : (
               <div className="space-y-4">
                 {admins.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Building className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500 mb-2">Nenhuma empresa cadastrada ainda</p>
-                    <p className="text-sm text-gray-400">Use o botão "Nova Empresa" para começar</p>
+                  <div className="text-center py-12">
+                    <Building className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500 mb-2 text-lg">Nenhuma empresa cadastrada ainda</p>
+                    <p className="text-sm text-gray-400 mb-4">Use o botão "Nova Empresa" para começar</p>
+                    <Button
+                      onClick={() => setShowForm(true)}
+                      className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Cadastrar Primeira Empresa
+                    </Button>
                   </div>
                 ) : (
                   admins.map((admin) => (
