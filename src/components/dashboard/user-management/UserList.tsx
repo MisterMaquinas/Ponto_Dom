@@ -4,18 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Eye } from 'lucide-react';
-
-interface User {
-  id: string;
-  name: string;
-  username: string;
-  role: string;
-  createdBy: string;
-  companyId: string;
-  cpf: string;
-  contact: string;
-  face_data?: string;
-}
+import type { User } from './types';
 
 interface UserListProps {
   users: User[];
