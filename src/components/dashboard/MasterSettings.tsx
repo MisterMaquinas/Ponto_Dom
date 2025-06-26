@@ -1,10 +1,12 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Crown, Users, Database, Shield, Settings as SettingsIcon } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import CompanyLimitsManager from './master/CompanyLimitsManager';
+import DatabaseSettings from './master/DatabaseSettings';
+import SecuritySettings from './master/SecuritySettings';
+import GeneralSettings from './master/GeneralSettings';
 
 interface MasterSettingsProps {
   onBack: () => void;
@@ -18,6 +20,36 @@ const MasterSettings = ({ onBack, onLogout, userData }: MasterSettingsProps) => 
   if (activeSection === 'company-limits') {
     return (
       <CompanyLimitsManager 
+        onBack={() => setActiveSection('overview')} 
+        userData={userData}
+        onLogout={onLogout}
+      />
+    );
+  }
+
+  if (activeSection === 'database') {
+    return (
+      <DatabaseSettings 
+        onBack={() => setActiveSection('overview')} 
+        userData={userData}
+        onLogout={onLogout}
+      />
+    );
+  }
+
+  if (activeSection === 'security') {
+    return (
+      <SecuritySettings 
+        onBack={() => setActiveSection('overview')} 
+        userData={userData}
+        onLogout={onLogout}
+      />
+    );
+  }
+
+  if (activeSection === 'general') {
+    return (
+      <GeneralSettings 
         onBack={() => setActiveSection('overview')} 
         userData={userData}
         onLogout={onLogout}
@@ -40,7 +72,7 @@ const MasterSettings = ({ onBack, onLogout, userData }: MasterSettingsProps) => 
       description: 'Gerenciar configurações de banco de dados e performance',
       icon: Database,
       color: 'from-green-500 to-green-600',
-      action: () => console.log('Database settings')
+      action: () => setActiveSection('database')
     },
     {
       id: 'security',
@@ -48,7 +80,7 @@ const MasterSettings = ({ onBack, onLogout, userData }: MasterSettingsProps) => 
       description: 'Configurar políticas de segurança e autenticação',
       icon: Shield,
       color: 'from-red-500 to-red-600',
-      action: () => console.log('Security settings')
+      action: () => setActiveSection('security')
     },
     {
       id: 'general',
@@ -56,7 +88,7 @@ const MasterSettings = ({ onBack, onLogout, userData }: MasterSettingsProps) => 
       description: 'Ajustes gerais do sistema e preferências',
       icon: SettingsIcon,
       color: 'from-purple-500 to-purple-600',
-      action: () => console.log('General settings')
+      action: () => setActiveSection('general')
     }
   ];
 
