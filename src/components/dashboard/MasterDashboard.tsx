@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Users, Building, Crown, Plus, Settings, BarChart3 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import AdminManagement from './AdminManagement';
+import MasterReports from './MasterReports';
+import MasterSettings from './MasterSettings';
 
 interface MasterDashboardProps {
   userData: any;
@@ -132,6 +134,14 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
     return <AdminManagement onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} />;
   }
 
+  if (activeTab === 'reports') {
+    return <MasterReports onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} />;
+  }
+
+  if (activeTab === 'settings') {
+    return <MasterSettings onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} />;
+  }
+
   const statsData = [
     { title: 'Total de Empresas', value: stats.totalCompanies.toString(), icon: Building, color: 'from-purple-500 to-purple-600' },
     { title: 'Administradores', value: stats.totalAdmins.toString(), icon: Users, color: 'from-blue-500 to-blue-600' },
@@ -254,15 +264,15 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
                     Cadastrar Nova Empresa
                   </Button>
                   <Button
-                    variant="outline"
-                    className="w-full justify-start h-12 border-gray-200 hover:bg-gray-50"
+                    onClick={() => setActiveTab('reports')}
+                    className="w-full justify-start h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
                   >
                     <BarChart3 className="w-5 h-5 mr-3" />
                     Relatórios Gerais
                   </Button>
                   <Button
-                    variant="outline"
-                    className="w-full justify-start h-12 border-gray-200 hover:bg-gray-50"
+                    onClick={() => setActiveTab('settings')}
+                    className="w-full justify-start h-12 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700"
                   >
                     <Settings className="w-5 h-5 mr-3" />
                     Configurações do Sistema
