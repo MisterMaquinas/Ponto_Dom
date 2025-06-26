@@ -4,16 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, Calendar, Clock, Filter } from 'lucide-react';
+import { ArrowLeft, Download, Calendar, Clock, Filter, Building } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 
 interface ReportsProps {
   onBack: () => void;
   userType: 'admin' | 'manager' | 'supervisor';
   onLogout: () => void;
+  userData: any;
 }
 
-const Reports = ({ onBack, userType, onLogout }: ReportsProps) => {
+const Reports = ({ onBack, userType, onLogout, userData }: ReportsProps) => {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState('');
@@ -59,6 +60,12 @@ const Reports = ({ onBack, userType, onLogout }: ReportsProps) => {
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Relatórios de Ponto</h1>
                 <p className="text-gray-600">Visualizar e exportar registros</p>
+                {userData?.companyName && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <Building className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm text-blue-600 font-medium">{userData.companyName}</span>
+                  </div>
+                )}
               </div>
             </div>
             <Button onClick={onLogout} variant="outline">

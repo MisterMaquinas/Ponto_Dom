@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,11 +21,11 @@ const ManagerDashboard = ({ userData, onLogout }: ManagerDashboardProps) => {
   ];
 
   if (activeTab === 'users') {
-    return <UserManagement onBack={() => setActiveTab('overview')} userType="manager" onLogout={onLogout} />;
+    return <UserManagement onBack={() => setActiveTab('overview')} userType="manager" onLogout={onLogout} userData={userData} />;
   }
 
   if (activeTab === 'reports') {
-    return <Reports onBack={() => setActiveTab('overview')} userType="manager" onLogout={onLogout} />;
+    return <Reports onBack={() => setActiveTab('overview')} userType="manager" onLogout={onLogout} userData={userData} />;
   }
 
   return (
@@ -114,6 +113,3 @@ const ManagerDashboard = ({ userData, onLogout }: ManagerDashboardProps) => {
       </div>
     </div>
   );
-};
-
-export default ManagerDashboard;
