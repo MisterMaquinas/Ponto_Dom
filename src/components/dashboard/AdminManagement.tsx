@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowLeft, Plus, Edit, Trash2, Building, Crown } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +31,8 @@ interface Admin {
 
 const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) => {
   const [showForm, setShowForm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +41,11 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
     adminName: '',
     adminUser: '',
     adminPassword: ''
+  });
+  const [editFormData, setEditFormData] = useState({
+    companyName: '',
+    adminName: '',
+    adminUser: ''
   });
 
   useEffect(() => {
@@ -187,6 +195,82 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
       toast({
         title: "Erro",
         description: "Erro inesperado ao cadastrar empresa",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditClick = (admin: Admin) => {
+    setEditingAdmin(admin);
+    setEditFormData({
+      companyName: admin.companies?.name || '',
+      adminName: admin.name,
+      adminUser: admin.username
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!editingAdmin || !editFormData.companyName || !editFormData.adminName || !editFormData.adminUser) {
+      toast({
+        title: "Erro",
+        description: "Todos os campos são obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Atualizar a empresa
+      const { error: companyError } = await supabase
+        .from('companies')
+        .update({ name: editFormData.companyName })
+        .eq('id', editingAdmin.company_id);
+
+      if (companyError) {
+        console.error('Erro ao atualizar empresa:', companyError);
+        toast({
+          title: "Erro",
+          description: "Erro ao atualizar empresa: " + companyError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Atualizar o administrador
+      const { error: adminError } = await supabase
+        .from('users')
+        .update({
+          name: editFormData.adminName,
+          username: editFormData.adminUser
+        })
+        .eq('id', editingAdmin.id);
+
+      if (adminError) {
+        console.error('Erro ao atualizar administrador:', adminError);
+        toast({
+          title: "Erro",
+          description: "Erro ao atualizar administrador: " + adminError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await loadData();
+      setShowEditModal(false);
+      setEditingAdmin(null);
+      
+      toast({
+        title: "Dados atualizados com sucesso!",
+        description: `As informações de ${editFormData.companyName} foram atualizadas`,
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao atualizar dados",
         variant: "destructive",
       });
     }
@@ -408,6 +492,7 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
                             variant="ghost" 
                             size="sm" 
                             className="text-blue-600 hover:text-blue-700"
+                            onClick={() => handleEditClick(admin)}
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -429,6 +514,66 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
           </CardContent>
         </Card>
       </div>
+
+      {/* Modal de Edição */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5" />
+              Editar Empresa
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nome da Empresa *
+              </label>
+              <Input
+                value={editFormData.companyName}
+                onChange={(e) => setEditFormData({ ...editFormData, companyName: e.target.value })}
+                placeholder="Nome da empresa"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nome do Administrador *
+              </label>
+              <Input
+                value={editFormData.adminName}
+                onChange={(e) => setEditFormData({ ...editFormData, adminName: e.target.value })}
+                placeholder="Nome do administrador"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Login do Administrador *
+              </label>
+              <Input
+                value={editFormData.adminUser}
+                onChange={(e) => setEditFormData({ ...editFormData, adminUser: e.target.value })}
+                placeholder="Login do administrador"
+                required
+              />
+            </div>
+            <div className="flex gap-4 pt-4">
+              <Button type="submit" className="bg-blue-500 hover:bg-blue-600 flex-1">
+                Salvar Alterações
+              </Button>
+              <Button 
+                type="button" 
+                onClick={() => setShowEditModal(false)} 
+                variant="outline"
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
