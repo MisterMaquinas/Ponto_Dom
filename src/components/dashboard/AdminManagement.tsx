@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Edit, Trash2, Building, Crown } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AdminManagementProps {
   onBack: () => void;
@@ -13,67 +14,188 @@ interface AdminManagementProps {
   userData: any;
 }
 
+interface Company {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
 interface Admin {
   id: string;
-  companyName: string;
-  adminUser: string;
-  status: 'Ativa' | 'Inativa';
-  employees: number;
-  createdAt: string;
+  company_id: string;
+  name: string;
+  username: string;
+  companies?: Company;
 }
 
 const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) => {
   const [showForm, setShowForm] = useState(false);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [admins, setAdmins] = useState<Admin[]>([]);
   const [formData, setFormData] = useState({
     companyName: '',
+    adminName: '',
     adminUser: '',
     adminPassword: ''
   });
 
-  const [admins, setAdmins] = useState<Admin[]>([
-    { id: 'company_1', companyName: 'Empresa Alpha', adminUser: 'Adm1', status: 'Ativa', employees: 45, createdAt: '2024-01-15' },
-    { id: 'company_2', companyName: 'Empresa Beta', adminUser: 'Adm2', status: 'Ativa', employees: 32, createdAt: '2024-02-10' },
-    { id: 'company_raiox', companyName: 'RaioX', adminUser: 'RaioXadm', status: 'Ativa', employees: 28, createdAt: '2024-03-05' },
-    { id: 'company_3', companyName: 'TechCorp', adminUser: 'TechAdm', status: 'Inativa', employees: 25, createdAt: '2024-01-20' },
-    { id: 'company_4', companyName: 'MediCenter', adminUser: 'MediAdm', status: 'Ativa', employees: 20, createdAt: '2024-02-28' },
-  ]);
+  useEffect(() => {
+    loadData();
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const loadData = async () => {
+    try {
+      // Carregar empresas
+      const { data: companiesData, error: companiesError } = await supabase
+        .from('companies')
+        .select('*')
+        .order('name');
+
+      if (companiesError) {
+        console.error('Erro ao carregar empresas:', companiesError);
+      } else {
+        setCompanies(companiesData || []);
+      }
+
+      // Carregar administradores
+      const { data: adminsData, error: adminsError } = await supabase
+        .from('users')
+        .select(`
+          *,
+          companies (
+            id,
+            name,
+            created_at
+          )
+        `)
+        .eq('role', 'admin')
+        .order('name');
+
+      if (adminsError) {
+        console.error('Erro ao carregar administradores:', adminsError);
+      } else {
+        setAdmins(adminsData || []);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newAdmin: Admin = {
-      id: `company_${Date.now()}`,
-      companyName: formData.companyName,
-      adminUser: formData.adminUser,
-      status: 'Ativa',
-      employees: 0,
-      createdAt: new Date().toISOString().split('T')[0]
-    };
+    try {
+      // Primeiro, criar a empresa
+      const { data: companyData, error: companyError } = await supabase
+        .from('companies')
+        .insert([
+          { name: formData.companyName }
+        ])
+        .select()
+        .single();
 
-    setAdmins([...admins, newAdmin]);
-    setFormData({ companyName: '', adminUser: '', adminPassword: '' });
-    setShowForm(false);
-    
-    toast({
-      title: "Administrador criado com sucesso!",
-      description: `Empresa ${formData.companyName} foi cadastrada com o admin ${formData.adminUser}`,
-    });
+      if (companyError) {
+        console.error('Erro ao criar empresa:', companyError);
+        toast({
+          title: "Erro",
+          description: "Erro ao criar empresa: " + companyError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Depois, criar o administrador
+      const { data: adminData, error: adminError } = await supabase
+        .from('users')
+        .insert([
+          {
+            company_id: companyData.id,
+            name: formData.adminName,
+            cpf: '000.000.000-00', // CPF temporário
+            rg: '0000000',
+            birth_date: '1990-01-01',
+            street: 'Rua Principal',
+            number: '123',
+            neighborhood: 'Centro',
+            city: 'Cidade',
+            state: 'SP',
+            zip_code: '00000-000',
+            contact: 'admin@empresa.com',
+            username: formData.adminUser,
+            password: formData.adminPassword,
+            role: 'admin',
+            created_by: 'master'
+          }
+        ])
+        .select();
+
+      if (adminError) {
+        console.error('Erro ao criar administrador:', adminError);
+        toast({
+          title: "Erro",
+          description: "Erro ao criar administrador: " + adminError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await loadData();
+      setFormData({ companyName: '', adminName: '', adminUser: '', adminPassword: '' });
+      setShowForm(false);
+      
+      toast({
+        title: "Administrador criado com sucesso!",
+        description: `Empresa ${formData.companyName} foi cadastrada com o admin ${formData.adminUser}`,
+      });
+    } catch (error) {
+      console.error('Erro ao cadastrar:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao cadastrar",
+        variant: "destructive",
+      });
+    }
   };
 
-  const deleteAdmin = (id: string) => {
-    setAdmins(admins.filter(admin => admin.id !== id));
-    toast({
-      title: "Administrador removido",
-      description: "A empresa foi removida do sistema",
-    });
-  };
+  const deleteAdmin = async (adminId: string, companyId: string) => {
+    try {
+      // Primeiro, deletar o admin
+      const { error: adminError } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', adminId);
 
-  const toggleStatus = (id: string) => {
-    setAdmins(admins.map(admin => 
-      admin.id === id 
-        ? { ...admin, status: admin.status === 'Ativa' ? 'Inativa' : 'Ativa' }
-        : admin
-    ));
+      if (adminError) {
+        console.error('Erro ao deletar admin:', adminError);
+        toast({
+          title: "Erro",
+          description: "Erro ao remover administrador",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Depois, deletar a empresa (se não houver outros usuários)
+      const { data: remainingUsers } = await supabase
+        .from('users')
+        .select('id')
+        .eq('company_id', companyId);
+
+      if (!remainingUsers || remainingUsers.length === 0) {
+        await supabase
+          .from('companies')
+          .delete()
+          .eq('id', companyId);
+      }
+
+      await loadData();
+      toast({
+        title: "Administrador removido",
+        description: "A empresa foi removida do sistema",
+      });
+    } catch (error) {
+      console.error('Erro ao deletar:', error);
+    }
   };
 
   return (
@@ -142,6 +264,19 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nome do Administrador
+                    </label>
+                    <Input
+                      value={formData.adminName}
+                      onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
+                      placeholder="Nome completo do admin"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Usuário Administrador
                     </label>
                     <Input
@@ -151,18 +286,18 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
                       required
                     />
                   </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Senha do Administrador
-                  </label>
-                  <Input
-                    type="password"
-                    value={formData.adminPassword}
-                    onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
-                    placeholder="Digite a senha para o administrador"
-                    required
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Senha do Administrador
+                    </label>
+                    <Input
+                      type="password"
+                      value={formData.adminPassword}
+                      onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                      placeholder="Digite a senha para o administrador"
+                      required
+                    />
+                  </div>
                 </div>
                 <div className="flex gap-4">
                   <Button type="submit" className="bg-green-500 hover:bg-green-600">
@@ -179,50 +314,54 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
 
         <Card className="border-0 shadow-lg">
           <CardHeader>
-            <CardTitle>Empresas Cadastradas</CardTitle>
+            <CardTitle>Empresas Cadastradas ({admins.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {admins.map((admin) => (
-                <div key={admin.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
-                      <Building className="w-6 h-6 text-white" />
+              {admins.length === 0 ? (
+                <p className="text-center text-gray-500 py-8">
+                  Nenhuma empresa cadastrada ainda.
+                </p>
+              ) : (
+                admins.map((admin) => (
+                  <div key={admin.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
+                        <Building className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{admin.companies?.name}</p>
+                        <p className="text-sm text-gray-600">Admin: {admin.name} (@{admin.username})</p>
+                        <p className="text-xs text-gray-500">
+                          Criada em {new Date(admin.companies?.created_at || '').toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{admin.companyName}</p>
-                      <p className="text-sm text-gray-600">Admin: {admin.adminUser}</p>
-                      <p className="text-xs text-gray-500">{admin.employees} funcionários • Criada em {admin.createdAt}</p>
+                    <div className="flex items-center gap-4">
+                      <Badge className="bg-green-100 text-green-800">
+                        Ativa
+                      </Badge>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => deleteAdmin(admin.id, admin.company_id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <Badge 
-                      variant={admin.status === 'Ativa' ? 'default' : 'secondary'}
-                      className={admin.status === 'Ativa' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
-                    >
-                      {admin.status}
-                    </Badge>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-blue-600 hover:text-blue-700"
-                        onClick={() => toggleStatus(admin.id)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-red-600 hover:text-red-700"
-                        onClick={() => deleteAdmin(admin.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>

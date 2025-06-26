@@ -9,7 +9,125 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      master_users: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          password: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          password: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          password?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          birth_date: string
+          city: string
+          company_id: string
+          contact: string
+          cpf: string
+          created_at: string
+          created_by: string
+          face_data: string | null
+          id: string
+          name: string
+          neighborhood: string
+          number: string
+          password: string
+          rg: string
+          role: string
+          state: string
+          street: string
+          updated_at: string
+          username: string
+          zip_code: string
+        }
+        Insert: {
+          birth_date: string
+          city: string
+          company_id: string
+          contact: string
+          cpf: string
+          created_at?: string
+          created_by: string
+          face_data?: string | null
+          id?: string
+          name: string
+          neighborhood: string
+          number: string
+          password: string
+          rg: string
+          role: string
+          state: string
+          street: string
+          updated_at?: string
+          username: string
+          zip_code: string
+        }
+        Update: {
+          birth_date?: string
+          city?: string
+          company_id?: string
+          contact?: string
+          cpf?: string
+          created_at?: string
+          created_by?: string
+          face_data?: string | null
+          id?: string
+          name?: string
+          neighborhood?: string
+          number?: string
+          password?: string
+          rg?: string
+          role?: string
+          state?: string
+          street?: string
+          updated_at?: string
+          username?: string
+          zip_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,197 +1,144 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LoginFormProps {
   onLogin: (userType: string, userData: any) => void;
 }
 
 const LoginForm = ({ onLogin }: LoginFormProps) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  // Master user and companies
-  const users = {
-    // Master user - manages all companies
-    'Master1': { 
-      password: 'Master1', 
-      type: 'master', 
-      name: 'Master Admin', 
-      companyId: 'master',
-      companyName: 'Sistema Master'
-    },
-    // Empresa 1
-    'Adm1': { 
-      password: 'Adm1', 
-      type: 'admin', 
-      name: 'Administrador', 
-      companyId: 'company_1',
-      companyName: 'Empresa Alpha'
-    },
-    'Gerente1': { 
-      password: 'Gerente1', 
-      type: 'manager', 
-      name: 'Gerente',
-      companyId: 'company_1',
-      companyName: 'Empresa Alpha'
-    },
-    'Supervisor1': { 
-      password: 'Supervisor1', 
-      type: 'supervisor', 
-      name: 'Supervisor',
-      companyId: 'company_1',
-      companyName: 'Empresa Alpha'
-    },
-    'Usuario1': { 
-      password: 'Usuario1', 
-      type: 'user', 
-      name: 'Funcionário',
-      companyId: 'company_1',
-      companyName: 'Empresa Alpha'
-    },
-    // Empresa 2 (exemplo)
-    'Adm2': { 
-      password: 'Adm2', 
-      type: 'admin', 
-      name: 'Administrador', 
-      companyId: 'company_2',
-      companyName: 'Empresa Beta'
-    },
-    'Gerente2': { 
-      password: 'Gerente2', 
-      type: 'manager', 
-      name: 'Gerente',
-      companyId: 'company_2',
-      companyName: 'Empresa Beta'
-    },
-    // Exemplo RaioX
-    'RaioXadm': { 
-      password: 'RaioXadm', 
-      type: 'admin', 
-      name: 'Administrador RaioX', 
-      companyId: 'company_raiox',
-      companyName: 'RaioX'
-    },
-  };
+  const [formData, setFormData] = useState({
+    username: '',
+    password: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
 
-    // Simulate login delay
-    setTimeout(() => {
-      const user = users[username as keyof typeof users];
-      
-      if (user && user.password === password) {
+    try {
+      // Primeiro, verificar se é usuário master
+      const { data: masterUser, error: masterError } = await supabase
+        .from('master_users')
+        .select('*')
+        .eq('username', formData.username)
+        .eq('password', formData.password)
+        .single();
+
+      if (masterUser && !masterError) {
+        onLogin('master', masterUser);
         toast({
           title: "Login realizado com sucesso!",
-          description: `Bem-vindo, ${user.name} - ${user.companyName}`,
+          description: `Bem-vindo, ${masterUser.name}`,
         });
-        onLogin(user.type, { 
-          username, 
-          name: user.name, 
-          type: user.type,
-          companyId: user.companyId,
-          companyName: user.companyName
-        });
-      } else {
-        toast({
-          title: "Erro no login",
-          description: "Usuário ou senha incorretos",
-          variant: "destructive",
-        });
+        return;
       }
-      setLoading(false);
-    }, 1000);
+
+      // Se não for master, verificar usuários normais
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select(`
+          *,
+          companies (
+            id,
+            name
+          )
+        `)
+        .eq('username', formData.username)
+        .eq('password', formData.password)
+        .single();
+
+      if (user && !userError) {
+        const userData = {
+          ...user,
+          companyName: user.companies?.name,
+          companyId: user.company_id
+        };
+        
+        onLogin(user.role, userData);
+        toast({
+          title: "Login realizado com sucesso!",
+          description: `Bem-vindo, ${user.name}`,
+        });
+        return;
+      }
+
+      // Se chegou aqui, credenciais inválidas
+      toast({
+        title: "Erro no login",
+        description: "Usuário ou senha incorretos",
+        variant: "destructive",
+      });
+
+    } catch (error) {
+      console.error('Erro no login:', error);
+      toast({
+        title: "Erro no login",
+        description: "Ocorreu um erro ao tentar fazer login",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <Card className="w-full max-w-md mx-4 shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-        <CardHeader className="text-center pb-8">
-          <div className="mx-auto mb-6">
-            <img 
-              src="/lovable-uploads/a30e2daf-b16c-4217-b819-2a70f12af50d.png" 
-              alt="BioPonto Logo" 
-              className="w-32 h-32 mx-auto object-contain"
-            />
-          </div>
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            BioPonto
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-xl">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold text-gray-900">
+            BioPonto System
           </CardTitle>
-          <p className="text-sm text-gray-600 mt-2">Sistema de Ponto Digital</p>
+          <p className="text-gray-600">
+            Sistema de Controle de Ponto com Biometria
+          </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Usuário</label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Usuário
+              </label>
               <Input
                 type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 placeholder="Digite seu usuário"
-                className="h-12 border-gray-200 focus:border-blue-500 transition-colors"
                 required
+                disabled={isLoading}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Senha</label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Senha
+              </label>
               <Input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder="Digite sua senha"
-                className="h-12 border-gray-200 focus:border-blue-500 transition-colors"
                 required
+                disabled={isLoading}
               />
             </div>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
+              disabled={isLoading}
             >
-              {loading ? "Entrando..." : "Entrar"}
+              {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-600 mb-2">Usuário Master:</p>
-            <div className="text-xs space-y-1 text-gray-500">
-              <div>Master: Master1 / Master1</div>
-            </div>
-            <p className="text-xs text-gray-600 mb-2 mt-3">Usuários de teste - Empresa Alpha:</p>
-            <div className="text-xs space-y-1 text-gray-500">
-              <div>Admin: Adm1 / Adm1</div>
-              <div>Gerente: Gerente1 / Gerente1</div>
-              <div>Supervisor: Supervisor1 / Supervisor1</div>
-              <div>Funcionário: Usuario1 / Usuario1</div>
-            </div>
-            <p className="text-xs text-gray-600 mb-1 mt-2">Empresa RaioX:</p>
-            <div className="text-xs space-y-1 text-gray-500">
-              <div>Admin: RaioXadm / RaioXadm</div>
-            </div>
-          </div>
           
-          {/* Créditos e Contato */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <div className="text-center space-y-2">
-              <p className="text-xs text-gray-600 font-medium">
-                Desenvolvido por
-              </p>
-              <p className="text-sm font-bold text-gray-800">
-                DOM LIMA TECNOLOGIA
-              </p>
-              <p className="text-xs text-gray-500 mb-2">
-                CNPJ: 49.335.000/0001-31
-              </p>
-              <div className="text-xs text-gray-500 space-y-1">
-                <p>📱 (81) 98642-4175</p>
-                <p>🌐 www.domlimatecnologia.com.br</p>
-              </div>
-            </div>
+          <div className="mt-6 text-center text-sm text-gray-500">
+            <p>Credenciais de teste:</p>
+            <p>Master: Master1 / Master1</p>
+            <p>Admin: RaioXadm / 123456</p>
           </div>
         </CardContent>
       </Card>
