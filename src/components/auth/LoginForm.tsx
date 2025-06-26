@@ -134,12 +134,6 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-          
-          <div className="mt-6 text-center text-sm text-gray-500">
-            <p>Credenciais de teste:</p>
-            <p>Master: Master1 / Master1</p>
-            <p>Admin: RaioXadm / 123456</p>
-          </div>
         </CardContent>
       </Card>
     </div>
