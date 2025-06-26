@@ -14,8 +14,16 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Cada empresa/cliente tem seu próprio conjunto de usuários
-  const companies = {
+  // Master user and companies
+  const users = {
+    // Master user - manages all companies
+    'Master1': { 
+      password: 'Master1', 
+      type: 'master', 
+      name: 'Master Admin', 
+      companyId: 'master',
+      companyName: 'Sistema Master'
+    },
     // Empresa 1
     'Adm1': { 
       password: 'Adm1', 
@@ -60,6 +68,14 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
       companyId: 'company_2',
       companyName: 'Empresa Beta'
     },
+    // Exemplo RaioX
+    'RaioXadm': { 
+      password: 'RaioXadm', 
+      type: 'admin', 
+      name: 'Administrador RaioX', 
+      companyId: 'company_raiox',
+      companyName: 'RaioX'
+    },
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,7 +84,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
 
     // Simulate login delay
     setTimeout(() => {
-      const user = companies[username as keyof typeof companies];
+      const user = users[username as keyof typeof users];
       
       if (user && user.password === password) {
         toast({
@@ -142,17 +158,20 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             </Button>
           </form>
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-600 mb-2">Usuários de teste - Empresa Alpha:</p>
+            <p className="text-xs text-gray-600 mb-2">Usuário Master:</p>
+            <div className="text-xs space-y-1 text-gray-500">
+              <div>Master: Master1 / Master1</div>
+            </div>
+            <p className="text-xs text-gray-600 mb-2 mt-3">Usuários de teste - Empresa Alpha:</p>
             <div className="text-xs space-y-1 text-gray-500">
               <div>Admin: Adm1 / Adm1</div>
               <div>Gerente: Gerente1 / Gerente1</div>
               <div>Supervisor: Supervisor1 / Supervisor1</div>
               <div>Funcionário: Usuario1 / Usuario1</div>
             </div>
-            <p className="text-xs text-gray-600 mb-1 mt-2">Empresa Beta:</p>
+            <p className="text-xs text-gray-600 mb-1 mt-2">Empresa RaioX:</p>
             <div className="text-xs space-y-1 text-gray-500">
-              <div>Admin: Adm2 / Adm2</div>
-              <div>Gerente: Gerente2 / Gerente2</div>
+              <div>Admin: RaioXadm / RaioXadm</div>
             </div>
           </div>
           

@@ -5,6 +5,7 @@ import AdminDashboard from '@/components/dashboard/AdminDashboard';
 import ManagerDashboard from '@/components/dashboard/ManagerDashboard';
 import SupervisorDashboard from '@/components/dashboard/SupervisorDashboard';
 import UserDashboard from '@/components/dashboard/UserDashboard';
+import MasterDashboard from '@/components/dashboard/MasterDashboard';
 
 const Index = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -22,6 +23,8 @@ const Index = () => {
   }
 
   switch (currentUser.type) {
+    case 'master':
+      return <MasterDashboard userData={currentUser} onLogout={handleLogout} />;
     case 'admin':
       return <AdminDashboard userData={currentUser} onLogout={handleLogout} />;
     case 'manager':
