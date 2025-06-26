@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, UserPlus, FileText, BarChart3, Clock, MapPin } from 'lucide-react';
+import { Users, UserPlus, FileText, BarChart3, Clock, MapPin, Building } from 'lucide-react';
 import UserManagement from './UserManagement';
 import Reports from './Reports';
 
@@ -15,26 +15,28 @@ interface AdminDashboardProps {
 const AdminDashboard = ({ userData, onLogout }: AdminDashboardProps) => {
   const [activeTab, setActiveTab] = useState('overview');
 
+  // Stats específicos da empresa do administrador
   const stats = [
-    { title: 'Total de Funcionários', value: '145', icon: Users, color: 'from-blue-500 to-blue-600' },
-    { title: 'Presenças Hoje', value: '132', icon: Clock, color: 'from-green-500 to-green-600' },
-    { title: 'Faltas Hoje', value: '13', icon: UserPlus, color: 'from-red-500 to-red-600' },
-    { title: 'Bases Ativas', value: '8', color: 'from-purple-500 to-purple-600', icon: MapPin },
+    { title: 'Funcionários da Empresa', value: '45', icon: Users, color: 'from-blue-500 to-blue-600' },
+    { title: 'Presenças Hoje', value: '42', icon: Clock, color: 'from-green-500 to-green-600' },
+    { title: 'Faltas Hoje', value: '3', icon: UserPlus, color: 'from-red-500 to-red-600' },
+    { title: 'Bases da Empresa', value: '3', color: 'from-purple-500 to-purple-600', icon: MapPin },
   ];
 
+  // Atividade recente filtrada por empresa
   const recentActivity = [
-    { name: 'João Silva', action: 'Entrada', time: '08:15', status: 'success' },
-    { name: 'Maria Santos', action: 'Saída', time: '17:45', status: 'success' },
-    { name: 'Pedro Costa', action: 'Entrada', time: '08:30', status: 'warning' },
-    { name: 'Ana Oliveira', action: 'Entrada', time: '08:00', status: 'success' },
+    { name: 'João Silva', action: 'Entrada', time: '08:15', status: 'success', company: userData.companyName },
+    { name: 'Maria Santos', action: 'Saída', time: '17:45', status: 'success', company: userData.companyName },
+    { name: 'Pedro Costa', action: 'Entrada', time: '08:30', status: 'warning', company: userData.companyName },
+    { name: 'Ana Oliveira', action: 'Entrada', time: '08:00', status: 'success', company: userData.companyName },
   ];
 
   if (activeTab === 'users') {
-    return <UserManagement onBack={() => setActiveTab('overview')} userType="admin" onLogout={onLogout} />;
+    return <UserManagement onBack={() => setActiveTab('overview')} userType="admin" onLogout={onLogout} userData={userData} />;
   }
 
   if (activeTab === 'reports') {
-    return <Reports onBack={() => setActiveTab('overview')} userType="admin" onLogout={onLogout} />;
+    return <Reports onBack={() => setActiveTab('overview')} userType="admin" onLogout={onLogout} userData={userData} />;
   }
 
   return (
@@ -45,6 +47,10 @@ const AdminDashboard = ({ userData, onLogout }: AdminDashboardProps) => {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
               <p className="text-gray-600">Bem-vindo, {userData.name}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <Building className="w-4 h-4 text-blue-600" />
+                <span className="text-sm text-blue-600 font-medium">{userData.companyName}</span>
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
@@ -82,7 +88,7 @@ const AdminDashboard = ({ userData, onLogout }: AdminDashboardProps) => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="w-5 h-5" />
-                Atividade Recente
+                Atividade Recente - {userData.companyName}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -118,7 +124,7 @@ const AdminDashboard = ({ userData, onLogout }: AdminDashboardProps) => {
                 className="w-full justify-start h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
               >
                 <UserPlus className="w-5 h-5 mr-3" />
-                Gerenciar Usuários
+                Gerenciar Usuários da Empresa
               </Button>
               <Button
                 onClick={() => setActiveTab('reports')}
@@ -126,14 +132,14 @@ const AdminDashboard = ({ userData, onLogout }: AdminDashboardProps) => {
                 className="w-full justify-start h-12 border-gray-200 hover:bg-gray-50"
               >
                 <FileText className="w-5 h-5 mr-3" />
-                Gerar Relatórios
+                Relatórios da Empresa
               </Button>
               <Button
                 variant="outline"
                 className="w-full justify-start h-12 border-gray-200 hover:bg-gray-50"
               >
                 <BarChart3 className="w-5 h-5 mr-3" />
-                Análises Avançadas
+                Análises da {userData.companyName}
               </Button>
             </CardContent>
           </Card>

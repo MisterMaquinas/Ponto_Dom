@@ -5,21 +5,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Edit, Trash2, Users } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Users, Building } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 
 interface UserManagementProps {
   onBack: () => void;
   userType: 'admin' | 'manager' | 'supervisor';
   onLogout: () => void;
+  userData: any;
 }
 
-const UserManagement = ({ onBack, userType, onLogout }: UserManagementProps) => {
+const UserManagement = ({ onBack, userType, onLogout, userData }: UserManagementProps) => {
+  // Usuários filtrados por empresa - cada admin só vê sua empresa
   const [users, setUsers] = useState([
-    { id: 1, name: 'João Silva', username: 'joao.silva', role: 'user', createdBy: 'admin' },
-    { id: 2, name: 'Maria Santos', username: 'maria.santos', role: 'supervisor', createdBy: 'admin' },
-    { id: 3, name: 'Pedro Costa', username: 'pedro.costa', role: 'manager', createdBy: 'admin' },
-    { id: 4, name: 'Ana Oliveira', username: 'ana.oliveira', role: 'user', createdBy: 'supervisor' },
+    { id: 1, name: 'João Silva', username: 'joao.silva', role: 'user', createdBy: 'admin', companyId: userData.companyId },
+    { id: 2, name: 'Maria Santos', username: 'maria.santos', role: 'supervisor', createdBy: 'admin', companyId: userData.companyId },
+    { id: 3, name: 'Pedro Costa', username: 'pedro.costa', role: 'manager', createdBy: 'admin', companyId: userData.companyId },
+    { id: 4, name: 'Ana Oliveira', username: 'ana.oliveira', role: 'user', createdBy: 'supervisor', companyId: userData.companyId },
   ]);
 
   const [showForm, setShowForm] = useState(false);
@@ -29,6 +31,9 @@ const UserManagement = ({ onBack, userType, onLogout }: UserManagementProps) => 
     password: '',
     role: 'user'
   });
+
+  // Filtrar usuários pela empresa do usuário logado
+  const companyUsers = users.filter(user => user.companyId === userData.companyId);
 
   const canCreateRole = (role: string) => {
     if (userType === 'admin') return true;
@@ -65,7 +70,8 @@ const UserManagement = ({ onBack, userType, onLogout }: UserManagementProps) => 
     const newUser = {
       id: users.length + 1,
       ...formData,
-      createdBy: userType
+      createdBy: userType,
+      companyId: userData.companyId // Associar à empresa do criador
     };
 
     setUsers([...users, newUser]);
@@ -74,7 +80,7 @@ const UserManagement = ({ onBack, userType, onLogout }: UserManagementProps) => 
     
     toast({
       title: "Usuário criado com sucesso!",
-      description: `${formData.name} foi adicionado ao sistema`,
+      description: `${formData.name} foi adicionado à ${userData.companyName}`,
     });
   };
 
@@ -82,7 +88,7 @@ const UserManagement = ({ onBack, userType, onLogout }: UserManagementProps) => 
     setUsers(users.filter(user => user.id !== id));
     toast({
       title: "Usuário removido",
-      description: "O usuário foi removido do sistema",
+      description: "O usuário foi removido da empresa",
     });
   };
 
@@ -119,6 +125,10 @@ const UserManagement = ({ onBack, userType, onLogout }: UserManagementProps) => 
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Gerenciar Usuários</h1>
                 <p className="text-gray-600">Cadastrar e gerenciar funcionários</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Building className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm text-blue-600 font-medium">{userData.companyName}</span>
+                </div>
               </div>
             </div>
             <Button onClick={onLogout} variant="outline">
@@ -144,7 +154,7 @@ const UserManagement = ({ onBack, userType, onLogout }: UserManagementProps) => 
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                Cadastrar Novo Usuário
+                Cadastrar Novo Usuário - {userData.companyName}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -219,11 +229,11 @@ const UserManagement = ({ onBack, userType, onLogout }: UserManagementProps) => 
 
         <Card className="border-0 shadow-lg">
           <CardHeader>
-            <CardTitle>Usuários Cadastrados</CardTitle>
+            <CardTitle>Usuários da {userData.companyName}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {users.map((user) => (
+              {companyUsers.map((user) => (
                 <div key={user.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
