@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X, CheckCircle, Camera } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
-import SimpleFaceCapture from './SimpleFaceCapture';
+import NativeFaceCapture from './NativeFaceCapture';
 
 interface FaceRecognitionProps {
   onSuccess: (faceData: any) => void;
@@ -50,7 +49,7 @@ const FaceRecognition = ({ onSuccess, onCancel, userData }: FaceRecognitionProps
 
   if (showCapture) {
     return (
-      <SimpleFaceCapture
+      <NativeFaceCapture
         onCapture={handleCapture}
         onCancel={handleCaptureCancel}
         title="Reconhecimento Facial"
