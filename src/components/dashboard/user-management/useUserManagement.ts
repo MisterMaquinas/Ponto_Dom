@@ -4,13 +4,13 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getAvailableRoles, getRoleLabel, getRoleBadgeVariant } from './roleUtils';
 import { filterUsersByHierarchy, UserRole } from './hierarchyUtils';
-import type { User, FormData } from './types';
+import type { User, UserFormData } from './types';
 
 export const useUserManagement = (userType: 'admin' | 'manager' | 'supervisor', userData: any) => {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<UserFormData>({
     name: '',
     cpf: '',
     rg: '',
