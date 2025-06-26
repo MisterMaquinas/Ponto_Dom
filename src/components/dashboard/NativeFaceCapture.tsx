@@ -2,10 +2,11 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Camera, X, Smartphone } from 'lucide-react';
+import { Camera, X, Smartphone, Zap } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { useCapacitor } from '@/hooks/useCapacitor';
 import SimpleFaceCapture from './SimpleFaceCapture';
+import MLKitFaceCapture from './MLKitFaceCapture';
 
 interface NativeFaceCaptureProps {
   onCapture: (imageData: string) => void;
@@ -14,41 +15,36 @@ interface NativeFaceCaptureProps {
 }
 
 const NativeFaceCapture = ({ onCapture, onCancel, title = "Captura Facial" }: NativeFaceCaptureProps) => {
-  const [showWebCapture, setShowWebCapture] = useState(false);
+  const [captureMode, setCaptureMode] = useState<'select' | 'mlkit' | 'web'>('select');
   const { isNative, platform } = useCapacitor();
 
-  const handleNativeCapture = async () => {
-    if (!isNative) {
-      // Fallback para captura web
-      setShowWebCapture(true);
-      return;
-    }
-
-    try {
-      // Aqui você pode implementar a captura nativa usando ML Kit
-      // Por enquanto, vamos usar a captura web como fallback
-      toast({
-        title: "Recursos nativos detectados",
-        description: `Rodando em ${platform}. Funcionalidade ML Kit será implementada em breve.`,
-      });
-      
-      setShowWebCapture(true);
-    } catch (error) {
-      console.error('Erro na captura nativa:', error);
-      toast({
-        title: "Erro",
-        description: "Erro na captura nativa. Usando captura web.",
-        variant: "destructive",
-      });
-      setShowWebCapture(true);
-    }
+  const handleMLKitCapture = () => {
+    setCaptureMode('mlkit');
   };
 
-  if (showWebCapture) {
+  const handleWebCapture = () => {
+    setCaptureMode('web');
+  };
+
+  const handleBackToSelect = () => {
+    setCaptureMode('select');
+  };
+
+  if (captureMode === 'mlkit') {
+    return (
+      <MLKitFaceCapture
+        onCapture={onCapture}
+        onCancel={onCancel}
+        title={title}
+      />
+    );
+  }
+
+  if (captureMode === 'web') {
     return (
       <SimpleFaceCapture
         onCapture={onCapture}
-        onCancel={onCancel}
+        onCancel={handleBackToSelect}
         title={title}
       />
     );
@@ -76,33 +72,39 @@ const NativeFaceCapture = ({ onCapture, onCancel, title = "Captura Facial" }: Na
             
             <div>
               <h3 className="text-lg font-medium mb-2">
-                {isNative ? 'Captura Nativa' : 'Captura Web'}
+                Escolha o Método de Captura
               </h3>
               <p className="text-gray-600 text-sm">
                 {isNative 
-                  ? `Usando recursos nativos do ${platform}`
-                  : 'Usando câmera do navegador'
+                  ? `Executando em ${platform} - recursos nativos disponíveis`
+                  : 'Executando no navegador web'
                 }
               </p>
             </div>
 
-            <Button onClick={handleNativeCapture} className="w-full">
-              <Camera className="w-4 h-4 mr-2" />
-              Iniciar Captura
-            </Button>
+            <div className="space-y-3">
+              <Button onClick={handleMLKitCapture} className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700">
+                <Zap className="w-4 h-4 mr-2" />
+                Google ML Kit
+              </Button>
+              
+              <Button onClick={handleWebCapture} variant="outline" className="w-full">
+                <Camera className="w-4 h-4 mr-2" />
+                Captura Tradicional
+              </Button>
+            </div>
 
-            {isNative && (
-              <div className="bg-blue-50 rounded-lg p-3">
-                <p className="text-sm text-blue-700">
-                  <strong>Recursos nativos disponíveis:</strong>
-                </p>
-                <ul className="text-sm text-blue-600 mt-1">
-                  <li>• Melhor qualidade de imagem</li>
-                  <li>• Detecção facial aprimorada</li>
-                  <li>• Processamento mais rápido</li>
-                </ul>
-              </div>
-            )}
+            <div className="bg-blue-50 rounded-lg p-3">
+              <p className="text-sm text-blue-700 mb-2">
+                <strong>Google ML Kit oferece:</strong>
+              </p>
+              <ul className="text-sm text-blue-600 space-y-1">
+                <li>• Detecção facial em tempo real</li>
+                <li>• Análise de qualidade da imagem</li>
+                <li>• Detecção de landmarks faciais</li>
+                <li>• {isNative ? 'Processamento nativo otimizado' : 'Funciona no navegador'}</li>
+              </ul>
+            </div>
           </div>
         </CardContent>
       </Card>
