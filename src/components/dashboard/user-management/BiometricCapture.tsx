@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Camera, Check, X } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
-import ModernFaceCapture from '../ModernFaceCapture';
+import SimpleFaceCapture from '../SimpleFaceCapture';
 
 interface BiometricCaptureProps {
   formData: { face_data?: string };
@@ -68,7 +68,7 @@ const BiometricCapture = ({ formData, setFormData }: BiometricCaptureProps) => {
       </div>
 
       {showCapture && (
-        <ModernFaceCapture
+        <SimpleFaceCapture
           onCapture={handleCapture}
           onCancel={handleCancel}
           title="Captura de Biometria"
