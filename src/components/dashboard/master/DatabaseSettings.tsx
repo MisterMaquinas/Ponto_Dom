@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +28,8 @@ const DatabaseSettings = ({ onBack, userData, onLogout }: DatabaseSettingsProps)
   const handleSave = async () => {
     setSaving(true);
     try {
+      console.log('Salvando configurações do banco de dados:', settings);
+      
       // Simular salvamento das configurações
       await new Promise(resolve => setTimeout(resolve, 1500));
       
@@ -36,7 +37,10 @@ const DatabaseSettings = ({ onBack, userData, onLogout }: DatabaseSettingsProps)
         title: "Configurações salvas!",
         description: "As configurações do banco de dados foram atualizadas com sucesso.",
       });
+      
+      console.log('Configurações salvas com sucesso');
     } catch (error) {
+      console.error('Erro ao salvar configurações:', error);
       toast({
         title: "Erro",
         description: "Erro ao salvar configurações do banco de dados.",
@@ -50,6 +54,7 @@ const DatabaseSettings = ({ onBack, userData, onLogout }: DatabaseSettingsProps)
   const testConnection = async () => {
     setConnectionStatus('checking');
     try {
+      console.log('Testando conexão com o banco de dados...');
       await new Promise(resolve => setTimeout(resolve, 2000));
       setConnectionStatus('connected');
       toast({
@@ -57,6 +62,7 @@ const DatabaseSettings = ({ onBack, userData, onLogout }: DatabaseSettingsProps)
         description: "Conexão com o banco de dados está funcionando corretamente.",
       });
     } catch (error) {
+      console.error('Erro na conexão:', error);
       setConnectionStatus('disconnected');
       toast({
         title: "Erro de conexão",

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,13 +31,18 @@ const SecuritySettings = ({ onBack, userData, onLogout }: SecuritySettingsProps)
   const handleSave = async () => {
     setSaving(true);
     try {
+      console.log('Salvando configurações de segurança:', settings);
+      
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast({
         title: "Configurações de segurança salvas!",
         description: "As políticas de segurança foram atualizadas com sucesso.",
       });
+      
+      console.log('Configurações de segurança salvas com sucesso');
     } catch (error) {
+      console.error('Erro ao salvar configurações de segurança:', error);
       toast({
         title: "Erro",
         description: "Erro ao salvar configurações de segurança.",
@@ -51,6 +55,7 @@ const SecuritySettings = ({ onBack, userData, onLogout }: SecuritySettingsProps)
 
   const generateNewApiKey = () => {
     const newKey = 'sk_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    console.log('Nova chave API gerada:', newKey);
     toast({
       title: "Nova chave API gerada!",
       description: "Uma nova chave de API foi gerada. Salve-a em local seguro.",
@@ -84,7 +89,6 @@ const SecuritySettings = ({ onBack, userData, onLogout }: SecuritySettingsProps)
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Políticas de Senha */}
           <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -146,7 +150,6 @@ const SecuritySettings = ({ onBack, userData, onLogout }: SecuritySettingsProps)
             </CardContent>
           </Card>
 
-          {/* Configurações de Sessão */}
           <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle>Configurações de Sessão</CardTitle>
@@ -232,7 +235,7 @@ const SecuritySettings = ({ onBack, userData, onLogout }: SecuritySettingsProps)
             </CardContent>
           </Card>
 
-          {/* Chaves de API */}
+          {/* API Keys Management */}
           <Card className="border-0 shadow-lg lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,13 +34,18 @@ const GeneralSettings = ({ onBack, userData, onLogout }: GeneralSettingsProps) =
   const handleSave = async () => {
     setSaving(true);
     try {
+      console.log('Salvando configurações gerais:', settings);
+      
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast({
         title: "Configurações gerais salvas!",
         description: "As configurações do sistema foram atualizadas com sucesso.",
       });
+      
+      console.log('Configurações gerais salvas com sucesso');
     } catch (error) {
+      console.error('Erro ao salvar configurações gerais:', error);
       toast({
         title: "Erro",
         description: "Erro ao salvar configurações gerais.",
@@ -79,7 +83,6 @@ const GeneralSettings = ({ onBack, userData, onLogout }: GeneralSettingsProps) =
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Informações do Sistema */}
           <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -175,7 +178,6 @@ const GeneralSettings = ({ onBack, userData, onLogout }: GeneralSettingsProps) =
             </CardContent>
           </Card>
 
-          {/* Preferências de Interface */}
           <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -275,7 +277,6 @@ const GeneralSettings = ({ onBack, userData, onLogout }: GeneralSettingsProps) =
             </CardContent>
           </Card>
 
-          {/* Anúncios do Sistema */}
           <Card className="border-0 shadow-lg lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -301,7 +302,7 @@ const GeneralSettings = ({ onBack, userData, onLogout }: GeneralSettingsProps) =
 
               <Button onClick={handleSave} disabled={saving} className="w-full bg-purple-500 hover:bg-purple-600">
                 <Save className="w-4 h-4 mr-2" />
-                {saving ? 'Salvando...' : 'Salvar Configurações Gerais'}
+                {saving ? 'Salvar Configurações Gerais'}
               </Button>
             </CardContent>
           </Card>
