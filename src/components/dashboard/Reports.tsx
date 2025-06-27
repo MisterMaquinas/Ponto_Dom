@@ -355,7 +355,7 @@ const Reports = ({ onBack, userType, onLogout, userData }: ReportsProps) => {
               <div className="text-2xl font-bold text-orange-600 mb-2">
                 {punchRecords.filter(r => r.confidence_score && r.confidence_score >= 0.9).length}
               </div>
-              <div className="text-sm text-gray-600">Alta Confiança (>90%)</div>
+              <div className="text-sm text-gray-600">Alta Confiança ({'>'}90%)</div>
             </CardContent>
           </Card>
         </div>
