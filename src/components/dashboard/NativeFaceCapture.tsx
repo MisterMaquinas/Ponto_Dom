@@ -1,20 +1,25 @@
 
 import React from 'react';
-import { useCapacitor } from '@/hooks/useCapacitor';
-import MLKitFaceCapture from './MLKitFaceCapture';
+import DynamicFaceCapture from './DynamicFaceCapture';
 
 interface NativeFaceCaptureProps {
-  onCapture: (imageData: string) => void;
+  onCapture: (imageData: string, faceData?: any) => void;
   onCancel: () => void;
   title?: string;
+  userData?: any;
 }
 
-const NativeFaceCapture = ({ onCapture, onCancel, title = "Captura Facial" }: NativeFaceCaptureProps) => {
+const NativeFaceCapture = ({ onCapture, onCancel, title = "Captura Facial", userData }: NativeFaceCaptureProps) => {
+  const handleCapture = (imageData: string, faceData: any) => {
+    onCapture(imageData, faceData);
+  };
+
   return (
-    <MLKitFaceCapture
-      onCapture={onCapture}
+    <DynamicFaceCapture
+      onCapture={handleCapture}
       onCancel={onCancel}
       title={title}
+      userData={userData}
     />
   );
 };

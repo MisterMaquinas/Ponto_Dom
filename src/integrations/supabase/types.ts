@@ -68,6 +68,60 @@ export type Database = {
           },
         ]
       }
+      face_recognition_logs: {
+        Row: {
+          confidence_score: number
+          created_at: string
+          device_info: Json | null
+          face_image_url: string
+          id: string
+          location: Json | null
+          punch_record_id: string | null
+          recognition_status: string
+          recognition_timestamp: string
+          user_id: string
+        }
+        Insert: {
+          confidence_score: number
+          created_at?: string
+          device_info?: Json | null
+          face_image_url: string
+          id?: string
+          location?: Json | null
+          punch_record_id?: string | null
+          recognition_status: string
+          recognition_timestamp?: string
+          user_id: string
+        }
+        Update: {
+          confidence_score?: number
+          created_at?: string
+          device_info?: Json | null
+          face_image_url?: string
+          id?: string
+          location?: Json | null
+          punch_record_id?: string | null
+          recognition_status?: string
+          recognition_timestamp?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "face_recognition_logs_punch_record_id_fkey"
+            columns: ["punch_record_id"]
+            isOneToOne: false
+            referencedRelation: "punch_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "face_recognition_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       master_users: {
         Row: {
           created_at: string
@@ -91,6 +145,53 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      punch_records: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          device_info: Json | null
+          face_image_url: string | null
+          id: string
+          location: Json | null
+          punch_type: string
+          timestamp: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          device_info?: Json | null
+          face_image_url?: string | null
+          id?: string
+          location?: Json | null
+          punch_type: string
+          timestamp?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          device_info?: Json | null
+          face_image_url?: string | null
+          id?: string
+          location?: Json | null
+          punch_type?: string
+          timestamp?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "punch_records_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {

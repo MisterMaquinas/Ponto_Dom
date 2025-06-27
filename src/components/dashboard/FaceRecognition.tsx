@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X, CheckCircle, Camera } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import NativeFaceCapture from './NativeFaceCapture';
 
 interface FaceRecognitionProps {
@@ -15,36 +17,66 @@ const FaceRecognition = ({ onSuccess, onCancel, userData }: FaceRecognitionProps
   const [showCapture, setShowCapture] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleCapture = async (imageData: string) => {
+  const handleCapture = async (imageData: string, faceData: any) => {
     setIsProcessing(true);
     setShowCapture(false);
 
-    // Simular processamento de reconhecimento facial
-    setTimeout(() => {
+    try {
+      // Registrar ponto no banco de dados
       const punchData = {
-        userId: userData.username,
+        user_id: userData.id,
+        punch_type: 'entry', // ou 'exit' baseado na lógica de negócio
+        confidence_score: faceData.confidence,
+        face_image_url: null, // será preenchido após upload
+        device_info: {
+          userAgent: navigator.userAgent,
+          platform: navigator.platform,
+          language: navigator.language
+        },
+        location: null // capturar se necessário
+      };
+
+      // Salvar no banco
+      const { data: punchRecord, error } = await supabase
+        .from('punch_records')
+        .insert(punchData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao registrar ponto:', error);
+        throw error;
+      }
+
+      const finalPunchData = {
+        ...punchRecord,
         name: userData.name,
-        timestamp: new Date().toISOString(),
-        hash: generateHash(),
-        imageData: imageData
+        timestamp: punchRecord.timestamp,
+        hash: punchRecord.id,
+        imageData: imageData,
+        confidence: faceData.confidence
       };
       
       setIsProcessing(false);
-      onSuccess(punchData);
+      onSuccess(finalPunchData);
       
       toast({
-        title: "Reconhecimento realizado!",
-        description: "Ponto registrado com sucesso",
+        title: "Ponto registrado!",
+        description: `Reconhecimento realizado com ${Math.round(faceData.confidence * 100)}% de confiança`,
       });
-    }, 2000);
+    } catch (error) {
+      console.error('Erro ao processar:', error);
+      setIsProcessing(false);
+      toast({
+        title: "Erro",
+        description: "Erro ao registrar ponto",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCaptureCancel = () => {
     setShowCapture(false);
-  };
-
-  const generateHash = () => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   };
 
   if (showCapture) {
@@ -52,7 +84,8 @@ const FaceRecognition = ({ onSuccess, onCancel, userData }: FaceRecognitionProps
       <NativeFaceCapture
         onCapture={handleCapture}
         onCancel={handleCaptureCancel}
-        title="Reconhecimento Facial"
+        title="Reconhecimento Facial - Registro de Ponto"
+        userData={userData}
       />
     );
   }
@@ -78,14 +111,14 @@ const FaceRecognition = ({ onSuccess, onCancel, userData }: FaceRecognitionProps
                 Olá, {userData.name}!
               </h3>
               <p className="text-gray-600">
-                Clique no botão abaixo para iniciar o reconhecimento facial
+                Posicione seu rosto dentro do círculo para registro de ponto
               </p>
             </div>
 
             {isProcessing ? (
               <div className="space-y-4">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-                <p className="text-blue-600 font-medium">Processando reconhecimento...</p>
+                <p className="text-blue-600 font-medium">Processando registro...</p>
               </div>
             ) : (
               <Button
@@ -99,13 +132,13 @@ const FaceRecognition = ({ onSuccess, onCancel, userData }: FaceRecognitionProps
 
             <div className="bg-blue-50 rounded-lg p-4">
               <p className="text-sm text-blue-700 mb-2">
-                <strong>Dicas para melhor reconhecimento:</strong>
+                <strong>Novo sistema dinâmico:</strong>
               </p>
               <ul className="text-sm text-blue-600 space-y-1">
-                <li>• Mantenha o rosto bem iluminado</li>
-                <li>• Posicione o rosto dentro da área indicada</li>
-                <li>• Evite movimentos durante a captura</li>
-                <li>• Remova óculos escuros se possível</li>
+                <li>• Círculo de posicionamento em tempo real</li>
+                <li>• Detecção facial contínua</li>
+                <li>• Histórico completo de reconhecimentos</li>
+                <li>• Armazenamento seguro das imagens</li>
               </ul>
             </div>
           </div>
