@@ -80,6 +80,7 @@ const FaceRecognitionHistory = ({ companyId, userId, showUserFilter = true }: Fa
 
       const processedLogs = data?.map(log => ({
         ...log,
+        recognition_status: log.recognition_status as 'success' | 'failed' | 'low_confidence',
         user: log.users
       })) || [];
 
