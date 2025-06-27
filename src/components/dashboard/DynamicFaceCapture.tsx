@@ -21,6 +21,7 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
   const [confidence, setConfidence] = useState(0);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,34 +29,88 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const startCamera = async () => {
+    console.log('Tentando iniciar câmera...');
+    setCameraError(null);
+    
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'user',
-          width: { ideal: 640 },
-          height: { ideal: 480 }
-        }
-      });
+      // Verificar se getUserMedia está disponível
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('getUserMedia não é suportado neste navegador');
+      }
+
+      console.log('Solicitando permissão de câmera...');
+      
+      // Tentar primeiro com configurações específicas
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'user',
+            width: { ideal: 640, min: 320 },
+            height: { ideal: 480, min: 240 }
+          },
+          audio: false
+        });
+      } catch (error) {
+        console.log('Configuração específica falhou, tentando configuração básica...');
+        // Fallback para configuração mais simples
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+      }
+      
+      console.log('Câmera inicializada com sucesso');
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
-        setIsActive(true);
-        startFaceDetection();
+        
+        // Aguardar o vídeo carregar antes de marcar como ativo
+        videoRef.current.onloadedmetadata = () => {
+          console.log('Metadados do vídeo carregados');
+          if (videoRef.current) {
+            videoRef.current.play().then(() => {
+              console.log('Vídeo iniciado');
+              setIsActive(true);
+              startFaceDetection();
+            }).catch(error => {
+              console.error('Erro ao iniciar vídeo:', error);
+              setCameraError('Erro ao iniciar visualização da câmera');
+            });
+          }
+        };
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao acessar câmera:', error);
+      let errorMessage = 'Não foi possível acessar a câmera';
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = 'Permissão de câmera negada. Por favor, permita o acesso à câmera e tente novamente.';
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = 'Nenhuma câmera encontrada no dispositivo.';
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = 'Câmera está sendo usada por outro aplicativo.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setCameraError(errorMessage);
       toast({
         title: "Erro na câmera",
-        description: "Não foi possível acessar a câmera",
+        description: errorMessage,
         variant: "destructive",
       });
     }
   };
 
   const stopCamera = () => {
+    console.log('Parando câmera...');
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach(track => {
+        track.stop();
+        console.log('Track parado:', track.kind);
+      });
       streamRef.current = null;
     }
     if (intervalRef.current) {
@@ -64,11 +119,13 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
     }
     setIsActive(false);
     setFaceDetected(false);
+    setCameraError(null);
   };
 
   const startFaceDetection = () => {
     if (intervalRef.current) return;
     
+    console.log('Iniciando detecção facial...');
     intervalRef.current = setInterval(() => {
       detectFace();
     }, 200);
@@ -290,7 +347,7 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
           </div>
 
           <div className="space-y-4">
-            {!isActive ? (
+            {!isActive && !cameraError ? (
               <div className="text-center space-y-4">
                 <div className="w-20 h-20 mx-auto bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                   <Camera className="w-10 h-10 text-white" />
@@ -305,6 +362,27 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
                   <Camera className="w-4 h-4 mr-2" />
                   Iniciar Câmera
                 </Button>
+              </div>
+            ) : cameraError ? (
+              <div className="text-center space-y-4">
+                <div className="w-20 h-20 mx-auto bg-red-500 rounded-full flex items-center justify-center">
+                  <AlertCircle className="w-10 h-10 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-2 text-red-600">Erro na Câmera</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    {cameraError}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Button onClick={startCamera} className="w-full bg-blue-600 hover:bg-blue-700">
+                    <Camera className="w-4 h-4 mr-2" />
+                    Tentar Novamente
+                  </Button>
+                  <Button onClick={onCancel} variant="outline" className="w-full">
+                    Cancelar
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
