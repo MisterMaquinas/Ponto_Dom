@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +21,7 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
   const [countdown, setCountdown] = useState<number | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [cameraLoading, setCameraLoading] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,6 +31,7 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
   const startCamera = async () => {
     console.log('Tentando iniciar câmera...');
     setCameraError(null);
+    setCameraLoading(true);
     
     try {
       // Verificar se getUserMedia está disponível
@@ -61,28 +62,55 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
       }
       
       console.log('Câmera inicializada com sucesso');
+      streamRef.current = stream;
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        streamRef.current = stream;
         
-        // Aguardar o vídeo carregar antes de marcar como ativo
-        videoRef.current.onloadedmetadata = () => {
+        // Aguardar o vídeo carregar e então iniciar
+        const video = videoRef.current;
+        
+        const onLoadedMetadata = () => {
           console.log('Metadados do vídeo carregados');
-          if (videoRef.current) {
-            videoRef.current.play().then(() => {
-              console.log('Vídeo iniciado');
+          video.play().then(() => {
+            console.log('Vídeo iniciado com sucesso');
+            setIsActive(true);
+            setCameraLoading(false);
+            startFaceDetection();
+          }).catch(error => {
+            console.error('Erro ao iniciar vídeo:', error);
+            setCameraError('Erro ao iniciar visualização da câmera');
+            setCameraLoading(false);
+          });
+        };
+
+        const onError = (error: any) => {
+          console.error('Erro no vídeo:', error);
+          setCameraError('Erro ao carregar vídeo da câmera');
+          setCameraLoading(false);
+        };
+
+        video.addEventListener('loadedmetadata', onLoadedMetadata);
+        video.addEventListener('error', onError);
+        
+        // Timeout para caso o vídeo não carregue
+        setTimeout(() => {
+          if (!isActive && cameraLoading) {
+            console.log('Timeout - forçando início do vídeo');
+            video.play().then(() => {
               setIsActive(true);
+              setCameraLoading(false);
               startFaceDetection();
-            }).catch(error => {
-              console.error('Erro ao iniciar vídeo:', error);
-              setCameraError('Erro ao iniciar visualização da câmera');
+            }).catch(() => {
+              setCameraError('Timeout ao iniciar câmera');
+              setCameraLoading(false);
             });
           }
-        };
+        }, 5000);
       }
     } catch (error: any) {
       console.error('Erro ao acessar câmera:', error);
+      setCameraLoading(false);
       let errorMessage = 'Não foi possível acessar a câmera';
       
       if (error.name === 'NotAllowedError') {
@@ -120,6 +148,7 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
     setIsActive(false);
     setFaceDetected(false);
     setCameraError(null);
+    setCameraLoading(false);
   };
 
   const startFaceDetection = () => {
@@ -347,7 +376,7 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
           </div>
 
           <div className="space-y-4">
-            {!isActive && !cameraError ? (
+            {!isActive && !cameraError && !cameraLoading ? (
               <div className="text-center space-y-4">
                 <div className="w-20 h-20 mx-auto bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                   <Camera className="w-10 h-10 text-white" />
@@ -362,6 +391,18 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
                   <Camera className="w-4 h-4 mr-2" />
                   Iniciar Câmera
                 </Button>
+              </div>
+            ) : cameraLoading ? (
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 mx-auto">
+                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent"></div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Carregando Câmera</h3>
+                  <p className="text-gray-600 text-sm">
+                    Aguarde enquanto inicializamos a câmera...
+                  </p>
+                </div>
               </div>
             ) : cameraError ? (
               <div className="text-center space-y-4">
