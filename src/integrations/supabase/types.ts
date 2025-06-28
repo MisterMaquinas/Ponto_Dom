@@ -9,6 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      biometric_verification_logs: {
+        Row: {
+          attempt_photo_url: string
+          created_at: string
+          device_info: Json | null
+          error_message: string | null
+          id: string
+          reference_photo_url: string
+          similarity_score: number | null
+          user_id: string
+          verification_result: string
+        }
+        Insert: {
+          attempt_photo_url: string
+          created_at?: string
+          device_info?: Json | null
+          error_message?: string | null
+          id?: string
+          reference_photo_url: string
+          similarity_score?: number | null
+          user_id: string
+          verification_result: string
+        }
+        Update: {
+          attempt_photo_url?: string
+          created_at?: string
+          device_info?: Json | null
+          error_message?: string | null
+          id?: string
+          reference_photo_url?: string
+          similarity_score?: number | null
+          user_id?: string
+          verification_result?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "biometric_verification_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string
@@ -158,6 +202,7 @@ export type Database = {
           timestamp: string
           updated_at: string
           user_id: string
+          verification_log_id: string | null
         }
         Insert: {
           confidence_score?: number | null
@@ -170,6 +215,7 @@ export type Database = {
           timestamp?: string
           updated_at?: string
           user_id: string
+          verification_log_id?: string | null
         }
         Update: {
           confidence_score?: number | null
@@ -182,10 +228,56 @@ export type Database = {
           timestamp?: string
           updated_at?: string
           user_id?: string
+          verification_log_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "punch_records_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "punch_records_verification_log_id_fkey"
+            columns: ["verification_log_id"]
+            isOneToOne: false
+            referencedRelation: "biometric_verification_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_biometric_photos: {
+        Row: {
+          created_at: string
+          face_encoding: string | null
+          id: string
+          is_active: boolean
+          reference_photo_url: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          face_encoding?: string | null
+          id?: string
+          is_active?: boolean
+          reference_photo_url: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          face_encoding?: string | null
+          id?: string
+          is_active?: boolean
+          reference_photo_url?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_biometric_photos_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
