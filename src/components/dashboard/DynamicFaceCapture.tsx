@@ -27,11 +27,18 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const startCamera = async () => {
     console.log('Tentando iniciar câmera...');
     setCameraError(null);
     setCameraLoading(true);
+    setIsActive(false);
+    
+    // Limpar timeout anterior se existir
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+    }
     
     try {
       // Verificar se getUserMedia está disponível
@@ -41,25 +48,11 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
 
       console.log('Solicitando permissão de câmera...');
       
-      // Tentar primeiro com configurações específicas
-      let stream: MediaStream;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'user',
-            width: { ideal: 640, min: 320 },
-            height: { ideal: 480, min: 240 }
-          },
-          audio: false
-        });
-      } catch (error) {
-        console.log('Configuração específica falhou, tentando configuração básica...');
-        // Fallback para configuração mais simples
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false
-        });
-      }
+      // Tentar primeiro com configurações básicas
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: false
+      });
       
       console.log('Câmera inicializada com sucesso');
       streamRef.current = stream;
@@ -67,16 +60,21 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         
-        // Aguardar o vídeo carregar e então iniciar
+        // Aguardar o vídeo carregar
         const video = videoRef.current;
         
-        const onLoadedMetadata = () => {
-          console.log('Metadados do vídeo carregados');
+        const handleVideoReady = () => {
+          console.log('Vídeo pronto para reprodução');
           video.play().then(() => {
             console.log('Vídeo iniciado com sucesso');
             setIsActive(true);
             setCameraLoading(false);
             startFaceDetection();
+            
+            // Limpar o timeout de loading
+            if (loadingTimeoutRef.current) {
+              clearTimeout(loadingTimeoutRef.current);
+            }
           }).catch(error => {
             console.error('Erro ao iniciar vídeo:', error);
             setCameraError('Erro ao iniciar visualização da câmera');
@@ -84,29 +82,23 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
           });
         };
 
-        const onError = (error: any) => {
-          console.error('Erro no vídeo:', error);
-          setCameraError('Erro ao carregar vídeo da câmera');
-          setCameraLoading(false);
-        };
-
-        video.addEventListener('loadedmetadata', onLoadedMetadata);
-        video.addEventListener('error', onError);
+        // Múltiplos event listeners para garantir que funcione
+        video.addEventListener('loadedmetadata', handleVideoReady);
+        video.addEventListener('canplay', handleVideoReady);
         
-        // Timeout para caso o vídeo não carregue
-        setTimeout(() => {
-          if (!isActive && cameraLoading) {
-            console.log('Timeout - forçando início do vídeo');
-            video.play().then(() => {
-              setIsActive(true);
-              setCameraLoading(false);
-              startFaceDetection();
-            }).catch(() => {
-              setCameraError('Timeout ao iniciar câmera');
-              setCameraLoading(false);
-            });
+        // Timeout para forçar início se necessário
+        loadingTimeoutRef.current = setTimeout(() => {
+          console.log('Timeout - tentando forçar início da câmera');
+          if (video.readyState >= 2) { // HAVE_CURRENT_DATA
+            handleVideoReady();
+          } else {
+            setCameraError('Timeout ao carregar câmera. Tente novamente.');
+            setCameraLoading(false);
           }
-        }, 5000);
+        }, 3000);
+        
+        // Forçar load do vídeo
+        video.load();
       }
     } catch (error: any) {
       console.error('Erro ao acessar câmera:', error);
@@ -134,6 +126,12 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
 
   const stopCamera = () => {
     console.log('Parando câmera...');
+    
+    // Limpar timeout de loading
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+    }
+    
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => {
         track.stop();
@@ -400,9 +398,12 @@ const DynamicFaceCapture = ({ onCapture, onCancel, title = "Reconhecimento Facia
                 <div>
                   <h3 className="text-lg font-medium mb-2">Carregando Câmera</h3>
                   <p className="text-gray-600 text-sm">
-                    Aguarde enquanto inicializamos a câmera...
+                    Iniciando câmera, aguarde...
                   </p>
                 </div>
+                <Button onClick={stopCamera} variant="outline" className="w-full">
+                  Cancelar
+                </Button>
               </div>
             ) : cameraError ? (
               <div className="text-center space-y-4">
