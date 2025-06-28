@@ -1,6 +1,6 @@
 
 import React from 'react';
-import SimpleFaceCapture from './SimpleFaceCapture';
+import ReliableFaceCapture from './ReliableFaceCapture';
 
 interface NativeFaceCaptureProps {
   onCapture: (imageData: string, faceData?: any) => void;
@@ -21,7 +21,7 @@ const NativeFaceCapture = ({ onCapture, onCancel, title = "Captura Facial", user
   };
 
   return (
-    <SimpleFaceCapture
+    <ReliableFaceCapture
       onCapture={handleCapture}
       onCancel={onCancel}
       title={title}
