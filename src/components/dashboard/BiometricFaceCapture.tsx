@@ -32,6 +32,7 @@ const BiometricFaceCapture = ({
     capturedImage,
     error,
     isVerifying,
+    countdown,
     videoRef,
     canvasRef,
     startCamera,
@@ -65,6 +66,7 @@ const BiometricFaceCapture = ({
       return (
         <CameraView 
           videoRef={videoRef}
+          countdown={countdown}
           onCapture={capturePhoto}
           onCancel={onCancel}
         />

@@ -17,6 +17,7 @@ export const useBiometricCapture = ({ mode, userData, onCapture }: UseBiometricC
   const [error, setError] = useState<string | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -93,24 +94,39 @@ export const useBiometricCapture = ({ mode, userData, onCapture }: UseBiometricC
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
 
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    if (!context) return;
-
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-
-    context.scale(-1, 1);
-    context.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+    // Start countdown
+    setCountdown(3);
+    let count = 3;
     
-    const imageData = canvas.toDataURL('image/jpeg', 0.8);
-    setCapturedImage(imageData);
-    setStep('captured');
-    cleanup();
-    
-    console.log('Foto capturada com sucesso');
+    const countdownInterval = setInterval(() => {
+      count--;
+      setCountdown(count);
+      
+      if (count === 0) {
+        clearInterval(countdownInterval);
+        setCountdown(null);
+        
+        // Take the actual photo
+        const video = videoRef.current!;
+        const canvas = canvasRef.current!;
+        const context = canvas.getContext('2d');
+
+        if (!context) return;
+
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+
+        context.scale(-1, 1);
+        context.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+        
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+        setCapturedImage(imageData);
+        setStep('captured');
+        cleanup();
+        
+        console.log('Foto capturada com sucesso');
+      }
+    }, 1000);
   };
 
   const processCapture = async () => {
@@ -219,6 +235,7 @@ export const useBiometricCapture = ({ mode, userData, onCapture }: UseBiometricC
     capturedImage,
     error,
     isVerifying,
+    countdown,
     videoRef,
     canvasRef,
     startCamera,
