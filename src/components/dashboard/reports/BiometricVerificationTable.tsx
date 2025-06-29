@@ -48,7 +48,13 @@ const BiometricVerificationTable = ({ companyId }: BiometricVerificationTablePro
 
       if (error) throw error;
       
-      setVerificationLogs(data || []);
+      // Type assertion para garantir que verification_result seja do tipo correto
+      const typedData = (data || []).map(log => ({
+        ...log,
+        verification_result: log.verification_result as 'success' | 'failed' | 'error'
+      }));
+      
+      setVerificationLogs(typedData);
     } catch (error) {
       console.error('Erro ao carregar logs:', error);
     } finally {
