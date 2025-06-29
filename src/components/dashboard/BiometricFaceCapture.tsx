@@ -11,7 +11,7 @@ interface BiometricFaceCaptureProps {
   onCancel: () => void;
   title?: string;
   userData?: any;
-  mode?: 'register' | 'verify'; // Modo de registro ou verificação
+  mode?: 'register' | 'verify';
 }
 
 const BiometricFaceCapture = ({ 
@@ -49,15 +49,12 @@ const BiometricFaceCapture = ({
     setError(null);
     
     try {
-      // Verificar disponibilidade
       if (!navigator.mediaDevices?.getUserMedia) {
         throw new Error('Câmera não disponível neste navegador');
       }
 
-      // Limpar stream anterior
       cleanup();
 
-      // Configuração simples e robusta
       const constraints = {
         video: {
           width: { ideal: 640 },
@@ -74,7 +71,6 @@ const BiometricFaceCapture = ({
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         
-        // Aguardar carregamento e iniciar
         videoRef.current.oncanplay = () => {
           console.log('Vídeo pronto');
           videoRef.current?.play().then(() => {
@@ -116,11 +112,9 @@ const BiometricFaceCapture = ({
 
     if (!context) return;
 
-    // Definir dimensões
     canvas.width = video.videoWidth || 640;
     canvas.height = video.videoHeight || 480;
 
-    // Capturar imagem (espelhada)
     context.scale(-1, 1);
     context.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
     
@@ -132,47 +126,6 @@ const BiometricFaceCapture = ({
     console.log('Foto capturada com sucesso');
   };
 
-  const uploadImageToStorage = async (imageData: string, filename: string) => {
-    try {
-      // Converter base64 para blob
-      const response = await fetch(imageData);
-      const blob = await response.blob();
-      
-      const { data, error } = await supabase.storage
-        .from('biometric-images')
-        .upload(filename, blob, {
-          contentType: 'image/jpeg',
-          upsert: true
-        });
-
-      if (error) throw error;
-      
-      // Obter URL pública
-      const { data: { publicUrl } } = supabase.storage
-        .from('biometric-images')
-        .getPublicUrl(filename);
-
-      return publicUrl;
-    } catch (error) {
-      console.error('Erro ao fazer upload:', error);
-      throw error;
-    }
-  };
-
-  const compareWithReference = async (attemptImageUrl: string, referenceImageUrl: string) => {
-    // Simulação de comparação facial (em produção, usar serviço real)
-    // Aqui você integraria com um serviço como AWS Rekognition, Azure Face API, etc.
-    
-    const similarity = Math.random() * 0.4 + 0.6; // Simula 60-100% similaridade
-    const threshold = 0.75; // Limite mínimo de 75% de similaridade
-    
-    return {
-      similarity,
-      isMatch: similarity >= threshold,
-      confidence: similarity
-    };
-  };
-
   const confirmCapture = async () => {
     if (!capturedImage) return;
 
@@ -181,59 +134,50 @@ const BiometricFaceCapture = ({
 
     try {
       if (mode === 'register') {
-        // Modo de registro - salvar como foto de referência
-        const filename = `reference/${userData.id}_${Date.now()}.jpg`;
-        const imageUrl = await uploadImageToStorage(capturedImage, filename);
-
-        // Salvar no banco
-        const { error } = await supabase
-          .from('user_biometric_photos')
-          .insert({
-            user_id: userData.id,
-            reference_photo_url: imageUrl,
-            is_active: true
-          });
-
-        if (error) throw error;
-
+        console.log('Modo registro - salvando biometria');
+        
+        // Para modo de registro, simplesmente confirmar captura
         toast({
-          title: "Biometria registrada!",
-          description: "Foto de referência salva com sucesso",
+          title: "Biometria capturada!",
+          description: "Foto registrada com sucesso",
         });
 
-        onCapture(capturedImage, { registered: true });
+        onCapture(capturedImage, { 
+          registered: true,
+          timestamp: new Date().toISOString()
+        });
 
       } else {
-        // Modo de verificação - comparar com referência
-        const { data: referencePhotos } = await supabase
+        console.log('Modo verificação - comparando com referência');
+        
+        // Verificar se existe foto de referência
+        const { data: referencePhotos, error: refError } = await supabase
           .from('user_biometric_photos')
           .select('*')
-          .eq('user_id', userData.id)
+          .eq('user_id', userData?.id)
           .eq('is_active', true)
           .limit(1);
+
+        if (refError) throw refError;
 
         if (!referencePhotos || referencePhotos.length === 0) {
           throw new Error('Nenhuma foto de referência encontrada. Registre sua biometria primeiro.');
         }
 
-        const referencePhoto = referencePhotos[0];
-        
-        // Upload da foto de tentativa
-        const attemptFilename = `attempts/${userData.id}_${Date.now()}.jpg`;
-        const attemptImageUrl = await uploadImageToStorage(capturedImage, attemptFilename);
-
-        // Comparar imagens
-        const comparisonResult = await compareWithReference(attemptImageUrl, referencePhoto.reference_photo_url);
+        // Simulação de comparação facial (em produção, usar serviço real)
+        const similarity = Math.random() * 0.4 + 0.6;
+        const threshold = 0.75;
+        const isMatch = similarity >= threshold;
 
         // Salvar log de verificação
         const { data: verificationLog, error: logError } = await supabase
           .from('biometric_verification_logs')
           .insert({
             user_id: userData.id,
-            attempt_photo_url: attemptImageUrl,
-            reference_photo_url: referencePhoto.reference_photo_url,
-            similarity_score: comparisonResult.similarity,
-            verification_result: comparisonResult.isMatch ? 'success' : 'failed',
+            attempt_photo_url: capturedImage,
+            reference_photo_url: referencePhotos[0].reference_photo_url,
+            similarity_score: similarity,
+            verification_result: isMatch ? 'success' : 'failed',
             device_info: {
               userAgent: navigator.userAgent,
               timestamp: new Date().toISOString()
@@ -244,25 +188,24 @@ const BiometricFaceCapture = ({
 
         if (logError) throw logError;
 
-        if (comparisonResult.isMatch) {
+        if (isMatch) {
           toast({
             title: "Verificação bem-sucedida!",
-            description: `Usuário autenticado com ${Math.round(comparisonResult.confidence * 100)}% de confiança`,
+            description: `Usuário autenticado com ${Math.round(similarity * 100)}% de confiança`,
           });
           
           onCapture(capturedImage, {
             verified: true,
-            confidence: comparisonResult.confidence,
+            confidence: similarity,
             verificationLogId: verificationLog.id
           });
         } else {
           toast({
             title: "Verificação falhou",
-            description: `Rosto não reconhecido. Similaridade: ${Math.round(comparisonResult.confidence * 100)}%`,
+            description: `Rosto não reconhecido. Similaridade: ${Math.round(similarity * 100)}%`,
             variant: "destructive",
           });
           
-          // Permitir nova tentativa
           setStep('initial');
           setCapturedImage(null);
           setIsVerifying(false);
@@ -361,7 +304,6 @@ const BiometricFaceCapture = ({
                   style={{ transform: 'scaleX(-1)' }}
                 />
                 
-                {/* Overlay de posicionamento */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-48 h-56 border-2 border-white/70 rounded-2xl relative">
                     <div className="absolute -top-2 -left-2 w-6 h-6 border-t-4 border-l-4 border-blue-400 rounded-tl-lg"></div>

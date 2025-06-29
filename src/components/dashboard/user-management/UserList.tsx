@@ -3,10 +3,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Users, Trash2, Edit, User, Calendar, Phone, MapPin } from 'lucide-react';
-import { toast } from "@/hooks/use-toast";
+import EditUserDialog from './EditUserDialog';
 
 interface User {
   id: string;
@@ -14,9 +12,16 @@ interface User {
   username: string;
   role: string;
   cpf: string;
-  contact: string;
+  rg: string;
+  birth_date: string;
+  street: string;
+  number: string;
+  neighborhood: string;
   city: string;
   state: string;
+  zip_code: string;
+  contact: string;
+  face_data?: string;
   created_at: string;
 }
 
@@ -30,36 +35,21 @@ interface UserListProps {
 
 const UserList = ({ users, userData, onDeleteUser, getRoleLabel, getRoleBadgeVariant }: UserListProps) => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [editForm, setEditForm] = useState({
-    name: '',
-    contact: '',
-    username: ''
-  });
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   const handleEdit = (user: User) => {
     setEditingUser(user);
-    setEditForm({
-      name: user.name,
-      contact: user.contact,
-      username: user.username
-    });
+    setShowEditDialog(true);
   };
 
-  const handleSaveEdit = async () => {
-    try {
-      // Aqui você implementaria a lógica de atualização no Supabase
-      toast({
-        title: "Funcionalidade em desenvolvimento",
-        description: "A edição de usuários será implementada em breve.",
-      });
-      setEditingUser(null);
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar usuário",
-        variant: "destructive",
-      });
-    }
+  const handleCloseEdit = () => {
+    setEditingUser(null);
+    setShowEditDialog(false);
+  };
+
+  const handleUserUpdated = () => {
+    // Recarregar a lista de usuários após atualização
+    window.location.reload();
   };
 
   return (
@@ -88,7 +78,15 @@ const UserList = ({ users, userData, onDeleteUser, getRoleLabel, getRoleBadgeVar
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                          <User className="w-6 h-6 text-white" />
+                          {user.face_data ? (
+                            <img 
+                              src={user.face_data} 
+                              alt={user.name}
+                              className="w-12 h-12 rounded-full object-cover"
+                            />
+                          ) : (
+                            <User className="w-6 h-6 text-white" />
+                          )}
                         </div>
                         <div>
                           <div className="flex items-center gap-3 mb-2">
@@ -143,57 +141,12 @@ const UserList = ({ users, userData, onDeleteUser, getRoleLabel, getRoleBadgeVar
         </CardContent>
       </Card>
 
-      <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Usuário</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nome
-              </label>
-              <Input
-                value={editForm.name}
-                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                placeholder="Nome completo"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Contato
-              </label>
-              <Input
-                value={editForm.contact}
-                onChange={(e) => setEditForm({ ...editForm, contact: e.target.value })}
-                placeholder="Telefone/Email"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nome de Usuário
-              </label>
-              <Input
-                value={editForm.username}
-                onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                placeholder="Username"
-              />
-            </div>
-            <div className="flex gap-4 pt-4">
-              <Button onClick={handleSaveEdit} className="flex-1">
-                Salvar Alterações
-              </Button>
-              <Button 
-                onClick={() => setEditingUser(null)} 
-                variant="outline"
-                className="flex-1"
-              >
-                Cancelar
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <EditUserDialog
+        user={editingUser}
+        isOpen={showEditDialog}
+        onClose={handleCloseEdit}
+        onUserUpdated={handleUserUpdated}
+      />
     </>
   );
 };
