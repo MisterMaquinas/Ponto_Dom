@@ -1,10 +1,24 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Eye } from 'lucide-react';
-import type { User } from './types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Users, Trash2, Edit, User, Calendar, Phone, MapPin } from 'lucide-react';
+import { toast } from "@/hooks/use-toast";
+
+interface User {
+  id: string;
+  name: string;
+  username: string;
+  role: string;
+  cpf: string;
+  contact: string;
+  city: string;
+  state: string;
+  created_at: string;
+}
 
 interface UserListProps {
   users: User[];
@@ -15,66 +29,172 @@ interface UserListProps {
 }
 
 const UserList = ({ users, userData, onDeleteUser, getRoleLabel, getRoleBadgeVariant }: UserListProps) => {
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    contact: '',
+    username: ''
+  });
+
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setEditForm({
+      name: user.name,
+      contact: user.contact,
+      username: user.username
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      // Aqui você implementaria a lógica de atualização no Supabase
+      toast({
+        title: "Funcionalidade em desenvolvimento",
+        description: "A edição de usuários será implementada em breve.",
+      });
+      setEditingUser(null);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar usuário",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <Card className="border-0 shadow-lg">
-      <CardHeader>
-        <CardTitle>Usuários da {userData.companyName}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+    <>
+      <Card className="border-0 shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Usuários Cadastrados - {userData.companyName}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           {users.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">
-              Nenhum usuário cadastrado ainda.
-            </p>
+            <div className="text-center py-8">
+              <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">Nenhum usuário cadastrado</p>
+              <p className="text-sm text-gray-400 mt-2">
+                Adicione usuários usando o botão "Novo Usuário"
+              </p>
+            </div>
           ) : (
-            users.map((user) => (
-              <div key={user.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center relative">
-                    <span className="text-white font-medium text-sm">
-                      {user.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
-                    </span>
-                    {user.face_data && (
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                        <Eye className="w-2 h-2 text-white" />
+            <div className="space-y-4">
+              {users.map((user) => (
+                <Card key={user.id} className="border-l-4 border-l-blue-500">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                          <User className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="font-semibold text-gray-900">{user.name}</h3>
+                            <Badge className={getRoleBadgeVariant(user.role)}>
+                              {getRoleLabel(user.role)}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4" />
+                              <span>{user.username}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Phone className="w-4 h-4" />
+                              <span>{user.contact}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4" />
+                              <span>{user.city}, {user.state}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                            <Calendar className="w-4 h-4" />
+                            <span>Cadastrado em {new Date(user.created_at).toLocaleDateString('pt-BR')}</span>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{user.name}</p>
-                    <p className="text-sm text-gray-600">@{user.username}</p>
-                    <p className="text-xs text-gray-500">CPF: {user.cpf} • {user.contact}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Badge className={getRoleBadgeVariant(user.role)}>
-                    {getRoleLabel(user.role)}
-                  </Badge>
-                  {user.face_data && (
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                      Bio
-                    </Badge>
-                  )}
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-red-600 hover:text-red-700"
-                      onClick={() => onDeleteUser(user.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleEdit(user)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          onClick={() => onDeleteUser(user.id)}
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Usuário</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nome
+              </label>
+              <Input
+                value={editForm.name}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                placeholder="Nome completo"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Contato
+              </label>
+              <Input
+                value={editForm.contact}
+                onChange={(e) => setEditForm({ ...editForm, contact: e.target.value })}
+                placeholder="Telefone/Email"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nome de Usuário
+              </label>
+              <Input
+                value={editForm.username}
+                onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                placeholder="Username"
+              />
+            </div>
+            <div className="flex gap-4 pt-4">
+              <Button onClick={handleSaveEdit} className="flex-1">
+                Salvar Alterações
+              </Button>
+              <Button 
+                onClick={() => setEditingUser(null)} 
+                variant="outline"
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

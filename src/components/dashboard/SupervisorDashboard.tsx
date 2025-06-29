@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, Clock, UserPlus, FileText, Building } from 'lucide-react';
+import { Users, Clock, UserPlus, FileText, Building, BarChart3 } from 'lucide-react';
 import UserManagement from './UserManagement';
 import Reports from './Reports';
 
@@ -15,7 +15,7 @@ interface SupervisorDashboardProps {
 const SupervisorDashboard = ({ userData, onLogout }: SupervisorDashboardProps) => {
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Stats específicos da empresa do supervisor
+  // Stats específicos da filial/área do supervisor
   const stats = [
     { title: 'Funcionários', value: '12', icon: Users, color: 'from-blue-500 to-blue-600' },
     { title: 'Presentes', value: '10', icon: Clock, color: 'from-green-500 to-green-600' },
@@ -36,11 +36,11 @@ const SupervisorDashboard = ({ userData, onLogout }: SupervisorDashboardProps) =
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Painel de Supervisão</h1>
+              <h1 className="text-2xl font-bold text-gray-900">PontoDom - Painel de Supervisão</h1>
               <p className="text-gray-600">Bem-vindo, {userData.name}</p>
               <div className="flex items-center gap-2 mt-1">
                 <Building className="w-4 h-4 text-orange-600" />
-                <span className="text-sm text-orange-600 font-medium">{userData.companyName}</span>
+                <span className="text-sm text-orange-600 font-medium">{userData.companyName} - Filial</span>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -76,7 +76,7 @@ const SupervisorDashboard = ({ userData, onLogout }: SupervisorDashboardProps) =
 
         <Card className="border-0 shadow-lg">
           <CardHeader>
-            <CardTitle>Ações Disponíveis - {userData.companyName}</CardTitle>
+            <CardTitle>Ações Disponíveis - Sua Filial/Área</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button
@@ -84,15 +84,23 @@ const SupervisorDashboard = ({ userData, onLogout }: SupervisorDashboardProps) =
               className="w-full justify-start h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
             >
               <UserPlus className="w-5 h-5 mr-3" />
-              Cadastrar Funcionário
+              Cadastrar e Gerenciar Funcionários
             </Button>
             <Button
               onClick={() => setActiveTab('reports')}
               variant="outline"
               className="w-full justify-start h-12"
             >
+              <BarChart3 className="w-5 h-5 mr-3" />
+              Relatórios e Análises Detalhados
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start h-12"
+              disabled
+            >
               <FileText className="w-5 h-5 mr-3" />
-              Relatórios dos Funcionários
+              Configurações da Filial (Em breve)
             </Button>
           </CardContent>
         </Card>
