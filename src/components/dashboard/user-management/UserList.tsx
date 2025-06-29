@@ -5,28 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Users, Trash2, Edit, User, Calendar, Phone, MapPin } from 'lucide-react';
 import EditUserDialog from './EditUserDialog';
-
-interface User {
-  id: string;
-  name: string;
-  username: string;
-  role: string;
-  cpf: string;
-  rg: string;
-  birth_date: string;
-  street: string;
-  number: string;
-  neighborhood: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  contact: string;
-  face_data?: string;
-  created_at: string;
-}
+import { User as UserType } from './types';
 
 interface UserListProps {
-  users: User[];
+  users: UserType[];
   userData: any;
   onDeleteUser: (id: string) => void;
   getRoleLabel: (role: string) => string;
@@ -34,10 +16,10 @@ interface UserListProps {
 }
 
 const UserList = ({ users, userData, onDeleteUser, getRoleLabel, getRoleBadgeVariant }: UserListProps) => {
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<UserType | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
-  const handleEdit = (user: User) => {
+  const handleEdit = (user: UserType) => {
     setEditingUser(user);
     setShowEditDialog(true);
   };
