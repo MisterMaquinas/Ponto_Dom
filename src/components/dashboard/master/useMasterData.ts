@@ -6,6 +6,7 @@ interface CompanyStats {
   totalCompanies: number;
   totalAdmins: number;
   totalEmployees: number;
+  totalUsers: number;
   activeCompanies: number;
 }
 
@@ -24,6 +25,7 @@ export const useMasterData = () => {
     totalCompanies: 0,
     totalAdmins: 0,
     totalEmployees: 0,
+    totalUsers: 0,
     activeCompanies: 0
   });
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -56,6 +58,7 @@ export const useMasterData = () => {
           totalCompanies: 0,
           totalAdmins: 0,
           totalEmployees: 0,
+          totalUsers: 0,
           activeCompanies: 0
         });
         return;
@@ -69,6 +72,15 @@ export const useMasterData = () => {
 
       if (employeeError) {
         console.error('Erro ao carregar funcionários:', employeeError);
+      }
+
+      // Carregar contagem total de usuários
+      const { data: allUsersData, error: allUsersError } = await supabase
+        .from('users')
+        .select('id');
+
+      if (allUsersError) {
+        console.error('Erro ao carregar total de usuários:', allUsersError);
       }
 
       // Processar dados das empresas
@@ -91,10 +103,12 @@ export const useMasterData = () => {
 
       // Calcular estatísticas
       const totalEmployees = (employeeData || []).length;
+      const totalUsers = (allUsersData || []).length;
       const newStats: CompanyStats = {
         totalCompanies: processedCompanies.length,
         totalAdmins: processedCompanies.length,
         totalEmployees: totalEmployees,
+        totalUsers: totalUsers,
         activeCompanies: processedCompanies.length
       };
 
@@ -106,6 +120,7 @@ export const useMasterData = () => {
         totalCompanies: 0,
         totalAdmins: 0,
         totalEmployees: 0,
+        totalUsers: 0,
         activeCompanies: 0
       });
     } finally {

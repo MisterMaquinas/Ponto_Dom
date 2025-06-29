@@ -17,6 +17,7 @@ export interface User {
   zip_code: string;
   contact: string;
   face_data?: string;
+  created_at: string;
 }
 
 export interface UserFormData {
