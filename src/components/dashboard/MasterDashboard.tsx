@@ -3,8 +3,11 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building, Users, BarChart3, Crown, TrendingUp, Eye } from 'lucide-react';
+import { Building, Users, BarChart3, Crown, Eye, Settings, UserPlus } from 'lucide-react';
 import MasterReports from './MasterReports';
+import CompanyManagement from './master/CompanyManagement';
+import CompanyDetails from './master/CompanyDetails';
+import SystemSettings from './master/SystemSettings';
 import { useMasterData } from './master/useMasterData';
 
 interface MasterDashboardProps {
@@ -14,17 +17,34 @@ interface MasterDashboardProps {
 
 const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const { stats, companies, loading } = useMasterData();
 
   if (activeTab === 'reports') {
     return <MasterReports onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} />;
   }
 
+  if (activeTab === 'company-management') {
+    return <CompanyManagement onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} />;
+  }
+
+  if (activeTab === 'company-details' && selectedCompany) {
+    return <CompanyDetails company={selectedCompany} onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} />;
+  }
+
+  if (activeTab === 'system-settings') {
+    return <SystemSettings onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} />;
+  }
+
   const mainStats = [
     { title: 'Total de Empresas', value: stats.totalCompanies.toString(), icon: Building, color: 'from-purple-500 to-purple-600' },
     { title: 'Total de Usuários', value: stats.totalUsers.toString(), icon: Users, color: 'from-blue-500 to-blue-600' },
-    { title: 'Crescimento Mensal', value: '+12%', icon: TrendingUp, color: 'from-green-500 to-green-600' },
   ];
+
+  const handleCompanyClick = (company: any) => {
+    setSelectedCompany(company);
+    setActiveTab('company-details');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50">
@@ -58,7 +78,7 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {mainStats.map((stat, index) => (
                 <Card key={index} className="border-0 shadow-lg">
                   <CardContent className="p-6">
@@ -93,7 +113,7 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
                   ) : (
                     <div className="space-y-3">
                       {companies.slice(0, 5).map((company) => (
-                        <div key={company.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={company.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer" onClick={() => handleCompanyClick(company)}>
                           <div>
                             <h4 className="font-medium text-gray-900">{company.name}</h4>
                             <p className="text-sm text-gray-500">
@@ -128,20 +148,18 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
                     Relatórios Gerais do Sistema
                   </Button>
                   <Button
-                    variant="outline"
-                    className="w-full justify-start h-12"
-                    disabled
+                    onClick={() => setActiveTab('company-management')}
+                    className="w-full justify-start h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
                   >
                     <Building className="w-5 h-5 mr-3" />
-                    Gerenciar Empresas (Em breve)
+                    Gerenciar Empresas
                   </Button>
                   <Button
-                    variant="outline"
-                    className="w-full justify-start h-12"
-                    disabled
+                    onClick={() => setActiveTab('system-settings')}
+                    className="w-full justify-start h-12 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700"
                   >
-                    <Users className="w-5 h-5 mr-3" />
-                    Administrar Sistema (Em breve)
+                    <Settings className="w-5 h-5 mr-3" />
+                    Administrar Sistema
                   </Button>
                 </CardContent>
               </Card>

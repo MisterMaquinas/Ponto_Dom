@@ -96,7 +96,10 @@ const ModernFaceCapture = ({ onCapture, onCancel, title = "Captura Facial" }: Mo
 
           {/* Estado inicial */}
           {!isCameraActive && !capturedImage && !isInitializing && !error && (
-            <InitialView onStart={initializeCamera} />
+            <InitialView 
+              mode="register" 
+              onStartCamera={initializeCamera} 
+            />
           )}
 
           {/* Loading */}
