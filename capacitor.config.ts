@@ -1,9 +1,8 @@
-
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.lovable.dd0d6e4af5a7467e95dd09ad46b4d472',
-  appName: 'bioponto-face',
+  appName: 'PontoDom',
   webDir: 'dist',
   server: {
     url: 'https://dd0d6e4a-f5a7-467e-95dd-09ad46b4d472.lovableproject.com?forceHideBadge=true',
@@ -23,7 +22,7 @@ const config: CapacitorConfig = {
     webContentsDebuggingEnabled: true
   },
   ios: {
-    scheme: 'BioPonto Face',
+    scheme: 'PontoDom',
     contentInset: 'automatic'
   }
 };
