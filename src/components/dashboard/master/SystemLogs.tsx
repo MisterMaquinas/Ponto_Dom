@@ -55,7 +55,14 @@ const SystemLogs = ({ onBack, onLogout, userData }: SystemLogsProps) => {
         .limit(100);
 
       if (error) throw error;
-      setLogs(data || []);
+      
+      // Converter os dados para o tipo correto
+      const formattedLogs: SystemLog[] = (data || []).map(log => ({
+        ...log,
+        ip_address: log.ip_address ? String(log.ip_address) : null
+      }));
+      
+      setLogs(formattedLogs);
     } catch (error) {
       console.error('Erro ao carregar logs:', error);
       toast({

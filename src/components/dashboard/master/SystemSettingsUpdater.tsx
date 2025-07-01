@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { SystemSettings } from './SystemSettings';
+
+import { useState } from 'react';
+import SystemSettings from './SystemSettings';
 import BranchManagement from './BranchManagement';
 import SystemLogs from './SystemLogs';
 import SystemSettingsManager from './SystemSettingsManager';
