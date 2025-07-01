@@ -28,6 +28,21 @@ export const createUser = async (
   createdBy: string
 ): Promise<boolean> => {
   try {
+    // Log da criação do usuário
+    await supabase.rpc('log_system_action', {
+      p_action: 'create',
+      p_entity_type: 'user',
+      p_user_id: null,
+      p_master_user_id: null,
+      p_entity_id: null,
+      p_details: {
+        user_name: formData.name,
+        user_role: formData.role,
+        company_id: companyId,
+        created_by: createdBy
+      }
+    });
+
     const { data, error } = await supabase
       .from('users')
       .insert([
@@ -63,6 +78,22 @@ export const createUser = async (
       return false;
     }
 
+    // Log adicional após criação bem-sucedida
+    if (data && data[0]) {
+      await supabase.rpc('log_system_action', {
+        p_action: 'user_created_success',
+        p_entity_type: 'user',
+        p_user_id: null,
+        p_master_user_id: null,
+        p_entity_id: data[0].id,
+        p_details: {
+          user_id: data[0].id,
+          user_name: formData.name,
+          user_role: formData.role
+        }
+      });
+    }
+
     toast({
       title: "Usuário criado com sucesso!",
       description: `${formData.name} foi adicionado à empresa`,
@@ -81,6 +112,13 @@ export const createUser = async (
 
 export const deleteUser = async (id: string): Promise<boolean> => {
   try {
+    // Buscar dados do usuário antes de deletar para o log
+    const { data: userData } = await supabase
+      .from('users')
+      .select('name, role')
+      .eq('id', id)
+      .single();
+
     const { error } = await supabase
       .from('users')
       .delete()
@@ -95,6 +133,19 @@ export const deleteUser = async (id: string): Promise<boolean> => {
       });
       return false;
     }
+
+    // Log da exclusão
+    await supabase.rpc('log_system_action', {
+      p_action: 'delete',
+      p_entity_type: 'user',
+      p_user_id: null,
+      p_master_user_id: null,
+      p_entity_id: id,
+      p_details: {
+        deleted_user_name: userData?.name || 'Unknown',
+        deleted_user_role: userData?.role || 'Unknown'
+      }
+    });
 
     toast({
       title: "Usuário removido",

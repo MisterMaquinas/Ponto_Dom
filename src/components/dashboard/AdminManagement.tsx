@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -145,6 +144,19 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
         return;
       }
 
+      // Log da criação da empresa
+      await supabase.rpc('log_system_action', {
+        p_action: 'create',
+        p_entity_type: 'company',
+        p_master_user_id: userData?.id || null,
+        p_entity_id: companyData.id,
+        p_details: {
+          company_name: formData.companyName,
+          admin_name: formData.adminName,
+          admin_username: formData.adminUser
+        }
+      });
+
       // Depois, criar o administrador
       const { data: adminData, error: adminError } = await supabase
         .from('users')
@@ -181,6 +193,17 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
         });
         return;
       }
+
+      // Criar limites padrão para a empresa
+      await supabase
+        .from('company_limits')
+        .insert([{
+          company_id: companyData.id,
+          max_admins: 1,
+          max_managers: 5,
+          max_supervisors: 10,
+          max_users: 50
+        }]);
 
       await loadData();
       setFormData({ companyName: '', adminName: '', adminUser: '', adminPassword: '' });
@@ -258,6 +281,19 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
         return;
       }
 
+      // Log da atualização
+      await supabase.rpc('log_system_action', {
+        p_action: 'update',
+        p_entity_type: 'company',
+        p_master_user_id: userData?.id || null,
+        p_entity_id: editingAdmin.company_id,
+        p_details: {
+          company_name: editFormData.companyName,
+          admin_name: editFormData.adminName,
+          admin_username: editFormData.adminUser
+        }
+      });
+
       await loadData();
       setShowEditModal(false);
       setEditingAdmin(null);
@@ -282,6 +318,13 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
     }
 
     try {
+      // Buscar dados da empresa para o log
+      const { data: companyData } = await supabase
+        .from('companies')
+        .select('name')
+        .eq('id', companyId)
+        .single();
+
       // Primeiro, deletar todos os usuários da empresa
       const { error: usersError } = await supabase
         .from('users')
@@ -313,6 +356,17 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
         });
         return;
       }
+
+      // Log da exclusão
+      await supabase.rpc('log_system_action', {
+        p_action: 'delete',
+        p_entity_type: 'company',
+        p_master_user_id: userData?.id || null,
+        p_entity_id: companyId,
+        p_details: {
+          company_name: companyData?.name || 'Unknown'
+        }
+      });
 
       await loadData();
       toast({
