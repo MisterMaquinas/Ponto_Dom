@@ -1,65 +1,39 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Save, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Shield, Save, Lock } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 
 interface SecuritySettingsProps {
   onBack: () => void;
-  userData: any;
   onLogout: () => void;
+  userData: any;
 }
 
-const SecuritySettings = ({ onBack, userData, onLogout }: SecuritySettingsProps) => {
+const SecuritySettings = ({ onBack, onLogout, userData }: SecuritySettingsProps) => {
   const [settings, setSettings] = useState({
-    passwordMinLength: 8,
-    requireUppercase: true,
-    requireNumbers: true,
-    requireSpecialChars: true,
-    sessionTimeout: 60,
-    maxLoginAttempts: 5,
-    twoFactorEnabled: false,
-    auditLogEnabled: true,
-    encryptionLevel: 'AES256'
+    maxLoginAttempts: '5',
+    sessionTimeout: '60',
+    passwordMinLength: '8',
+    requireTwoFactor: false,
+    logFailedAttempts: true,
+    blockAfterFailures: true,
+    maintenanceMode: false,
+    auditLogging: true
   });
-  const [showApiKey, setShowApiKey] = useState(false);
-  const [saving, setSaving] = useState(false);
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      console.log('Salvando configurações de segurança:', settings);
-      
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: "Configurações de segurança salvas!",
-        description: "As políticas de segurança foram atualizadas com sucesso.",
-      });
-      
-      console.log('Configurações de segurança salvas com sucesso');
-    } catch (error) {
-      console.error('Erro ao salvar configurações de segurança:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar configurações de segurança.",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
+  const handleSave = () => {
+    toast({
+      title: "Configurações de Segurança Salvas",
+      description: "As configurações de segurança foram atualizadas com sucesso.",
+    });
   };
 
-  const generateNewApiKey = () => {
-    const newKey = 'sk_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    console.log('Nova chave API gerada:', newKey);
-    toast({
-      title: "Nova chave API gerada!",
-      description: "Uma nova chave de API foi gerada. Salve-a em local seguro.",
-    });
+  const handleToggle = (key: string, value: boolean) => {
+    setSettings({...settings, [key]: value});
   };
 
   return (
@@ -69,7 +43,7 @@ const SecuritySettings = ({ onBack, userData, onLogout }: SecuritySettingsProps)
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button onClick={onBack} variant="ghost" size="sm">
-                <Shield className="w-4 h-4 mr-2" />
+                <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar
               </Button>
               <div>
@@ -77,7 +51,7 @@ const SecuritySettings = ({ onBack, userData, onLogout }: SecuritySettingsProps)
                   <Shield className="w-6 h-6 text-red-600" />
                   Configurações de Segurança
                 </h1>
-                <p className="text-gray-600">Gerenciar políticas de segurança e autenticação</p>
+                <p className="text-gray-600">Gerencie as configurações de segurança do sistema</p>
               </div>
             </div>
             <Button onClick={onLogout} variant="outline">
@@ -87,195 +61,144 @@ const SecuritySettings = ({ onBack, userData, onLogout }: SecuritySettingsProps)
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5" />
-                Políticas de Senha
+                <Lock className="w-5 h-5" />
+                Políticas de Autenticação
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Comprimento Mínimo
-                </label>
-                <Input
-                  type="number"
-                  min="6"
-                  max="20"
-                  value={settings.passwordMinLength}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    passwordMinLength: parseInt(e.target.value) || 8
-                  })}
-                />
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Requer Maiúsculas</span>
-                  <Switch
-                    checked={settings.requireUppercase}
-                    onCheckedChange={(checked) => setSettings({
-                      ...settings,
-                      requireUppercase: checked
-                    })}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Requer Números</span>
-                  <Switch
-                    checked={settings.requireNumbers}
-                    onCheckedChange={(checked) => setSettings({
-                      ...settings,
-                      requireNumbers: checked
-                    })}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Requer Caracteres Especiais</span>
-                  <Switch
-                    checked={settings.requireSpecialChars}
-                    onCheckedChange={(checked) => setSettings({
-                      ...settings,
-                      requireSpecialChars: checked
-                    })}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle>Configurações de Sessão</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Timeout de Sessão (minutos)
-                </label>
-                <Input
-                  type="number"
-                  min="15"
-                  max="480"
-                  value={settings.sessionTimeout}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    sessionTimeout: parseInt(e.target.value) || 60
-                  })}
-                />
-              </div>
-
+            <CardContent className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Máximo de Tentativas de Login
                 </label>
                 <Input
                   type="number"
-                  min="3"
-                  max="10"
                   value={settings.maxLoginAttempts}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    maxLoginAttempts: parseInt(e.target.value) || 5
-                  })}
+                  onChange={(e) => setSettings({...settings, maxLoginAttempts: e.target.value})}
+                  placeholder="5"
                 />
               </div>
-
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nível de Criptografia
+                  Timeout da Sessão (minutos)
                 </label>
-                <Select 
-                  value={settings.encryptionLevel} 
-                  onValueChange={(value) => setSettings({
-                    ...settings,
-                    encryptionLevel: value
-                  })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="AES128">AES-128</SelectItem>
-                    <SelectItem value="AES256">AES-256</SelectItem>
-                    <SelectItem value="RSA2048">RSA-2048</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  type="number"
+                  value={settings.sessionTimeout}
+                  onChange={(e) => setSettings({...settings, sessionTimeout: e.target.value})}
+                  placeholder="60"
+                />
               </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Autenticação de Dois Fatores</span>
-                  <Switch
-                    checked={settings.twoFactorEnabled}
-                    onCheckedChange={(checked) => setSettings({
-                      ...settings,
-                      twoFactorEnabled: checked
-                    })}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Log de Auditoria</span>
-                  <Switch
-                    checked={settings.auditLogEnabled}
-                    onCheckedChange={(checked) => setSettings({
-                      ...settings,
-                      auditLogEnabled: checked
-                    })}
-                  />
-                </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Comprimento Mínimo da Senha
+                </label>
+                <Input
+                  type="number"
+                  value={settings.passwordMinLength}
+                  onChange={(e) => setSettings({...settings, passwordMinLength: e.target.value})}
+                  placeholder="8"
+                />
+              </div>
+              
+              <div className="flex items-center justify-between py-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Exigir Autenticação de Dois Fatores
+                </label>
+                <Switch
+                  checked={settings.requireTwoFactor}
+                  onCheckedChange={(checked) => handleToggle('requireTwoFactor', checked)}
+                />
               </div>
             </CardContent>
           </Card>
 
-          {/* API Keys Management */}
-          <Card className="border-0 shadow-lg lg:col-span-2">
+          <Card className="border-0 shadow-lg">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-yellow-500" />
-                Gerenciamento de Chaves API
-              </CardTitle>
+              <CardTitle>Configurações de Monitoramento</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="w-4 h-4 text-yellow-600" />
-                  <span className="text-sm font-medium text-yellow-800">Chave API Master</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type={showApiKey ? "text" : "password"}
-                    value="sk_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
-                    readOnly
-                    className="flex-1 bg-white"
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowApiKey(!showApiKey)}
-                  >
-                    {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
-                  <Button size="sm" onClick={generateNewApiKey} variant="destructive">
-                    Gerar Nova
-                  </Button>
-                </div>
+              <div className="flex items-center justify-between py-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Registrar Tentativas de Login Falhadas
+                </label>
+                <Switch
+                  checked={settings.logFailedAttempts}
+                  onCheckedChange={(checked) => handleToggle('logFailedAttempts', checked)}
+                />
               </div>
-
-              <Button onClick={handleSave} disabled={saving} className="w-full bg-red-500 hover:bg-red-600">
-                <Save className="w-4 h-4 mr-2" />
-                {saving ? 'Salvando...' : 'Salvar Configurações de Segurança'}
-              </Button>
+              
+              <div className="flex items-center justify-between py-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Bloquear Após Falhas Sucessivas
+                </label>
+                <Switch
+                  checked={settings.blockAfterFailures}
+                  onCheckedChange={(checked) => handleToggle('blockAfterFailures', checked)}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between py-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Logs de Auditoria
+                </label>
+                <Switch
+                  checked={settings.auditLogging}
+                  onCheckedChange={(checked) => handleToggle('auditLogging', checked)}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between py-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Modo de Manutenção
+                </label>
+                <Switch
+                  checked={settings.maintenanceMode}
+                  onCheckedChange={(checked) => handleToggle('maintenanceMode', checked)}
+                />
+              </div>
+              
+              <div className="pt-4">
+                <Button onClick={handleSave} className="w-full">
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Configurações
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
+
+        <Card className="mt-8 border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle>Status de Segurança</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">Ativo</div>
+                <div className="text-sm text-gray-600">Firewall</div>
+              </div>
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">12</div>
+                <div className="text-sm text-gray-600">Tentativas Bloqueadas</div>
+              </div>
+              <div className="text-center p-4 bg-purple-50 rounded-lg">
+                <div className="text-2xl font-bold text-purple-600">256</div>
+                <div className="text-sm text-gray-600">Sessões Ativas</div>
+              </div>
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <div className="text-2xl font-bold text-orange-600">99.9%</div>
+                <div className="text-sm text-gray-600">Uptime</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -1,75 +1,40 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Database, Save, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Database, Save, TestTube } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 
 interface DatabaseSettingsProps {
   onBack: () => void;
-  userData: any;
   onLogout: () => void;
+  userData: any;
 }
 
-const DatabaseSettings = ({ onBack, userData, onLogout }: DatabaseSettingsProps) => {
+const DatabaseSettings = ({ onBack, onLogout, userData }: DatabaseSettingsProps) => {
   const [settings, setSettings] = useState({
-    maxConnections: 100,
-    queryTimeout: 30,
-    backupEnabled: true,
-    maintenanceMode: false,
-    logQueries: false,
-    cacheEnabled: true
+    host: 'localhost',
+    port: '5432',
+    database: 'pontodom',
+    username: 'postgres',
+    maxConnections: '100',
+    backupFrequency: '24',
+    retentionDays: '30'
   });
-  const [saving, setSaving] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'checking'>('connected');
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      console.log('Salvando configurações do banco de dados:', settings);
-      
-      // Simular salvamento das configurações
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: "Configurações salvas!",
-        description: "As configurações do banco de dados foram atualizadas com sucesso.",
-      });
-      
-      console.log('Configurações salvas com sucesso');
-    } catch (error) {
-      console.error('Erro ao salvar configurações:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar configurações do banco de dados.",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
+  const handleSave = () => {
+    toast({
+      title: "Configurações Salvas",
+      description: "As configurações do banco de dados foram atualizadas com sucesso.",
+    });
   };
 
-  const testConnection = async () => {
-    setConnectionStatus('checking');
-    try {
-      console.log('Testando conexão com o banco de dados...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setConnectionStatus('connected');
-      toast({
-        title: "Conexão testada!",
-        description: "Conexão com o banco de dados está funcionando corretamente.",
-      });
-    } catch (error) {
-      console.error('Erro na conexão:', error);
-      setConnectionStatus('disconnected');
-      toast({
-        title: "Erro de conexão",
-        description: "Não foi possível conectar ao banco de dados.",
-        variant: "destructive",
-      });
-    }
+  const handleTestConnection = () => {
+    toast({
+      title: "Testando Conexão",
+      description: "Conexão com o banco de dados testada com sucesso!",
+    });
   };
 
   return (
@@ -79,15 +44,15 @@ const DatabaseSettings = ({ onBack, userData, onLogout }: DatabaseSettingsProps)
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button onClick={onBack} variant="ghost" size="sm">
-                <Database className="w-4 h-4 mr-2" />
+                <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar
               </Button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <Database className="w-6 h-6 text-green-600" />
-                  Configurações do Banco de Dados
+                  <Database className="w-6 h-6 text-blue-600" />
+                  Configurações do Banco
                 </h1>
-                <p className="text-gray-600">Gerenciar configurações de performance e conexão</p>
+                <p className="text-gray-600">Gerencie as configurações do banco de dados</p>
               </div>
             </div>
             <Button onClick={onLogout} variant="outline">
@@ -97,57 +62,69 @@ const DatabaseSettings = ({ onBack, userData, onLogout }: DatabaseSettingsProps)
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Status da Conexão */}
           <Card className="border-0 shadow-lg">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                Status da Conexão
-                <Badge 
-                  variant={connectionStatus === 'connected' ? 'default' : 'destructive'}
-                  className={connectionStatus === 'connected' ? 'bg-green-500' : ''}
-                >
-                  {connectionStatus === 'checking' ? (
-                    <>
-                      <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
-                      Testando...
-                    </>
-                  ) : connectionStatus === 'connected' ? (
-                    <>
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Conectado
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="w-3 h-3 mr-1" />
-                      Desconectado
-                    </>
-                  )}
-                </Badge>
-              </CardTitle>
+              <CardTitle>Configurações de Conexão</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <div className="text-sm text-gray-600 space-y-2">
-                  <div>Host: localhost:5432</div>
-                  <div>Database: sistema_empresarial</div>
-                  <div>Conexões ativas: 15/100</div>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Host do Banco
+                </label>
+                <Input
+                  value={settings.host}
+                  onChange={(e) => setSettings({...settings, host: e.target.value})}
+                  placeholder="localhost"
+                />
               </div>
-              <Button onClick={testConnection} className="w-full" disabled={connectionStatus === 'checking'}>
-                <RefreshCw className={`w-4 h-4 mr-2 ${connectionStatus === 'checking' ? 'animate-spin' : ''}`} />
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Porta
+                </label>
+                <Input
+                  value={settings.port}
+                  onChange={(e) => setSettings({...settings, port: e.target.value})}
+                  placeholder="5432"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nome do Banco
+                </label>
+                <Input
+                  value={settings.database}
+                  onChange={(e) => setSettings({...settings, database: e.target.value})}
+                  placeholder="pontodom"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Usuário
+                </label>
+                <Input
+                  value={settings.username}
+                  onChange={(e) => setSettings({...settings, username: e.target.value})}
+                  placeholder="postgres"
+                />
+              </div>
+              
+              <Button onClick={handleTestConnection} className="w-full" variant="outline">
+                <TestTube className="w-4 h-4 mr-2" />
                 Testar Conexão
               </Button>
             </CardContent>
           </Card>
 
-          {/* Configurações de Performance */}
           <Card className="border-0 shadow-lg">
             <CardHeader>
-              <CardTitle>Configurações de Performance</CardTitle>
+              <CardTitle>Configurações Avançadas</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Máximo de Conexões
@@ -155,80 +132,70 @@ const DatabaseSettings = ({ onBack, userData, onLogout }: DatabaseSettingsProps)
                 <Input
                   type="number"
                   value={settings.maxConnections}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    maxConnections: parseInt(e.target.value) || 100
-                  })}
+                  onChange={(e) => setSettings({...settings, maxConnections: e.target.value})}
+                  placeholder="100"
                 />
               </div>
-
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Timeout de Query (segundos)
+                  Frequência de Backup (horas)
                 </label>
                 <Input
                   type="number"
-                  value={settings.queryTimeout}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    queryTimeout: parseInt(e.target.value) || 30
-                  })}
+                  value={settings.backupFrequency}
+                  onChange={(e) => setSettings({...settings, backupFrequency: e.target.value})}
+                  placeholder="24"
                 />
               </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Cache Habilitado</span>
-                  <Switch
-                    checked={settings.cacheEnabled}
-                    onCheckedChange={(checked) => setSettings({
-                      ...settings,
-                      cacheEnabled: checked
-                    })}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Log de Queries</span>
-                  <Switch
-                    checked={settings.logQueries}
-                    onCheckedChange={(checked) => setSettings({
-                      ...settings,
-                      logQueries: checked
-                    })}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Backup Automático</span>
-                  <Switch
-                    checked={settings.backupEnabled}
-                    onCheckedChange={(checked) => setSettings({
-                      ...settings,
-                      backupEnabled: checked
-                    })}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Modo Manutenção</span>
-                  <Switch
-                    checked={settings.maintenanceMode}
-                    onCheckedChange={(checked) => setSettings({
-                      ...settings,
-                      maintenanceMode: checked
-                    })}
-                  />
-                </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Retenção de Backups (dias)
+                </label>
+                <Input
+                  type="number"
+                  value={settings.retentionDays}
+                  onChange={(e) => setSettings({...settings, retentionDays: e.target.value})}
+                  placeholder="30"
+                />
               </div>
-
-              <Button onClick={handleSave} disabled={saving} className="w-full bg-green-500 hover:bg-green-600">
-                <Save className="w-4 h-4 mr-2" />
-                {saving ? 'Salvando...' : 'Salvar Configurações'}
-              </Button>
+              
+              <div className="pt-4">
+                <Button onClick={handleSave} className="w-full">
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Configurações
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
+
+        <Card className="mt-8 border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle>Status do Sistema</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">Online</div>
+                <div className="text-sm text-gray-600">Status do Banco</div>
+              </div>
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">45</div>
+                <div className="text-sm text-gray-600">Conexões Ativas</div>
+              </div>
+              <div className="text-center p-4 bg-purple-50 rounded-lg">
+                <div className="text-2xl font-bold text-purple-600">2.1GB</div>
+                <div className="text-sm text-gray-600">Tamanho do Banco</div>
+              </div>
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <div className="text-2xl font-bold text-orange-600">12h</div>
+                <div className="text-sm text-gray-600">Último Backup</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
