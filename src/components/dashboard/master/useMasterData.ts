@@ -41,15 +41,8 @@ export const useMasterData = () => {
         .select(`
           id,
           name,
-          created_at,
-          users!inner (
-            id,
-            name,
-            username,
-            role
-          )
-        `)
-        .eq('users.role', 'admin');
+          created_at
+        `);
 
       if (companiesError) {
         console.error('Erro ao carregar empresas:', companiesError);
@@ -62,6 +55,16 @@ export const useMasterData = () => {
           activeCompanies: 0
         });
         return;
+      }
+
+      // Carregar administradores separadamente
+      const { data: adminsData, error: adminsError } = await supabase
+        .from('users')
+        .select('id, name, username, company_id')
+        .eq('role', 'admin');
+
+      if (adminsError) {
+        console.error('Erro ao carregar admins:', adminsError);
       }
 
       // Carregar contagem total de funcionários por empresa
@@ -85,7 +88,7 @@ export const useMasterData = () => {
 
       // Processar dados das empresas
       const processedCompanies: Company[] = (companiesData || []).map(company => {
-        const admin = company.users[0];
+        const admin = (adminsData || []).find(admin => admin.company_id === company.id);
         const employeeCount = (employeeData || []).filter(emp => emp.company_id === company.id).length;
         
         return {

@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Building, Eye, Edit, Plus } from 'lucide-react';
+import { ArrowLeft, Building, Eye, Edit, Plus, BarChart3, Trash2 } from 'lucide-react';
 import { useMasterData } from './useMasterData';
 import CompanyDetails from './CompanyDetails';
 import EditCompanyDialog from './EditCompanyDialog';
 import AddCompanyDialog from './AddCompanyDialog';
+import DeleteCompanyDialog from './DeleteCompanyDialog';
+import SystemReports from './SystemReports';
 
 interface CompanyManagementProps {
   onBack: () => void;
@@ -16,17 +18,29 @@ interface CompanyManagementProps {
 }
 
 const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProps) => {
-  const { companies, loading } = useMasterData();
+  const { companies, loading, loadData } = useMasterData();
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [editingCompany, setEditingCompany] = useState<any>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [deletingCompany, setDeletingCompany] = useState<any>(null);
+  const [showReports, setShowReports] = useState(false);
 
   if (showDetails && selectedCompany) {
     return (
       <CompanyDetails 
         company={selectedCompany} 
         onBack={() => setShowDetails(false)} 
+        onLogout={onLogout} 
+        userData={userData} 
+      />
+    );
+  }
+
+  if (showReports) {
+    return (
+      <SystemReports 
+        onBack={() => setShowReports(false)} 
         onLogout={onLogout} 
         userData={userData} 
       />
@@ -48,7 +62,16 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
 
   const handleCompanyAdded = () => {
     setShowAddDialog(false);
-    window.location.reload();
+    loadData(); // Recarregar dados em vez de reload da página
+  };
+
+  const handleDeleteCompany = (company: any) => {
+    setDeletingCompany(company);
+  };
+
+  const handleCompanyDeleted = () => {
+    setDeletingCompany(null);
+    loadData(); // Recarregar dados em vez de reload da página
   };
 
   return (
@@ -67,6 +90,10 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
               </div>
             </div>
             <div className="flex items-center gap-4">
+              <Button onClick={() => setShowReports(true)} variant="outline">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Relatórios
+              </Button>
               <Button onClick={handleAddCompany} className="bg-green-500 hover:bg-green-600">
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Empresa
@@ -128,6 +155,14 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
+                    <Button
+                      onClick={() => handleDeleteCompany(company)}
+                      variant="outline"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -143,7 +178,7 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
           onClose={() => setEditingCompany(null)}
           onCompanyUpdated={() => {
             setEditingCompany(null);
-            window.location.reload();
+            loadData(); // Recarregar dados em vez de reload da página
           }}
         />
       )}
@@ -152,6 +187,13 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
         isOpen={showAddDialog}
         onClose={() => setShowAddDialog(false)}
         onCompanyAdded={handleCompanyAdded}
+      />
+
+      <DeleteCompanyDialog
+        isOpen={!!deletingCompany}
+        onClose={() => setDeletingCompany(null)}
+        company={deletingCompany}
+        onCompanyDeleted={handleCompanyDeleted}
       />
     </div>
   );
