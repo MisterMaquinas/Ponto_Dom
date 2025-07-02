@@ -7,6 +7,7 @@ import { ArrowLeft, Building, Eye, Edit, Plus } from 'lucide-react';
 import { useMasterData } from './useMasterData';
 import CompanyDetails from './CompanyDetails';
 import EditCompanyDialog from './EditCompanyDialog';
+import AddCompanyDialog from './AddCompanyDialog';
 
 interface CompanyManagementProps {
   onBack: () => void;
@@ -19,6 +20,7 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [editingCompany, setEditingCompany] = useState<any>(null);
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   if (showDetails && selectedCompany) {
     return (
@@ -40,6 +42,15 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
     setEditingCompany(company);
   };
 
+  const handleAddCompany = () => {
+    setShowAddDialog(true);
+  };
+
+  const handleCompanyAdded = () => {
+    setShowAddDialog(false);
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50">
       <div className="bg-white shadow-sm border-b">
@@ -56,7 +67,7 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Button className="bg-green-500 hover:bg-green-600">
+              <Button onClick={handleAddCompany} className="bg-green-500 hover:bg-green-600">
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Empresa
               </Button>
@@ -136,6 +147,12 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
           }}
         />
       )}
+
+      <AddCompanyDialog
+        isOpen={showAddDialog}
+        onClose={() => setShowAddDialog(false)}
+        onCompanyAdded={handleCompanyAdded}
+      />
     </div>
   );
 };
