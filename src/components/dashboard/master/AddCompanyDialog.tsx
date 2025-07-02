@@ -16,13 +16,14 @@ interface AddCompanyDialogProps {
 const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogProps) => {
   const [formData, setFormData] = useState({
     name: '',
+    fantasyName: '',
+    cnpj: '',
+    stateRegistration: '',
+    phone: '',
+    email: '',
     adminName: '',
     adminUsername: '',
     adminPassword: '',
-    contact: '',
-    cpf: '',
-    rg: '',
-    birthDate: '',
     street: '',
     number: '',
     neighborhood: '',
@@ -46,29 +47,31 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
 
       if (companyError) throw companyError;
 
-      // Criar usuário admin
-      const { error: userError } = await supabase
-        .from('users')
-        .insert([{
-          company_id: company.id,
-          name: formData.adminName,
-          username: formData.adminUsername,
-          password: formData.adminPassword,
-          role: 'admin',
-          contact: formData.contact,
-          cpf: formData.cpf,
-          rg: formData.rg,
-          birth_date: formData.birthDate,
-          street: formData.street,
-          number: formData.number,
-          neighborhood: formData.neighborhood,
-          city: formData.city,
-          state: formData.state,
-          zip_code: formData.zipCode,
-          created_by: 'master'
-        }]);
+      // Criar usuário admin (apenas se dados foram fornecidos)
+      if (formData.adminName && formData.adminUsername && formData.adminPassword) {
+        const { error: userError } = await supabase
+          .from('users')
+          .insert([{
+            company_id: company.id,
+            name: formData.adminName,
+            username: formData.adminUsername,
+            password: formData.adminPassword,
+            role: 'admin',
+            contact: formData.phone || '',
+            cpf: '',
+            rg: '',
+            birth_date: '1990-01-01',
+            street: formData.street || '',
+            number: formData.number || '',
+            neighborhood: formData.neighborhood || '',
+            city: formData.city || '',
+            state: formData.state || '',
+            zip_code: formData.zipCode || '',
+            created_by: 'master'
+          }]);
 
-      if (userError) throw userError;
+        if (userError) throw userError;
+      }
 
       // Criar limites padrão para a empresa
       const { error: limitsError } = await supabase
@@ -118,19 +121,69 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Dados da Empresa</h3>
-            <div>
-              <Label htmlFor="name">Nome da Empresa</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                required
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Razão Social</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="fantasyName">Nome Fantasia</Label>
+                <Input
+                  id="fantasyName"
+                  value={formData.fantasyName}
+                  onChange={(e) => handleInputChange('fantasyName', e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="cnpj">CNPJ</Label>
+                <Input
+                  id="cnpj"
+                  value={formData.cnpj}
+                  onChange={(e) => handleInputChange('cnpj', e.target.value)}
+                  placeholder="00.000.000/0000-00"
+                />
+              </div>
+              <div>
+                <Label htmlFor="stateRegistration">Inscrição Estadual</Label>
+                <Input
+                  id="stateRegistration"
+                  value={formData.stateRegistration}
+                  onChange={(e) => handleInputChange('stateRegistration', e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="phone">Telefone</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  placeholder="(00) 00000-0000"
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">E-mail</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                />
+              </div>
             </div>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Dados do Administrador</h3>
+            <h3 className="text-lg font-semibold">Dados do Responsável (Opcional)</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="adminName">Nome Completo</Label>
@@ -138,7 +191,6 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
                   id="adminName"
                   value={formData.adminName}
                   onChange={(e) => handleInputChange('adminName', e.target.value)}
-                  required
                 />
               </div>
               <div>
@@ -147,67 +199,23 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
                   id="adminUsername"
                   value={formData.adminUsername}
                   onChange={(e) => handleInputChange('adminUsername', e.target.value)}
-                  required
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="adminPassword">Senha</Label>
-                <Input
-                  id="adminPassword"
-                  type="password"
-                  value={formData.adminPassword}
-                  onChange={(e) => handleInputChange('adminPassword', e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="contact">Contato</Label>
-                <Input
-                  id="contact"
-                  value={formData.contact}
-                  onChange={(e) => handleInputChange('contact', e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="cpf">CPF</Label>
-                <Input
-                  id="cpf"
-                  value={formData.cpf}
-                  onChange={(e) => handleInputChange('cpf', e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="rg">RG</Label>
-                <Input
-                  id="rg"
-                  value={formData.rg}
-                  onChange={(e) => handleInputChange('rg', e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="birthDate">Data de Nascimento</Label>
-                <Input
-                  id="birthDate"
-                  type="date"
-                  value={formData.birthDate}
-                  onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                  required
-                />
-              </div>
+            <div>
+              <Label htmlFor="adminPassword">Senha</Label>
+              <Input
+                id="adminPassword"
+                type="password"
+                value={formData.adminPassword}
+                onChange={(e) => handleInputChange('adminPassword', e.target.value)}
+              />
             </div>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Endereço</h3>
+            <h3 className="text-lg font-semibold">Endereço (Opcional)</h3>
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
                 <Label htmlFor="street">Rua</Label>
@@ -215,7 +223,6 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
                   id="street"
                   value={formData.street}
                   onChange={(e) => handleInputChange('street', e.target.value)}
-                  required
                 />
               </div>
               <div>
@@ -224,7 +231,6 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
                   id="number"
                   value={formData.number}
                   onChange={(e) => handleInputChange('number', e.target.value)}
-                  required
                 />
               </div>
             </div>
@@ -236,7 +242,6 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
                   id="neighborhood"
                   value={formData.neighborhood}
                   onChange={(e) => handleInputChange('neighborhood', e.target.value)}
-                  required
                 />
               </div>
               <div>
@@ -245,7 +250,6 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
                   id="city"
                   value={formData.city}
                   onChange={(e) => handleInputChange('city', e.target.value)}
-                  required
                 />
               </div>
             </div>
@@ -257,7 +261,6 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
                   id="state"
                   value={formData.state}
                   onChange={(e) => handleInputChange('state', e.target.value)}
-                  required
                 />
               </div>
               <div>
@@ -266,7 +269,6 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
                   id="zipCode"
                   value={formData.zipCode}
                   onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                  required
                 />
               </div>
             </div>
