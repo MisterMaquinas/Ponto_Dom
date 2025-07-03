@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Clock, User, CheckCircle } from 'lucide-react';
+import { Camera, Clock, User, CheckCircle, Scan } from 'lucide-react';
 import FaceRecognition from './FaceRecognition';
+import FacialBiometricDemo from './FacialBiometricDemo';
 import ReceiptActions from './ReceiptActions';
 import { toast } from "@/hooks/use-toast";
 
@@ -15,6 +16,7 @@ interface UserDashboardProps {
 
 const UserDashboard = ({ userData, onLogout }: UserDashboardProps) => {
   const [showCamera, setShowCamera] = useState(false);
+  const [showBiometricDemo, setShowBiometricDemo] = useState(false);
   const [lastPunchTime, setLastPunchTime] = useState<Date | null>(null);
   const [lastPunchData, setLastPunchData] = useState<any>(null);
 
@@ -43,6 +45,15 @@ const UserDashboard = ({ userData, onLogout }: UserDashboardProps) => {
         onSuccess={handlePunchSuccess}
         onCancel={() => setShowCamera(false)}
         userData={userData}
+      />
+    );
+  }
+
+  if (showBiometricDemo) {
+    return (
+      <FacialBiometricDemo
+        userData={userData}
+        onBack={() => setShowBiometricDemo(false)}
       />
     );
   }
@@ -112,6 +123,15 @@ const UserDashboard = ({ userData, onLogout }: UserDashboardProps) => {
               >
                 <Camera className="w-6 h-6 mr-3" />
                 Registrar Ponto
+              </Button>
+
+              <Button
+                onClick={() => setShowBiometricDemo(true)}
+                variant="outline"
+                className="w-full mt-3 h-12 border-2 border-purple-200 text-purple-700 hover:bg-purple-50"
+              >
+                <Scan className="w-5 h-5 mr-2" />
+                Testar Biometria Facial
               </Button>
 
               {lastPunchTime && lastPunchData && (
