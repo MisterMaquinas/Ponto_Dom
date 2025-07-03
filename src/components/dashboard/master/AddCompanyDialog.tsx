@@ -47,31 +47,33 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
 
       if (companyError) throw companyError;
 
-      // Criar usuário admin (apenas se dados foram fornecidos)
-      if (formData.adminName && formData.adminUsername && formData.adminPassword) {
-        const { error: userError } = await supabase
-          .from('users')
-          .insert([{
-            company_id: company.id,
-            name: formData.adminName,
-            username: formData.adminUsername,
-            password: formData.adminPassword,
-            role: 'admin',
-            contact: formData.phone || '',
-            cpf: '',
-            rg: '',
-            birth_date: '1990-01-01',
-            street: formData.street || '',
-            number: formData.number || '',
-            neighborhood: formData.neighborhood || '',
-            city: formData.city || '',
-            state: formData.state || '',
-            zip_code: formData.zipCode || '',
-            created_by: 'master'
-          }]);
+      // Criar usuário admin padrão
+      const adminName = formData.adminName || 'Administrador';
+      const adminUsername = formData.adminUsername || company.name.toLowerCase().replace(/\s+/g, '');
+      const adminPassword = formData.adminPassword || '123456';
 
-        if (userError) throw userError;
-      }
+      const { error: userError } = await supabase
+        .from('users')
+        .insert([{
+          company_id: company.id,
+          name: adminName,
+          username: adminUsername,
+          password: adminPassword,
+          role: 'admin',
+          contact: formData.phone || '',
+          cpf: '',
+          rg: '',
+          birth_date: '1990-01-01',
+          street: formData.street || '',
+          number: formData.number || '',
+          neighborhood: formData.neighborhood || '',
+          city: formData.city || '',
+          state: formData.state || '',
+          zip_code: formData.zipCode || '',
+          created_by: 'master'
+        }]);
+
+      if (userError) throw userError;
 
       // Criar limites padrão para a empresa
       const { error: limitsError } = await supabase
