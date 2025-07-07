@@ -38,7 +38,7 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
 
   const mainStats = [
     { title: 'Total de Empresas', value: stats.totalCompanies.toString(), icon: Building, color: 'from-purple-500 to-purple-600' },
-    { title: 'Total de Usuários', value: stats.totalUsers.toString(), icon: Users, color: 'from-blue-500 to-blue-600' },
+    { title: 'Total de Filiais', value: stats.totalBranches?.toString() || '0', icon: Building, color: 'from-blue-500 to-blue-600' },
   ];
 
   const handleCompanyClick = (company: any) => {

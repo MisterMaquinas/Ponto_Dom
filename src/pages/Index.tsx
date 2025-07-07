@@ -9,6 +9,7 @@ import ManagerDashboard from '@/components/dashboard/ManagerDashboard';
 import SupervisorDashboard from '@/components/dashboard/SupervisorDashboard';
 import UserDashboard from '@/components/dashboard/UserDashboard';
 import MasterDashboard from '@/components/dashboard/MasterDashboard';
+import CompanyDashboard from '@/components/dashboard/CompanyDashboard';
 import BranchLogin from '@/components/dashboard/branch/BranchLogin';
 import BranchDashboard from '@/components/dashboard/branch/BranchDashboard';
 
@@ -31,19 +32,17 @@ const Index = () => {
     setCurrentView('branch-dashboard');
   };
 
-  // Se está logado no sistema antigo, mostra os dashboards antigos
+  // Sistema de hierarquia Master -> Empresa -> Filial
   if (currentUser) {
     switch (currentUser.type) {
       case 'master':
         return <MasterDashboard userData={currentUser} onLogout={handleLogout} />;
       case 'admin':
-        return <AdminDashboard userData={currentUser} onLogout={handleLogout} />;
       case 'manager':
-        return <ManagerDashboard userData={currentUser} onLogout={handleLogout} />;
-      case 'supervisor':
-        return <SupervisorDashboard userData={currentUser} onLogout={handleLogout} />;
+      case 'supervisor':  
       case 'user':
-        return <UserDashboard userData={currentUser} onLogout={handleLogout} />;
+        // Todos os tipos de usuário da empresa vão para o dashboard da empresa
+        return <CompanyDashboard userData={currentUser} onLogout={handleLogout} />;
     }
   }
 

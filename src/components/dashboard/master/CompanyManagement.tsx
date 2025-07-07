@@ -134,11 +134,11 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2 mb-4">
-                    <p className="text-sm"><strong>Admin:</strong> {company.admin_name}</p>
-                    <p className="text-sm"><strong>Usuário:</strong> @{company.admin_username}</p>
-                    <p className="text-sm"><strong>Funcionários:</strong> {company.employee_count}</p>
-                  </div>
+                   <div className="space-y-2 mb-4">
+                     <p className="text-sm"><strong>Nome:</strong> {company.name}</p>
+                     <p className="text-sm"><strong>Filiais:</strong> {company.branch_count || 0}</p>
+                     <p className="text-sm"><strong>Funcionários:</strong> {company.employee_count || 0}</p>
+                   </div>
                   <div className="flex gap-2">
                     <Button
                       onClick={() => handleViewDetails(company)}
