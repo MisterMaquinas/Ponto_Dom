@@ -6,9 +6,11 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 interface LoginFormProps {
   onLogin: (userType: string, userData: any) => void;
+  onBack?: () => void;
 }
 const LoginForm = ({
-  onLogin
+  onLogin,
+  onBack
 }: LoginFormProps) => {
   const [formData, setFormData] = useState({
     username: '',
@@ -106,6 +108,16 @@ const LoginForm = ({
             <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700" disabled={isLoading}>
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
+            {onBack && (
+              <Button
+                type="button"
+                onClick={onBack}
+                variant="outline"
+                className="w-full mt-2"
+              >
+                Voltar
+              </Button>
+            )}
           </form>
         </CardContent>
       </Card>

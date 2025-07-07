@@ -1,14 +1,21 @@
 
 import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Building, Building2, Crown } from 'lucide-react';
 import LoginForm from '@/components/auth/LoginForm';
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
 import ManagerDashboard from '@/components/dashboard/ManagerDashboard';
 import SupervisorDashboard from '@/components/dashboard/SupervisorDashboard';
 import UserDashboard from '@/components/dashboard/UserDashboard';
 import MasterDashboard from '@/components/dashboard/MasterDashboard';
+import BranchLogin from '@/components/dashboard/branch/BranchLogin';
+import BranchDashboard from '@/components/dashboard/branch/BranchDashboard';
 
 const Index = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentView, setCurrentView] = useState<'home' | 'master' | 'company' | 'branch' | 'branch-dashboard'>('home');
+  const [branchData, setBranchData] = useState<any>(null);
 
   const handleLogin = (userType: string, userData: any) => {
     setCurrentUser({ type: userType, ...userData });
@@ -16,26 +23,141 @@ const Index = () => {
 
   const handleLogout = () => {
     setCurrentUser(null);
+    setCurrentView('home');
   };
 
-  if (!currentUser) {
-    return <LoginForm onLogin={handleLogin} />;
+  const handleBranchLoginSuccess = (branch: any) => {
+    setBranchData(branch);
+    setCurrentView('branch-dashboard');
+  };
+
+  // Se está logado no sistema antigo, mostra os dashboards antigos
+  if (currentUser) {
+    switch (currentUser.type) {
+      case 'master':
+        return <MasterDashboard userData={currentUser} onLogout={handleLogout} />;
+      case 'admin':
+        return <AdminDashboard userData={currentUser} onLogout={handleLogout} />;
+      case 'manager':
+        return <ManagerDashboard userData={currentUser} onLogout={handleLogout} />;
+      case 'supervisor':
+        return <SupervisorDashboard userData={currentUser} onLogout={handleLogout} />;
+      case 'user':
+        return <UserDashboard userData={currentUser} onLogout={handleLogout} />;
+    }
   }
 
-  switch (currentUser.type) {
-    case 'master':
-      return <MasterDashboard userData={currentUser} onLogout={handleLogout} />;
-    case 'admin':
-      return <AdminDashboard userData={currentUser} onLogout={handleLogout} />;
-    case 'manager':
-      return <ManagerDashboard userData={currentUser} onLogout={handleLogout} />;
-    case 'supervisor':
-      return <SupervisorDashboard userData={currentUser} onLogout={handleLogout} />;
-    case 'user':
-      return <UserDashboard userData={currentUser} onLogout={handleLogout} />;
-    default:
-      return <LoginForm onLogin={handleLogin} />;
+  // Novo sistema de filiais
+  if (currentView === 'branch-dashboard' && branchData) {
+    return (
+      <BranchDashboard 
+        branchData={branchData} 
+        onLogout={() => {
+          setBranchData(null);
+          setCurrentView('home');
+        }}
+      />
+    );
   }
+
+  if (currentView === 'branch') {
+    return (
+      <BranchLogin 
+        onSuccess={handleBranchLoginSuccess}
+        onBack={() => setCurrentView('home')}
+      />
+    );
+  }
+
+  if (currentView === 'master' || currentView === 'company') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <LoginForm onLogin={handleLogin} onBack={() => setCurrentView('home')} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Sistema de Ponto Eletrônico</h1>
+          <p className="text-lg text-gray-600">Escolha seu tipo de acesso</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Acesso Master */}
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group"
+                onClick={() => setCurrentView('master')}>
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Crown className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-purple-600">Acesso Master</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-gray-600 mb-4">
+                Gerenciamento completo do sistema, criação de empresas e configurações globais
+              </p>
+              <Button className="w-full bg-purple-500 hover:bg-purple-600">
+                Entrar como Master
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Acesso Empresa */}
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group"
+                onClick={() => setCurrentView('company')}>
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Building className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-blue-600">Acesso Empresa</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-gray-600 mb-4">
+                Gerenciamento da empresa, criação de filiais e administração geral
+              </p>
+              <Button className="w-full bg-blue-500 hover:bg-blue-600">
+                Entrar como Empresa
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Acesso Filial */}
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group"
+                onClick={() => setCurrentView('branch')}>
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Building2 className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-green-600">Acesso Filial</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-gray-600 mb-4">
+                Sistema de ponto por biometria facial, cadastro e gerenciamento de funcionários
+              </p>
+              <Button className="w-full bg-green-500 hover:bg-green-600">
+                Entrar como Filial
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mt-8 text-center">
+          <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
+            <h4 className="font-semibold text-gray-900 mb-2">Como funciona?</h4>
+            <div className="text-sm text-gray-600 space-y-1">
+              <p><strong>Master:</strong> Cria e gerencia empresas</p>
+              <p><strong>Empresa:</strong> Cria e gerencia filiais</p>
+              <p><strong>Filial:</strong> Registra funcionários e controla ponto por biometria</p>
+              <p><strong>Funcionários:</strong> Fazem ponto apenas com reconhecimento facial</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Index;
