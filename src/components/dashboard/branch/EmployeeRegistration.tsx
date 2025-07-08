@@ -79,15 +79,22 @@ const EmployeeRegistration = ({ branchData, onBack }: EmployeeRegistrationProps)
     }
 
     try {
+      // Converter base64 para blob
+      const response = await fetch(formData.reference_photo_url);
+      const blob = await response.blob();
+      
       // Upload da imagem para o Supabase Storage
-      const fileName = `employee_${Date.now()}.jpg`;
+      const fileName = `employee_${branchData.id}_${Date.now()}.jpg`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('biometric-photos')
-        .upload(fileName, dataURItoBlob(formData.reference_photo_url), {
+        .upload(fileName, blob, {
           contentType: 'image/jpeg'
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Erro no upload:', uploadError);
+        throw uploadError;
+      }
 
       // Obter URL pública da imagem
       const { data: publicUrlData } = supabase.storage
@@ -99,9 +106,22 @@ const EmployeeRegistration = ({ branchData, onBack }: EmployeeRegistrationProps)
         .from('employees')
         .insert([
           {
-            ...formData,
+            name: formData.name,
+            cpf: formData.cpf,
+            rg: formData.rg,
+            birth_date: formData.birth_date,
+            street: formData.street,
+            number: formData.number,
+            neighborhood: formData.neighborhood,
+            city: formData.city,
+            state: formData.state,
+            zip_code: formData.zip_code,
+            contact: formData.contact,
+            position: formData.position,
+            custom_position: formData.custom_position,
             branch_id: branchData.id,
             reference_photo_url: publicUrlData.publicUrl,
+            face_encoding: formData.face_encoding,
             created_by: branchData.manager_username || 'branch_manager'
           }
         ]);

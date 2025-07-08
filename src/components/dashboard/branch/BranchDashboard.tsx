@@ -126,6 +126,12 @@ const BranchDashboard = ({ branchData, onLogout }: BranchDashboardProps) => {
                 <span className="text-gray-600">{branchData.companies?.name}</span>
               </div>
               <div>
+                <span className="font-semibold block text-gray-700">Código da Filial:</span>
+                <span className="text-blue-600 font-mono text-lg font-bold bg-blue-50 px-2 py-1 rounded">
+                  {branchData.id}
+                </span>
+              </div>
+              <div>
                 <span className="font-semibold block text-gray-700">Endereço:</span>
                 <span className="text-gray-600">{branchData.address}, {branchData.city}</span>
               </div>
@@ -140,6 +146,26 @@ const BranchDashboard = ({ branchData, onLogout }: BranchDashboardProps) => {
               <div>
                 <span className="font-semibold block text-gray-700">Contato:</span>
                 <span className="text-gray-600">{branchData.contact}</span>
+              </div>
+            </div>
+            
+            <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <h4 className="font-semibold text-orange-800 mb-2">📱 Código para Sistema de Ponto</h4>
+              <p className="text-sm text-orange-700 mb-2">
+                Compartilhe este código com os funcionários para acessarem o sistema de ponto:
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="bg-orange-100 px-3 py-2 rounded font-mono text-lg font-bold text-orange-800">
+                  {branchData.id}
+                </code>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => navigator.clipboard.writeText(branchData.id)}
+                  className="text-orange-600 border-orange-300 hover:bg-orange-100"
+                >
+                  Copiar
+                </Button>
               </div>
             </div>
           </CardContent>
