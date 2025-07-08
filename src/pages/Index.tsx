@@ -12,10 +12,12 @@ import MasterDashboard from '@/components/dashboard/MasterDashboard';
 import CompanyDashboard from '@/components/dashboard/CompanyDashboard';
 import BranchLogin from '@/components/dashboard/branch/BranchLogin';
 import BranchDashboard from '@/components/dashboard/branch/BranchDashboard';
+import EmployeePunchSystem from '@/components/dashboard/branch/EmployeePunchSystem';
+import EmployeePunchCodeLogin from '@/components/dashboard/branch/EmployeePunchCodeLogin';
 
 const Index = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [currentView, setCurrentView] = useState<'home' | 'master' | 'company' | 'branch' | 'branch-dashboard'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'master' | 'company' | 'branch' | 'branch-dashboard' | 'employee-punch' | 'employee-punch-code'>('home');
   const [branchData, setBranchData] = useState<any>(null);
 
   const handleLogin = (userType: string, userData: any) => {
@@ -32,6 +34,11 @@ const Index = () => {
     setCurrentView('branch-dashboard');
   };
 
+  const handleEmployeePunchLoginSuccess = (branch: any) => {
+    setBranchData(branch);
+    setCurrentView('employee-punch');
+  };
+
   // Sistema de hierarquia Master -> Empresa -> Filial
   if (currentUser) {
     switch (currentUser.type) {
@@ -46,6 +53,19 @@ const Index = () => {
     }
   }
 
+  // Sistema de ponto para funcionários
+  if (currentView === 'employee-punch' && branchData) {
+    return (
+      <EmployeePunchSystem 
+        branchData={branchData} 
+        onLogout={() => {
+          setBranchData(null);
+          setCurrentView('home');
+        }}
+      />
+    );
+  }
+
   // Novo sistema de filiais
   if (currentView === 'branch-dashboard' && branchData) {
     return (
@@ -55,6 +75,15 @@ const Index = () => {
           setBranchData(null);
           setCurrentView('home');
         }}
+      />
+    );
+  }
+
+  if (currentView === 'employee-punch-code') {
+    return (
+      <EmployeePunchCodeLogin 
+        onSuccess={handleEmployeePunchLoginSuccess}
+        onBack={() => setCurrentView('home')}
       />
     );
   }
@@ -84,7 +113,7 @@ const Index = () => {
           <p className="text-lg text-gray-600">Escolha seu tipo de acesso</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Acesso Master */}
           <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group"
                 onClick={() => setCurrentView('master')}>
@@ -138,6 +167,25 @@ const Index = () => {
               </p>
               <Button className="w-full bg-green-500 hover:bg-green-600">
                 Entrar como Filial
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Acesso Sistema de Ponto */}
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group"
+                onClick={() => setCurrentView('employee-punch-code')}>
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Building2 className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-orange-600">Sistema de Ponto</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-gray-600 mb-4">
+                Acesso direto ao sistema de ponto por reconhecimento facial para funcionários
+              </p>
+              <Button className="w-full bg-orange-500 hover:bg-orange-600">
+                Acessar Sistema de Ponto
               </Button>
             </CardContent>
           </Card>
