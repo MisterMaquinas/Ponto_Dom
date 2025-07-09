@@ -10,7 +10,7 @@ interface FacialBiometricCaptureProps {
   onCancel: () => void;
   title?: string;
   userData?: any;
-  mode?: 'register' | 'verify';
+  mode?: 'register' | 'verify' | 'employee';
 }
 
 const FacialBiometricCapture = ({ 
@@ -115,7 +115,10 @@ const FacialBiometricCapture = ({
     setStep('processing');
 
     try {
-      if (mode === 'register') {
+      if (mode === 'employee') {
+        // Modo funcionário: apenas retornar imagem capturada sem salvar
+        onCapture(capturedImage);
+      } else if (mode === 'register') {
         // Modo registro: salvar foto de referência
         await saveReferencePhoto(capturedImage);
         onCapture(capturedImage);
@@ -256,11 +259,15 @@ const FacialBiometricCapture = ({
 
               <div>
                 <h3 className="text-xl font-semibold mb-2">
-                  {mode === 'register' ? 'Registrar Biometria' : 'Verificação Facial'}
+                  {mode === 'register' ? 'Registrar Biometria' : 
+                   mode === 'employee' ? 'Capturar Biometria do Funcionário' : 
+                   'Verificação Facial'}
                 </h3>
                 <p className="text-gray-600">
                   {mode === 'register' 
                     ? 'Vamos capturar sua foto para registro biométrico'
+                    : mode === 'employee'
+                    ? 'Vamos capturar a foto biométrica do funcionário para registro'
                     : 'Posicione seu rosto para verificação de identidade'
                   }
                 </p>
@@ -390,6 +397,8 @@ const FacialBiometricCapture = ({
                 <p className="text-gray-600">
                   {mode === 'register' 
                     ? 'Salvando sua biometria facial'
+                    : mode === 'employee'
+                    ? 'Processando biometria do funcionário'
                     : 'Verificando sua identidade'
                   }
                 </p>

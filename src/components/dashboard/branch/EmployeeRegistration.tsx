@@ -180,7 +180,7 @@ const EmployeeRegistration = ({ branchData, onBack }: EmployeeRegistrationProps)
         onCapture={handleBiometricCapture}
         onCancel={() => setShowCamera(false)}
         title="Registro de Biometria do Funcionário"
-        mode="register"
+        mode="employee"
       />
     );
   }
