@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import FacialBiometricCapture from '../FacialBiometricCapture';
 import ReceiptActions from '../ReceiptActions';
+import LiveFaceRecognition from './LiveFaceRecognition';
 
 interface EmployeePunchSystemProps {
   branchData: any;
@@ -15,6 +16,7 @@ interface EmployeePunchSystemProps {
 
 const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps) => {
   const [showCamera, setShowCamera] = useState(false);
+  const [showLiveRecognition, setShowLiveRecognition] = useState(false);
   const [lastPunchRecord, setLastPunchRecord] = useState<any>(null);
   const [recognizedEmployee, setRecognizedEmployee] = useState<any>(null);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
@@ -204,6 +206,15 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
     );
   }
 
+  if (showLiveRecognition) {
+    return (
+      <LiveFaceRecognition
+        branchData={branchData}
+        onBack={() => setShowLiveRecognition(false)}
+      />
+    );
+  }
+
   if (showCamera) {
     return (
       <FacialBiometricCapture
@@ -269,13 +280,24 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
                 </p>
               </div>
 
-              <Button
-                onClick={() => setShowCamera(true)}
-                className="w-full h-14 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-              >
-                <Camera className="w-6 h-6 mr-3" />
-                Registrar Agora
-              </Button>
+              <div className="space-y-4">
+                <Button
+                  onClick={() => setShowLiveRecognition(true)}
+                  className="w-full h-14 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <Camera className="w-6 h-6 mr-3" />
+                  Sistema Ao Vivo
+                </Button>
+                
+                <Button
+                  onClick={() => setShowCamera(true)}
+                  variant="outline"
+                  className="w-full h-12 border-2"
+                >
+                  <Camera className="w-5 h-5 mr-2" />
+                  Registro Manual
+                </Button>
+              </div>
 
               {lastPunchRecord && (
                 <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">

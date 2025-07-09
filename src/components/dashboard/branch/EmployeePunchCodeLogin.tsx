@@ -16,6 +16,49 @@ const EmployeePunchCodeLogin = ({ onSuccess, onBack }: EmployeePunchCodeLoginPro
   const [branchCode, setBranchCode] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Verificar se já tem código salvo no localStorage
+  React.useEffect(() => {
+    const savedCode = localStorage.getItem('branch_code');
+    if (savedCode) {
+      setBranchCode(savedCode);
+      // Auto-validar código salvo
+      validateBranchCode(savedCode);
+    }
+  }, []);
+
+  const validateBranchCode = async (code: string) => {
+    setLoading(true);
+    
+    try {
+      const { data: branch, error } = await supabase
+        .from('branches')
+        .select(`
+          *,
+          companies (
+            id,
+            name
+          )
+        `)
+        .eq('id', code.trim())
+        .eq('is_active', true)
+        .single();
+
+      if (!error && branch) {
+        toast({
+          title: "Código salvo validado",
+          description: `Conectado à ${branch.name}`,
+        });
+        onSuccess(branch);
+        return true;
+      }
+    } catch (error) {
+      console.error('Erro ao validar código salvo:', error);
+    }
+    
+    setLoading(false);
+    return false;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -53,6 +96,9 @@ const EmployeePunchCodeLogin = ({ onSuccess, onBack }: EmployeePunchCodeLoginPro
         return;
       }
 
+      // Salvar código no localStorage para próximos acessos
+      localStorage.setItem('branch_code', branchCode.trim());
+      
       toast({
         title: "Acesso autorizado",
         description: `Bem-vindo à ${branch.name}`,
