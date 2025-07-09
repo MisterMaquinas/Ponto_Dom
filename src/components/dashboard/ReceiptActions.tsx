@@ -11,6 +11,9 @@ interface ReceiptActionsProps {
     name: string;
     timestamp: string;
     hash: string;
+    position?: string;
+    branch?: string;
+    confidence?: number;
   };
 }
 
@@ -26,13 +29,15 @@ const ReceiptActions = ({ punchData }: ReceiptActionsProps) => {
     return `
 COMPROVANTE DE PONTO
 ════════════════════
-Funcionário: ${punchData.name}
+Funcionário: ${punchData.name}${punchData.position ? `\nCargo: ${punchData.position}` : ''}${punchData.branch ? `\nFilial: ${punchData.branch}` : ''}
 Data: ${formattedDate}
-Horário: ${formattedTime}
+Horário: ${formattedTime}${punchData.confidence ? `\nConfiança: ${punchData.confidence}%` : ''}
 Hash: ${punchData.hash}
 ════════════════════
 Este comprovante é válido para
 fins de controle de ponto.
+Guarde-o para eventuais
+consultas ou esclarecimentos.
     `.trim();
   };
 

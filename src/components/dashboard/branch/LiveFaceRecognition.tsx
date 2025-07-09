@@ -149,22 +149,27 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
       
       if (recognition.status === 'success' && recognition.employee) {
         // Registrar ponto
-        await registerPunch(recognition.employee, recognition.confidence, imageData);
+        const punchData = await registerPunch(recognition.employee, recognition.confidence, imageData);
         
-        // Mostrar resultado por 3 segundos
+        // Mostrar resultado por 5 segundos
+        setTimeout(() => {
+          setResult(null);
+        }, 5000);
+        
+        // Notificar parent sobre o registro para gerar comprovante
+        if (punchData) {
+          window.dispatchEvent(new CustomEvent('punchRegistered', { detail: punchData }));
+        }
+      } else {
+        // Mostrar falha por 3 segundos
         setTimeout(() => {
           setResult(null);
         }, 3000);
-      } else {
-        // Mostrar falha por 2 segundos
-        setTimeout(() => {
-          setResult(null);
-        }, 2000);
       }
     } catch (error) {
       console.error('Erro no reconhecimento:', error);
       setResult({ employee: null, confidence: 0, status: 'failed' });
-      setTimeout(() => setResult(null), 2000);
+      setTimeout(() => setResult(null), 3000);
     }
     
     setProcessing(false);
@@ -172,24 +177,13 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
 
   const registerPunch = async (employee: any, confidence: number, imageData: string) => {
     try {
-      // Determinar tipo de ponto
-      const { data: lastRecord } = await supabase
-        .from('employee_punch_records')
-        .select('punch_type')
-        .eq('employee_id', employee.id)
-        .order('timestamp', { ascending: false })
-        .limit(1)
-        .single();
-
-      const punchType = (!lastRecord || lastRecord.punch_type === 'exit') ? 'entry' : 'exit';
-
-      const { error } = await supabase
+      const { data: punchRecord, error } = await supabase
         .from('employee_punch_records')
         .insert([
           {
             employee_id: employee.id,
             branch_id: branchData.id,
-            punch_type: punchType,
+            punch_type: 'punch', // Apenas registro de ponto, não entrada/saída
             face_confidence: confidence,
             photo_url: imageData,
             confirmed_by_employee: true,
@@ -198,14 +192,28 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
               timestamp: new Date().toISOString()
             }
           }
-        ]);
+        ])
+        .select()
+        .single();
 
       if (error) throw error;
 
+      const punchData = {
+        name: employee.name,
+        position: employee.position,
+        timestamp: new Date().toISOString(),
+        type: 'punch',
+        branch: branchData.name,
+        confidence: Math.round(confidence * 100),
+        hash: `${employee.id}-${Date.now()}`
+      };
+
       toast({
         title: "Ponto registrado!",
-        description: `${punchType === 'entry' ? 'Entrada' : 'Saída'} de ${employee.name}`,
+        description: `Ponto de ${employee.name} registrado com sucesso`,
       });
+
+      return punchData;
     } catch (error) {
       console.error('Erro ao registrar ponto:', error);
       toast({
@@ -213,19 +221,14 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
         description: "Erro ao registrar ponto",
         variant: "destructive",
       });
+      return null;
     }
   };
 
   const startRecognition = async () => {
     await startCamera();
     setIsActive(true);
-    
-    // Processar reconhecimento a cada 3 segundos
-    intervalRef.current = setInterval(() => {
-      if (!processing) {
-        processRecognition();
-      }
-    }, 3000);
+    // Não inicia loop automático - apenas prepara a câmera
   };
 
   const stopRecognition = () => {
@@ -327,16 +330,27 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
                     className="w-full h-12 bg-green-500 hover:bg-green-600 text-white font-medium text-lg"
                   >
                     <Camera className="w-5 h-5 mr-2" />
-                    Iniciar Reconhecimento
+                    Ativar Câmera
                   </Button>
                 ) : (
-                  <Button
-                    onClick={stopRecognition}
-                    className="w-full h-12 bg-red-500 hover:bg-red-600 text-white font-medium text-lg"
-                  >
-                    <X className="w-5 h-5 mr-2" />
-                    Parar Reconhecimento
-                  </Button>
+                  <div className="space-y-3">
+                    <Button
+                      onClick={processRecognition}
+                      disabled={processing}
+                      className="w-full h-14 bg-blue-500 hover:bg-blue-600 text-white font-medium text-lg"
+                    >
+                      <Camera className="w-6 h-6 mr-2" />
+                      {processing ? 'Processando...' : 'Registrar Ponto'}
+                    </Button>
+                    <Button
+                      onClick={stopRecognition}
+                      variant="outline"
+                      className="w-full h-10"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Desativar Câmera
+                    </Button>
+                  </div>
                 )}
               </div>
             </CardContent>
@@ -411,10 +425,11 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
                 <div className="p-4 bg-blue-500/20 rounded-lg border border-blue-500/30">
                   <h4 className="font-semibold text-blue-300 mb-2">Como usar:</h4>
                   <ul className="text-sm text-blue-200 space-y-1">
+                    <li>• Ative a câmera primeiro</li>
                     <li>• Posicione seu rosto na frente da câmera</li>
-                    <li>• Aguarde o sistema processar automaticamente</li>
-                    <li>• Verde = Acesso liberado e ponto registrado</li>
-                    <li>• Vermelho = Acesso negado</li>
+                    <li>• Clique em "Registrar Ponto" para processar</li>
+                    <li>• Verde = Ponto registrado com sucesso</li>
+                    <li>• Vermelho = Funcionário não reconhecido</li>
                   </ul>
                 </div>
               </div>

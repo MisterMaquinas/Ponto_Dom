@@ -21,6 +21,18 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
   const [recognizedEmployee, setRecognizedEmployee] = useState<any>(null);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
+  // Escutar eventos de registro de ponto do sistema ao vivo
+  React.useEffect(() => {
+    const handlePunchRegistered = (event: any) => {
+      setLastPunchRecord(event.detail);
+    };
+
+    window.addEventListener('punchRegistered', handlePunchRegistered);
+    return () => {
+      window.removeEventListener('punchRegistered', handlePunchRegistered);
+    };
+  }, []);
+
   const simulateEmployeeRecognition = async (imageData: string) => {
     // Simular reconhecimento facial - buscar um funcionário aleatório da filial
     try {
@@ -88,16 +100,8 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
     if (!recognizedEmployee) return;
 
     try {
-      // Determinar tipo de ponto (entrada/saída)
-      const { data: lastRecord } = await supabase
-        .from('employee_punch_records')
-        .select('punch_type')
-        .eq('employee_id', recognizedEmployee.employee.id)
-        .order('timestamp', { ascending: false })
-        .limit(1)
-        .single();
-
-      const punchType = (!lastRecord || lastRecord.punch_type === 'exit') ? 'entry' : 'exit';
+      // Registro simples de ponto
+      const punchType = 'punch';
 
       // Registrar ponto
       const { data: punchRecord, error } = await supabase
@@ -127,7 +131,8 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
         timestamp: new Date().toISOString(),
         type: punchType,
         branch: branchData.name,
-        confidence: Math.round(recognizedEmployee.confidence * 100)
+        confidence: Math.round(recognizedEmployee.confidence * 100),
+        hash: `${recognizedEmployee.employee.id}-${Date.now()}`
       };
 
       setLastPunchRecord(punchData);
@@ -136,7 +141,7 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
 
       toast({
         title: "Ponto registrado!",
-        description: `${punchType === 'entry' ? 'Entrada' : 'Saída'} registrada com sucesso`,
+        description: "Ponto registrado com sucesso",
       });
     } catch (error: any) {
       console.error('Erro ao registrar ponto:', error);
@@ -310,7 +315,7 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
                       <strong>{lastPunchRecord.name}</strong> - {lastPunchRecord.position}
                     </p>
                     <p className="text-green-700">
-                      {lastPunchRecord.type === 'entry' ? 'Entrada' : 'Saída'}: {new Date(lastPunchRecord.timestamp).toLocaleString('pt-BR')}
+                      Ponto registrado em: {new Date(lastPunchRecord.timestamp).toLocaleString('pt-BR')}
                     </p>
                     <p className="text-green-600">
                       Confiança: {lastPunchRecord.confidence}%
@@ -320,7 +325,10 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
                     <ReceiptActions punchData={{
                       name: lastPunchRecord.name,
                       timestamp: lastPunchRecord.timestamp,
-                      hash: `${lastPunchRecord.name}-${Date.now()}`
+                      hash: lastPunchRecord.hash,
+                      position: lastPunchRecord.position,
+                      branch: lastPunchRecord.branch,
+                      confidence: lastPunchRecord.confidence
                     }} />
                   </div>
                 </div>
