@@ -10,9 +10,9 @@ import ReportsHeader from './reports/ReportsHeader';
 
 interface ReportsProps {
   onBack: () => void;
-  onLogout: () => void;
-  userType: string;
-  userData: any;
+  onLogout?: () => void;
+  userType?: string;
+  userData?: any;
 }
 
 const Reports = ({ onBack, onLogout, userType, userData }: ReportsProps) => {
@@ -20,11 +20,28 @@ const Reports = ({ onBack, onLogout, userType, userData }: ReportsProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <ReportsHeader 
-        onBack={onBack}
-        onLogout={onLogout}
-        userData={userData}
-      />
+      {onLogout && userData ? (
+        <ReportsHeader 
+          onBack={onBack}
+          onLogout={onLogout}
+          userData={userData}
+        />
+      ) : (
+        <div className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">Relatórios</h1>
+                <p className="text-gray-600">Visualize relatórios de ponto e frequência</p>
+              </div>
+              <Button onClick={onBack} variant="outline">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-6">

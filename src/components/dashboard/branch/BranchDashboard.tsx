@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Users, Clock, UserPlus, BarChart3, LogOut } from 'lucide-react';
 import EmployeePunchSystem from './EmployeePunchSystem';
 import EmployeeRegistration from './EmployeeRegistration';
+import Reports from '../Reports';
 
 interface BranchDashboardProps {
   branchData: any;
@@ -11,7 +12,7 @@ interface BranchDashboardProps {
 }
 
 const BranchDashboard = ({ branchData, onLogout }: BranchDashboardProps) => {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'punch' | 'register'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'punch' | 'register' | 'reports'>('dashboard');
 
   if (currentView === 'punch') {
     return (
@@ -28,6 +29,12 @@ const BranchDashboard = ({ branchData, onLogout }: BranchDashboardProps) => {
         branchData={branchData} 
         onBack={() => setCurrentView('dashboard')}
       />
+    );
+  }
+
+  if (currentView === 'reports') {
+    return (
+      <Reports onBack={() => setCurrentView('dashboard')} />
     );
   }
 
@@ -89,7 +96,8 @@ const BranchDashboard = ({ branchData, onLogout }: BranchDashboardProps) => {
           </Card>
 
           {/* Card Relatórios */}
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group">
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group"
+                onClick={() => setCurrentView('reports')}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-purple-600 group-hover:text-purple-700">
                 <BarChart3 className="w-6 h-6" />
@@ -100,8 +108,8 @@ const BranchDashboard = ({ branchData, onLogout }: BranchDashboardProps) => {
               <p className="text-gray-600 mb-4">
                 Visualize relatórios de ponto e frequência
               </p>
-              <Button className="w-full bg-purple-500 hover:bg-purple-600" disabled>
-                Em Breve
+              <Button className="w-full bg-purple-500 hover:bg-purple-600">
+                Acessar Relatórios
               </Button>
             </CardContent>
           </Card>
