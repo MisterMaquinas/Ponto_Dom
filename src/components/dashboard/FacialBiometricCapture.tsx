@@ -120,10 +120,12 @@ const FacialBiometricCapture = ({
         onCapture(capturedImage);
       } else if (mode === 'register') {
         // Modo registro: salvar foto de referência
+        if (!userData?.id) throw new Error('ID do usuário não encontrado');
         await saveReferencePhoto(capturedImage);
         onCapture(capturedImage);
       } else {
         // Modo verificação: comparar com foto de referência
+        if (!userData?.id) throw new Error('ID do usuário não encontrado');
         const verificationResult = await verifyFace(capturedImage);
         onCapture(capturedImage, verificationResult);
       }
