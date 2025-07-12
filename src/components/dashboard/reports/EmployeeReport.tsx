@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Clock, CheckCircle, Building } from 'lucide-react';
+import { Users, Clock, CheckCircle, Building, Edit, Trash2, Eye } from 'lucide-react';
+import { toast } from "@/hooks/use-toast";
 
 interface EmployeeReportProps {
   onBack: () => void;
@@ -13,6 +16,9 @@ const EmployeeReport = ({ onBack }: EmployeeReportProps) => {
   const [employees, setEmployees] = useState<any[]>([]);
   const [punchRecords, setPunchRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [deleteEmployee, setDeleteEmployee] = useState<any>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -55,6 +61,59 @@ const EmployeeReport = ({ onBack }: EmployeeReportProps) => {
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     
     return employeePunches[0]?.timestamp || null;
+  };
+
+  const handleDeleteEmployee = async () => {
+    if (!deleteEmployee) return;
+
+    try {
+      const { error } = await supabase
+        .from('employees')
+        .delete()
+        .eq('id', deleteEmployee.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Funcionário excluído!",
+        description: `${deleteEmployee.name} foi removido do sistema.`,
+      });
+
+      setDeleteEmployee(null);
+      fetchData(); // Recarregar dados
+    } catch (error) {
+      console.error('Erro ao excluir funcionário:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o funcionário",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleStatus = async (employee: any) => {
+    try {
+      const { error } = await supabase
+        .from('employees')
+        .update({ is_active: !employee.is_active })
+        .eq('id', employee.id);
+
+      if (error) throw error;
+
+      toast({
+        title: employee.is_active ? "Funcionário desativado!" : "Funcionário ativado!",
+        description: `${employee.name} foi ${employee.is_active ? 'desativado' : 'ativado'} no sistema.`,
+      });
+
+      fetchData(); // Recarregar dados
+    } catch (error) {
+      console.error('Erro ao alterar status:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível alterar o status do funcionário",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -149,6 +208,8 @@ const EmployeeReport = ({ onBack }: EmployeeReportProps) => {
                     <TableHead>Último Ponto</TableHead>
                     <TableHead>Biometria</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Foto</TableHead>
+                    <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -202,6 +263,46 @@ const EmployeeReport = ({ onBack }: EmployeeReportProps) => {
                             {employee.is_active ? 'Ativo' : 'Inativo'}
                           </span>
                         </TableCell>
+                        <TableCell>
+                          {employee.reference_photo_url ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedPhoto(employee.reference_photo_url)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          ) : (
+                            <span className="text-gray-400 text-sm">N/A</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedEmployee(employee)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleToggleStatus(employee)}
+                              className={employee.is_active ? "text-red-600 hover:text-red-700" : "text-green-600 hover:text-green-700"}
+                            >
+                              {employee.is_active ? 'Desativar' : 'Ativar'}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setDeleteEmployee(employee)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     );
                   })}
@@ -210,6 +311,76 @@ const EmployeeReport = ({ onBack }: EmployeeReportProps) => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Dialog para visualizar foto */}
+        <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Foto do Funcionário</DialogTitle>
+            </DialogHeader>
+            {selectedPhoto && (
+              <div className="space-y-4">
+                <img 
+                  src={selectedPhoto} 
+                  alt="Foto do funcionário" 
+                  className="w-full rounded-lg border"
+                />
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog para editar funcionário */}
+        <Dialog open={!!selectedEmployee} onOpenChange={() => setSelectedEmployee(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Editar Funcionário</DialogTitle>
+            </DialogHeader>
+            {selectedEmployee && (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  Funcionalidade de edição será implementada em breve.
+                </p>
+                <div className="space-y-2">
+                  <p><strong>Nome:</strong> {selectedEmployee.name}</p>
+                  <p><strong>Cargo:</strong> {selectedEmployee.position}</p>
+                  <p><strong>CPF:</strong> {selectedEmployee.cpf}</p>
+                  <p><strong>Contato:</strong> {selectedEmployee.contact}</p>
+                  <p><strong>Status:</strong> {selectedEmployee.is_active ? 'Ativo' : 'Inativo'}</p>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSelectedEmployee(null)}>
+                Fechar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* AlertDialog para confirmar exclusão */}
+        <AlertDialog open={!!deleteEmployee} onOpenChange={() => setDeleteEmployee(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir o funcionário <strong>{deleteEmployee?.name}</strong>?
+                Esta ação não pode ser desfeita e removerá todos os registros relacionados.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setDeleteEmployee(null)}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDeleteEmployee}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

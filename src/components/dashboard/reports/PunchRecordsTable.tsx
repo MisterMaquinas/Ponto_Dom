@@ -37,18 +37,62 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
 
   const loadPunchRecords = async () => {
     try {
-      const { data, error } = await supabase
+      // Buscar registros da tabela punch_records
+      const { data: userPunchRecords, error: userError } = await supabase
         .from('punch_records')
         .select(`
           *,
           users!inner(name, company_id)
         `)
         .eq('users.company_id', companyId)
-        .order('timestamp', { ascending: false })
-        .limit(50);
+        .order('timestamp', { ascending: false });
 
-      if (error) throw error;
-      setPunchRecords(data || []);
+      if (userError) throw userError;
+
+      // Buscar registros da tabela employee_punch_records
+      const { data: employeePunchRecords, error: employeeError } = await supabase
+        .from('employee_punch_records')
+        .select(`
+          *,
+          employees!inner(name, branch_id),
+          branches!inner(company_id)
+        `)
+        .eq('branches.company_id', companyId)
+        .order('timestamp', { ascending: false });
+
+      if (employeeError) throw employeeError;
+
+      // Combinar e normalizar os dados
+      const normalizedUserRecords = userPunchRecords?.map(record => ({
+        id: record.id,
+        user_id: record.user_id,
+        punch_type: record.punch_type,
+        timestamp: record.timestamp,
+        confidence_score: record.confidence_score,
+        face_image_url: record.face_image_url,
+        users: {
+          name: record.users.name
+        }
+      })) || [];
+
+      const normalizedEmployeeRecords = employeePunchRecords?.map(record => ({
+        id: record.id,
+        user_id: record.employee_id,
+        punch_type: record.punch_type,
+        timestamp: record.timestamp,
+        confidence_score: record.face_confidence,
+        face_image_url: record.photo_url,
+        users: {
+          name: record.employees.name
+        }
+      })) || [];
+
+      // Combinar todos os registros e ordenar por timestamp
+      const allRecords = [...normalizedUserRecords, ...normalizedEmployeeRecords]
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 50); // Limitar a 50 registros mais recentes
+
+      setPunchRecords(allRecords);
     } catch (error) {
       console.error('Erro ao carregar registros:', error);
     } finally {

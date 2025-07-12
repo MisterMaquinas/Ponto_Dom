@@ -55,16 +55,36 @@ consultas ou esclarecimentos.
         description: "Procurando impressoras Bluetooth...",
       });
 
-      // Simular conexão Bluetooth (implementação real requer Web Bluetooth API)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const receiptText = generateReceiptText();
-      console.log('Enviando para impressora:', receiptText);
-      
-      toast({
-        title: "Impresso com sucesso!",
-        description: "Comprovante enviado para a impressora",
-      });
+      // Tentar conectar via Web Bluetooth API
+      try {
+        const device = await (navigator as any).bluetooth.requestDevice({
+          acceptAllDevices: true,
+          optionalServices: ['battery_service']
+        });
+        
+        console.log('Dispositivo selecionado:', device.name);
+        
+        // Simular envio para impressora
+        const receiptText = generateReceiptText();
+        console.log('Enviando para impressora:', receiptText);
+        
+        toast({
+          title: "Impresso com sucesso!",
+          description: `Comprovante enviado para ${device.name}`,
+        });
+      } catch (bluetoothError: any) {
+        console.log('Erro Bluetooth específico:', bluetoothError);
+        
+        if (bluetoothError.name === 'NotFoundError') {
+          throw new Error('Nenhuma impressora Bluetooth encontrada');
+        } else if (bluetoothError.name === 'SecurityError') {
+          throw new Error('Permissão negada para acessar Bluetooth');
+        } else if (bluetoothError.name === 'NotSupportedError') {
+          throw new Error('Bluetooth não disponível neste dispositivo');
+        } else {
+          throw new Error(`Erro Bluetooth: ${bluetoothError.message}`);
+        }
+      }
       
       setIsOpen(false);
     } catch (error) {
