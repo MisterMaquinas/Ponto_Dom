@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Camera, Check, X, Settings, RotateCcw } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import ReceiptActions from '../ReceiptActions';
 
 interface LiveFaceRecognitionProps {
   branchData: any;
@@ -26,6 +27,7 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
   const [result, setResult] = useState<RecognitionResult | null>(null);
   const [processing, setProcessing] = useState(false);
   const [employees, setEmployees] = useState<any[]>([]);
+  const [lastPunchData, setLastPunchData] = useState<any>(null);
 
   useEffect(() => {
     loadEmployees();
@@ -150,6 +152,11 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
       if (recognition.status === 'success' && recognition.employee) {
         // Registrar ponto
         const punchData = await registerPunch(recognition.employee, recognition.confidence, imageData);
+        
+        // Salvar dados do punch para mostrar ações do recibo
+        if (punchData) {
+          setLastPunchData(punchData);
+        }
         
         // Mostrar resultado por 5 segundos
         setTimeout(() => {
@@ -420,6 +427,26 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
                     <span className="font-semibold">{branchData.name}</span>
                   </div>
                 </div>
+
+                {/* Last Punch Receipt Actions */}
+                {lastPunchData && (
+                  <div className="p-4 bg-green-500/20 rounded-lg border border-green-500/30">
+                    <h4 className="font-semibold text-green-300 mb-3">Último Registro</h4>
+                    <div className="text-sm text-green-200 space-y-1 mb-3">
+                      <p><strong>{lastPunchData.name}</strong> - {lastPunchData.position}</p>
+                      <p>Registrado em: {new Date(lastPunchData.timestamp).toLocaleString('pt-BR')}</p>
+                      <p>Confiança: {lastPunchData.confidence}%</p>
+                    </div>
+                    <ReceiptActions punchData={{
+                      name: lastPunchData.name,
+                      timestamp: lastPunchData.timestamp,
+                      hash: lastPunchData.hash,
+                      position: lastPunchData.position,
+                      branch: lastPunchData.branch,
+                      confidence: lastPunchData.confidence
+                    }} />
+                  </div>
+                )}
 
                 {/* Instructions */}
                 <div className="p-4 bg-blue-500/20 rounded-lg border border-blue-500/30">
