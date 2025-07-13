@@ -60,6 +60,9 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
         .eq('branches.company_id', companyId)
         .order('timestamp', { ascending: false });
 
+      console.log('Employee punch records:', employeePunchRecords);
+      console.log('Employee error:', employeeError);
+
       if (employeeError) throw employeeError;
 
       // Combinar e normalizar os dados

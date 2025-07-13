@@ -58,8 +58,18 @@ consultas ou esclarecimentos.
       // Tentar conectar via Web Bluetooth API
       try {
         const device = await (navigator as any).bluetooth.requestDevice({
-          acceptAllDevices: true,
-          optionalServices: ['battery_service']
+          filters: [
+            { services: ['00001800-0000-1000-8000-00805f9b34fb'] }, // Generic Access
+            { services: ['00001801-0000-1000-8000-00805f9b34fb'] }, // Generic Attribute  
+            { namePrefix: 'Print' },
+            { namePrefix: 'Thermal' },
+            { namePrefix: 'Bluetooth' }
+          ],
+          optionalServices: [
+            '00001800-0000-1000-8000-00805f9b34fb',
+            '00001801-0000-1000-8000-00805f9b34fb',
+            '0000180a-0000-1000-8000-00805f9b34fb'
+          ]
         });
         
         console.log('Dispositivo selecionado:', device.name);
