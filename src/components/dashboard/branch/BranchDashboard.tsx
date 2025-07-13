@@ -34,7 +34,10 @@ const BranchDashboard = ({ branchData, onLogout }: BranchDashboardProps) => {
 
   if (currentView === 'reports') {
     return (
-      <Reports onBack={() => setCurrentView('dashboard')} />
+      <Reports 
+        companyId={branchData.company_id} 
+        onBack={() => setCurrentView('dashboard')} 
+      />
     );
   }
 

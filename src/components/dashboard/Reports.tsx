@@ -13,9 +13,10 @@ interface ReportsProps {
   onLogout?: () => void;
   userType?: string;
   userData?: any;
+  companyId?: string;
 }
 
-const Reports = ({ onBack, onLogout, userType, userData }: ReportsProps) => {
+const Reports = ({ onBack, onLogout, userType, userData, companyId }: ReportsProps) => {
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
@@ -69,19 +70,19 @@ const Reports = ({ onBack, onLogout, userType, userData }: ReportsProps) => {
 
         {activeTab === 'overview' && (
           <>
-            <ReportsStats companyId={userData?.companyId} />
+            <ReportsStats companyId={companyId || userData?.companyId} />
             <div className="mt-8">
-              <PunchRecordsTable companyId={userData?.companyId} />
+              <PunchRecordsTable companyId={companyId || userData?.companyId} />
             </div>
           </>
         )}
 
         {activeTab === 'punch-records' && (
-          <PunchRecordsTable companyId={userData?.companyId} />
+          <PunchRecordsTable companyId={companyId || userData?.companyId} />
         )}
 
         {activeTab === 'biometric' && (
-          <BiometricVerificationTable companyId={userData?.companyId} />
+          <BiometricVerificationTable companyId={companyId || userData?.companyId} />
         )}
       </div>
     </div>

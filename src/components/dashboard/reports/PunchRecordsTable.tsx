@@ -37,6 +37,8 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
 
   const loadPunchRecords = async () => {
     try {
+      console.log('Loading punch records for companyId:', companyId);
+      
       // Buscar registros da tabela punch_records
       const { data: userPunchRecords, error: userError } = await supabase
         .from('punch_records')
@@ -46,6 +48,9 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
         `)
         .eq('users.company_id', companyId)
         .order('timestamp', { ascending: false });
+
+      console.log('User punch records:', userPunchRecords);
+      console.log('User error:', userError);
 
       if (userError) throw userError;
 

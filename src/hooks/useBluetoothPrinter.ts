@@ -10,7 +10,12 @@ export const useBluetoothPrinter = () => {
     try {
       // Verificar se o navegador suporta Web Bluetooth
       if (!('bluetooth' in navigator)) {
-        throw new Error('Bluetooth não suportado neste navegador');
+        toast({
+          title: "Bluetooth não disponível",
+          description: "Seu dispositivo ou navegador não suporta impressão Bluetooth. Use 'Compartilhar no WhatsApp' ou 'Copiar Comprovante'.",
+          variant: "destructive",
+        });
+        return;
       }
 
       toast({
@@ -21,17 +26,11 @@ export const useBluetoothPrinter = () => {
       // Tentar conectar via Web Bluetooth API
       try {
         const device = await (navigator as any).bluetooth.requestDevice({
-          filters: [
-            { services: ['00001800-0000-1000-8000-00805f9b34fb'] }, // Generic Access
-            { services: ['00001801-0000-1000-8000-00805f9b34fb'] }, // Generic Attribute  
-            { namePrefix: 'Print' },
-            { namePrefix: 'Thermal' },
-            { namePrefix: 'Bluetooth' }
-          ],
+          acceptAllDevices: true,
           optionalServices: [
-            '00001800-0000-1000-8000-00805f9b34fb',
-            '00001801-0000-1000-8000-00805f9b34fb',
-            '0000180a-0000-1000-8000-00805f9b34fb'
+            '000018f0-0000-1000-8000-00805f9b34fb', // Serial Port Service
+            '00001101-0000-1000-8000-00805f9b34fb', // Serial Port Profile
+            '49535343-fe7d-4ae5-8fa9-9fafd205e455'  // HM-10 Service
           ]
         });
         
