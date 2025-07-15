@@ -114,7 +114,10 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
       const csvData = punchRecords.map(record => [
         record.users.name,
         new Date(record.timestamp).toLocaleString('pt-BR'),
-        record.punch_type === 'entry' ? 'Entrada' : 'Saída',
+        record.punch_type === 'entrada' || record.punch_type === 'entry' || record.punch_type === 'clock_in' ? 'Entrada' :
+        record.punch_type === 'saida' || record.punch_type === 'exit' || record.punch_type === 'clock_out' ? 'Saída' :
+        record.punch_type === 'intervalo_inicio' || record.punch_type === 'break_start' ? 'Início Intervalo' :
+        record.punch_type === 'intervalo_fim' || record.punch_type === 'break_end' ? 'Fim Intervalo' : record.punch_type,
         record.confidence_score ? Math.round(record.confidence_score * 100) : 'N/A'
       ]);
 
@@ -148,19 +151,81 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
   };
 
   const getStatusBadge = (punchType: string, confidence?: number) => {
-    const isEntry = punchType === 'entry';
-    return (
-      <div className="flex items-center gap-2">
-        <Badge className={isEntry ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}>
-          {isEntry ? 'Entrada' : 'Saída'}
-        </Badge>
-        {confidence && (
-          <Badge variant="outline" className="text-xs">
-            {Math.round(confidence * 100)}%
-          </Badge>
-        )}
-      </div>
-    );
+    const isHighConfidence = confidence && confidence > 0.9;
+    
+    switch (punchType) {
+      case 'entrada':
+      case 'entry':
+      case 'clock_in':
+        return (
+          <div className="flex items-center gap-2">
+            <Badge className={`${isHighConfidence ? 'bg-green-500 text-white' : 'bg-green-100 text-green-800'}`}>
+              Entrada
+            </Badge>
+            {confidence && (
+              <Badge variant="outline" className="text-xs">
+                {Math.round(confidence * 100)}%
+              </Badge>
+            )}
+          </div>
+        );
+      case 'saida':
+      case 'exit':
+      case 'clock_out':
+        return (
+          <div className="flex items-center gap-2">
+            <Badge className={`${isHighConfidence ? 'bg-red-500 text-white' : 'bg-red-100 text-red-800'}`}>
+              Saída
+            </Badge>
+            {confidence && (
+              <Badge variant="outline" className="text-xs">
+                {Math.round(confidence * 100)}%
+              </Badge>
+            )}
+          </div>
+        );
+      case 'intervalo_inicio':
+      case 'break_start':
+        return (
+          <div className="flex items-center gap-2">
+            <Badge className={`${isHighConfidence ? 'bg-blue-500 text-white' : 'bg-blue-100 text-blue-800'}`}>
+              Início Intervalo
+            </Badge>
+            {confidence && (
+              <Badge variant="outline" className="text-xs">
+                {Math.round(confidence * 100)}%
+              </Badge>
+            )}
+          </div>
+        );
+      case 'intervalo_fim':
+      case 'break_end':
+        return (
+          <div className="flex items-center gap-2">
+            <Badge className={`${isHighConfidence ? 'bg-purple-500 text-white' : 'bg-purple-100 text-purple-800'}`}>
+              Fim Intervalo
+            </Badge>
+            {confidence && (
+              <Badge variant="outline" className="text-xs">
+                {Math.round(confidence * 100)}%
+              </Badge>
+            )}
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">
+              {punchType}
+            </Badge>
+            {confidence && (
+              <Badge variant="outline" className="text-xs">
+                {Math.round(confidence * 100)}%
+              </Badge>
+            )}
+          </div>
+        );
+    }
   };
 
   const isLate = (timestamp: string, punchType: string) => {
@@ -168,7 +233,7 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
     const hour = punchTime.getHours();
     const minute = punchTime.getMinutes();
     
-    if (punchType === 'entry') {
+    if (punchType === 'entrada' || punchType === 'entry' || punchType === 'clock_in') {
       // Considerando 8:00 como horário padrão de entrada
       return hour > 8 || (hour === 8 && minute > 0);
     }
