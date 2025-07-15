@@ -109,29 +109,23 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
+          {/* Logo PontoDom - clicável para Master */}
+          <div 
+            className="flex justify-center mb-6 cursor-pointer pulse-gold"
+            onClick={() => setCurrentView('master')}
+            title="Acesso Master"
+          >
+            <img 
+              src="/lovable-uploads/742e8fa5-50c1-4bab-b53b-c82b18f8eebd.png" 
+              alt="PontoDom Biometria Facial" 
+              className="w-32 h-32 object-contain filter drop-shadow-lg hover:drop-shadow-2xl transition-all duration-300"
+            />
+          </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Sistema de Ponto Eletrônico</h1>
           <p className="text-lg text-gray-600">Escolha seu tipo de acesso</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Acesso Master */}
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group"
-                onClick={() => setCurrentView('master')}>
-            <CardHeader className="text-center">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Crown className="w-8 h-8 text-white" />
-              </div>
-              <CardTitle className="text-purple-600">Acesso Master</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-gray-600 mb-4">
-                Gerenciamento completo do sistema, criação de empresas e configurações globais
-              </p>
-              <Button className="w-full bg-purple-500 hover:bg-purple-600">
-                Entrar como Master
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* Acesso Empresa */}
           <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer group"
