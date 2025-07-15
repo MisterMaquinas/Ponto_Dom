@@ -118,7 +118,7 @@ const Index = () => {
             <img 
               src="/lovable-uploads/742e8fa5-50c1-4bab-b53b-c82b18f8eebd.png" 
               alt="PontoDom Biometria Facial" 
-              className="w-32 h-32 object-contain filter drop-shadow-lg hover:drop-shadow-2xl transition-all duration-300"
+              className="w-48 h-48 object-contain filter drop-shadow-lg hover:drop-shadow-2xl transition-all duration-300"
             />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Sistema de Ponto Eletrônico</h1>
