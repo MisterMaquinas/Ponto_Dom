@@ -55,10 +55,23 @@ const FaceRecognition = ({ onSuccess, onCancel, userData }: FaceRecognitionProps
         return;
       }
 
+      // Determinar tipo de punch com base no horário
+      const currentHour = new Date().getHours();
+      let punchType = 'entrada';
+      
+      // Lógica simples para determinar tipo baseado no horário
+      if (currentHour >= 12 && currentHour < 13) {
+        punchType = 'intervalo_inicio';
+      } else if (currentHour >= 13 && currentHour < 14) {
+        punchType = 'intervalo_fim';
+      } else if (currentHour >= 17) {
+        punchType = 'saida';
+      }
+
       // Registrar ponto no banco de dados
       const punchData = {
         user_id: userData.id,
-        punch_type: 'entry',
+        punch_type: punchType,
         confidence_score: faceData.confidence,
         verification_log_id: faceData.verificationLogId,
         device_info: {

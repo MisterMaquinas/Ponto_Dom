@@ -190,7 +190,7 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
           {
             employee_id: employee.id,
             branch_id: branchData.id,
-            punch_type: 'punch', // Apenas registro de ponto, não entrada/saída
+            punch_type: 'entrada', // Tipo padrão de entrada
             face_confidence: confidence,
             photo_url: imageData,
             confirmed_by_employee: true,

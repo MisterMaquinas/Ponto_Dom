@@ -100,8 +100,18 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
     if (!recognizedEmployee) return;
 
     try {
-      // Registro simples de ponto
-      const punchType = 'punch';
+      // Determinar tipo de punch com base no horário
+      const currentHour = new Date().getHours();
+      let punchType = 'entrada';
+      
+      // Lógica simples para determinar tipo baseado no horário
+      if (currentHour >= 12 && currentHour < 13) {
+        punchType = 'intervalo_inicio';
+      } else if (currentHour >= 13 && currentHour < 14) {
+        punchType = 'intervalo_fim';
+      } else if (currentHour >= 17) {
+        punchType = 'saida';
+      }
 
       // Registrar ponto
       const { data: punchRecord, error } = await supabase
