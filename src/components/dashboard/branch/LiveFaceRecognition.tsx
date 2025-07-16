@@ -184,13 +184,26 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
 
   const registerPunch = async (employee: any, confidence: number, imageData: string) => {
     try {
+      // Determinar tipo de punch com base no horário
+      const currentHour = new Date().getHours();
+      let punchType = 'entrada';
+      
+      // Lógica simples para determinar tipo baseado no horário
+      if (currentHour >= 12 && currentHour < 13) {
+        punchType = 'intervalo_inicio';
+      } else if (currentHour >= 13 && currentHour < 14) {
+        punchType = 'intervalo_fim';
+      } else if (currentHour >= 17) {
+        punchType = 'saida';
+      }
+
       const { data: punchRecord, error } = await supabase
         .from('employee_punch_records')
         .insert([
           {
             employee_id: employee.id,
             branch_id: branchData.id,
-            punch_type: 'entrada', // Tipo padrão de entrada
+            punch_type: punchType,
             face_confidence: confidence,
             photo_url: imageData,
             confirmed_by_employee: true,
@@ -209,7 +222,7 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
         name: employee.name,
         position: employee.position,
         timestamp: new Date().toISOString(),
-        type: 'punch',
+        type: punchType,
         branch: branchData.name,
         confidence: Math.round(confidence * 100),
         hash: `${employee.id}-${Date.now()}`

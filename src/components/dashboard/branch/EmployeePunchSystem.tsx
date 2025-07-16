@@ -20,6 +20,8 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
   const [lastPunchRecord, setLastPunchRecord] = useState<any>(null);
   const [recognizedEmployee, setRecognizedEmployee] = useState<any>(null);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
+  const [selectedPunchType, setSelectedPunchType] = useState<string>('entrada');
+  const [showPunchTypeSelection, setShowPunchTypeSelection] = useState(false);
 
   // Escutar eventos de registro de ponto do sistema ao vivo
   React.useEffect(() => {
@@ -100,27 +102,14 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
     if (!recognizedEmployee) return;
 
     try {
-      // Determinar tipo de punch com base no horário
-      const currentHour = new Date().getHours();
-      let punchType = 'entrada';
-      
-      // Lógica simples para determinar tipo baseado no horário
-      if (currentHour >= 12 && currentHour < 13) {
-        punchType = 'intervalo_inicio';
-      } else if (currentHour >= 13 && currentHour < 14) {
-        punchType = 'intervalo_fim';
-      } else if (currentHour >= 17) {
-        punchType = 'saida';
-      }
-
-      // Registrar ponto
+      // Registrar ponto com o tipo selecionado pelo funcionário
       const { data: punchRecord, error } = await supabase
         .from('employee_punch_records')
         .insert([
           {
             employee_id: recognizedEmployee.employee.id,
             branch_id: branchData.id,
-            punch_type: punchType,
+            punch_type: selectedPunchType,
             face_confidence: recognizedEmployee.confidence,
             photo_url: recognizedEmployee.imageData,
             confirmed_by_employee: true,
@@ -139,7 +128,7 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
         name: recognizedEmployee.employee.name,
         position: recognizedEmployee.employee.position,
         timestamp: new Date().toISOString(),
-        type: punchType,
+        type: selectedPunchType,
         branch: branchData.name,
         confidence: Math.round(recognizedEmployee.confidence * 100),
         hash: `${recognizedEmployee.employee.id}-${Date.now()}`
@@ -167,6 +156,78 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
     setRecognizedEmployee(null);
     setAwaitingConfirmation(false);
   };
+
+  const handlePunchTypeSelection = () => {
+    setShowPunchTypeSelection(false);
+    setShowCamera(true);
+  };
+
+  if (showPunchTypeSelection) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md border-0 shadow-2xl">
+          <CardHeader className="text-center">
+            <CardTitle>Selecione o Tipo de Registro</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              <Button
+                onClick={() => {
+                  setSelectedPunchType('entrada');
+                  handlePunchTypeSelection();
+                }}
+                className="w-full h-12 bg-green-500 hover:bg-green-600 text-white"
+              >
+                <Clock className="w-5 h-5 mr-2" />
+                Entrada
+              </Button>
+              
+              <Button
+                onClick={() => {
+                  setSelectedPunchType('saida');
+                  handlePunchTypeSelection();
+                }}
+                className="w-full h-12 bg-red-500 hover:bg-red-600 text-white"
+              >
+                <Clock className="w-5 h-5 mr-2" />
+                Saída
+              </Button>
+              
+              <Button
+                onClick={() => {
+                  setSelectedPunchType('intervalo_inicio');
+                  handlePunchTypeSelection();
+                }}
+                className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                <Clock className="w-5 h-5 mr-2" />
+                Saída (Intervalo)
+              </Button>
+              
+              <Button
+                onClick={() => {
+                  setSelectedPunchType('intervalo_fim');
+                  handlePunchTypeSelection();
+                }}
+                className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                <Clock className="w-5 h-5 mr-2" />
+                Volta (Intervalo)
+              </Button>
+            </div>
+            
+            <Button
+              onClick={() => setShowPunchTypeSelection(false)}
+              variant="outline"
+              className="w-full"
+            >
+              Cancelar
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (awaitingConfirmation && recognizedEmployee) {
     return (
@@ -305,7 +366,7 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
                 </Button>
                 
                 <Button
-                  onClick={() => setShowCamera(true)}
+                  onClick={() => setShowPunchTypeSelection(true)}
                   variant="outline"
                   className="w-full h-12 border-2"
                 >

@@ -21,31 +21,26 @@ const ReportsStats = ({ companyId }: ReportsStatsProps) => {
 
   const loadStats = async () => {
     try {
-      // Buscar registros de ponto da empresa
-      const { data: punchRecords, error: punchError } = await supabase
-        .from('punch_records')
+      // Buscar registros de ponto dos funcionários da empresa
+      const { data: employeePunchRecords, error: punchError } = await supabase
+        .from('employee_punch_records')
         .select(`
           *,
-          users!inner(company_id)
+          employees!inner(
+            branches!inner(company_id)
+          )
         `)
-        .eq('users.company_id', companyId);
+        .eq('employees.branches.company_id', companyId);
 
       if (punchError) throw punchError;
 
-      // Buscar logs de verificação biométrica
-      const { data: verificationLogs, error: verificationError } = await supabase
-        .from('biometric_verification_logs')
-        .select(`
-          *,
-          users!inner(company_id)
-        `)
-        .eq('users.company_id', companyId);
-
-      if (verificationError) throw verificationError;
-
-      const totalRecords = (punchRecords || []).length;
-      const successfulRecognitions = (verificationLogs || []).filter(log => log.verification_result === 'success').length;
-      const highConfidenceCount = (punchRecords || []).filter(r => r.confidence_score && r.confidence_score >= 0.9).length;
+      const totalRecords = (employeePunchRecords || []).length;
+      const successfulRecognitions = (employeePunchRecords || []).filter(record => 
+        record.face_confidence && record.face_confidence >= 0.75
+      ).length;
+      const highConfidenceCount = (employeePunchRecords || []).filter(r => 
+        r.face_confidence && r.face_confidence >= 0.9
+      ).length;
 
       setStats({
         totalRecords,
