@@ -565,6 +565,50 @@ export type Database = {
           },
         ]
       }
+      report_cache: {
+        Row: {
+          cache_key: string
+          company_id: string
+          created_at: string | null
+          data: Json
+          expires_at: string
+          filters: Json | null
+          id: string
+          report_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          cache_key: string
+          company_id: string
+          created_at?: string | null
+          data: Json
+          expires_at: string
+          filters?: Json | null
+          id?: string
+          report_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          cache_key?: string
+          company_id?: string
+          created_at?: string | null
+          data?: Json
+          expires_at?: string
+          filters?: Json | null
+          id?: string
+          report_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_cache_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_logs: {
         Row: {
           action: string
@@ -763,9 +807,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      unified_punch_records: {
+        Row: {
+          branch_id: string | null
+          branch_name: string | null
+          company_id: string | null
+          company_name: string | null
+          confirmed_by_employee: boolean | null
+          created_at: string | null
+          device_info: Json | null
+          employee_id: string | null
+          employee_name: string | null
+          employee_position: string | null
+          employee_role: string | null
+          face_confidence: number | null
+          id: string | null
+          location: Json | null
+          photo_url: string | null
+          punch_type: string | null
+          receipt_sent: boolean | null
+          record_source: string | null
+          timestamp: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      cleanup_expired_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       log_system_action: {
         Args: {
           p_action: string
