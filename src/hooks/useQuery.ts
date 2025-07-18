@@ -174,7 +174,7 @@ export const useUnifiedPunchRecords = (filters: PunchRecordsFilters) => {
         .single();
 
       if (cachedData && !isCacheExpired(cachedData.expires_at, REPORT_CACHE_DURATION.PUNCH_RECORDS)) {
-        return cachedData.data as UnifiedPunchRecord[];
+        return cachedData.data as unknown as UnifiedPunchRecord[];
       }
 
       // Buscar dados da view unificada
@@ -245,7 +245,7 @@ export const useReportStats = (companyId: string) => {
         .single();
 
       if (cachedData && !isCacheExpired(cachedData.expires_at, REPORT_CACHE_DURATION.STATS)) {
-        return cachedData.data as ReportStats;
+        return cachedData.data as unknown as ReportStats;
       }
 
       // Buscar dados atuais
