@@ -6,6 +6,7 @@ import { Camera, Check, X, Settings, RotateCcw } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ReceiptActions from '../ReceiptActions';
+import PunchTypeSelector from './PunchTypeSelector';
 
 interface LiveFaceRecognitionProps {
   branchData: any;
@@ -28,6 +29,8 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
   const [processing, setProcessing] = useState(false);
   const [employees, setEmployees] = useState<any[]>([]);
   const [lastPunchData, setLastPunchData] = useState<any>(null);
+  const [showPunchTypeSelector, setShowPunchTypeSelector] = useState(false);
+  const [selectedPunchType, setSelectedPunchType] = useState<string>('');
 
   useEffect(() => {
     loadEmployees();
@@ -184,18 +187,8 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
 
   const registerPunch = async (employee: any, confidence: number, imageData: string) => {
     try {
-      // Determinar tipo de punch com base no horário
-      const currentHour = new Date().getHours();
-      let punchType = 'entrada';
-      
-      // Lógica simples para determinar tipo baseado no horário
-      if (currentHour >= 12 && currentHour < 13) {
-        punchType = 'intervalo_inicio';
-      } else if (currentHour >= 13 && currentHour < 14) {
-        punchType = 'intervalo_fim';
-      } else if (currentHour >= 17) {
-        punchType = 'saida';
-      }
+      // Usar o tipo selecionado pelo funcionário
+      const punchType = selectedPunchType || 'entrada';
 
       const { data: punchRecord, error } = await supabase
         .from('employee_punch_records')
@@ -222,7 +215,7 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
         name: employee.name,
         position: employee.position,
         timestamp: new Date().toISOString(),
-        type: punchType,
+        type: selectedPunchType || 'entrada',
         branch: branchData.name,
         confidence: Math.round(confidence * 100),
         hash: `${employee.id}-${Date.now()}`
@@ -245,10 +238,14 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
     }
   };
 
-  const startRecognition = async () => {
-    await startCamera();
+  const startRecognition = () => {
+    if (!selectedPunchType) {
+      setShowPunchTypeSelector(true);
+      return;
+    }
+    
+    startCamera();
     setIsActive(true);
-    // Não inicia loop automático - apenas prepara a câmera
   };
 
   const stopRecognition = () => {
@@ -290,6 +287,36 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
       default: return null;
     }
   };
+
+  const getPunchTypeLabel = (type: string) => {
+    switch (type) {
+      case 'entrada': return 'Entrada';
+      case 'saida': return 'Saída';
+      case 'intervalo_inicio': return 'Saída (Intervalo)';
+      case 'intervalo_fim': return 'Volta (Intervalo)';
+      default: return type;
+    }
+  };
+
+  const handlePunchTypeSelect = async (punchType: string) => {
+    setSelectedPunchType(punchType);
+    setShowPunchTypeSelector(false);
+    await startCamera();
+    setIsActive(true);
+  };
+
+  const handlePunchTypeCancel = () => {
+    setShowPunchTypeSelector(false);
+  };
+
+  if (showPunchTypeSelector) {
+    return (
+      <PunchTypeSelector
+        onSelect={handlePunchTypeSelect}
+        onCancel={handlePunchTypeCancel}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900">
@@ -350,7 +377,7 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
                     className="w-full h-12 bg-green-500 hover:bg-green-600 text-white font-medium text-lg"
                   >
                     <Camera className="w-5 h-5 mr-2" />
-                    Ativar Câmera
+                    {selectedPunchType ? `Ativar Câmera (${getPunchTypeLabel(selectedPunchType)})` : 'Selecionar Tipo e Ativar'}
                   </Button>
                 ) : (
                   <div className="space-y-3">
@@ -363,12 +390,15 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
                       {processing ? 'Processando...' : 'Registrar Ponto'}
                     </Button>
                     <Button
-                      onClick={stopRecognition}
+                      onClick={() => {
+                        stopRecognition();
+                        setSelectedPunchType('');
+                      }}
                       variant="outline"
                       className="w-full h-10"
                     >
                       <X className="w-4 h-4 mr-2" />
-                      Desativar Câmera
+                      Alterar Tipo
                     </Button>
                   </div>
                 )}
@@ -430,6 +460,12 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
                     <Badge variant={isActive ? "default" : "secondary"}>
                       {isActive ? "Ativo" : "Inativo"}
                     </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Tipo selecionado:</span>
+                    <span className="font-semibold">
+                      {selectedPunchType ? getPunchTypeLabel(selectedPunchType) : 'Nenhum'}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/70">Funcionários cadastrados:</span>

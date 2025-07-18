@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import FacialBiometricCapture from '../FacialBiometricCapture';
 import ReceiptActions from '../ReceiptActions';
 import LiveFaceRecognition from './LiveFaceRecognition';
+import PunchTypeSelector from './PunchTypeSelector';
 
 interface EmployeePunchSystemProps {
   branchData: any;
@@ -157,75 +158,16 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
     setAwaitingConfirmation(false);
   };
 
-  const handlePunchTypeSelection = () => {
-    setShowPunchTypeSelection(false);
-    setShowCamera(true);
-  };
-
   if (showPunchTypeSelection) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md border-0 shadow-2xl">
-          <CardHeader className="text-center">
-            <CardTitle>Selecione o Tipo de Registro</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <Button
-                onClick={() => {
-                  setSelectedPunchType('entrada');
-                  handlePunchTypeSelection();
-                }}
-                className="w-full h-12 bg-green-500 hover:bg-green-600 text-white"
-              >
-                <Clock className="w-5 h-5 mr-2" />
-                Entrada
-              </Button>
-              
-              <Button
-                onClick={() => {
-                  setSelectedPunchType('saida');
-                  handlePunchTypeSelection();
-                }}
-                className="w-full h-12 bg-red-500 hover:bg-red-600 text-white"
-              >
-                <Clock className="w-5 h-5 mr-2" />
-                Saída
-              </Button>
-              
-              <Button
-                onClick={() => {
-                  setSelectedPunchType('intervalo_inicio');
-                  handlePunchTypeSelection();
-                }}
-                className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white"
-              >
-                <Clock className="w-5 h-5 mr-2" />
-                Saída (Intervalo)
-              </Button>
-              
-              <Button
-                onClick={() => {
-                  setSelectedPunchType('intervalo_fim');
-                  handlePunchTypeSelection();
-                }}
-                className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white"
-              >
-                <Clock className="w-5 h-5 mr-2" />
-                Volta (Intervalo)
-              </Button>
-            </div>
-            
-            <Button
-              onClick={() => setShowPunchTypeSelection(false)}
-              variant="outline"
-              className="w-full"
-            >
-              Cancelar
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <PunchTypeSelector
+        onSelect={(punchType) => {
+          setSelectedPunchType(punchType);
+          setShowPunchTypeSelection(false);
+          setShowCamera(true);
+        }}
+        onCancel={() => setShowPunchTypeSelection(false)}
+      />
     );
   }
 
