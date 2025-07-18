@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Download, User, Eye } from 'lucide-react';
+import { Clock, Download, User, Eye, FileSpreadsheet } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import PunchRecordsFilters from './PunchRecordsFilters';
 
 interface PunchRecord {
   id: string;
@@ -26,14 +27,61 @@ interface PunchRecordsTableProps {
 
 const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
   const [punchRecords, setPunchRecords] = useState<PunchRecord[]>([]);
+  const [filteredRecords, setFilteredRecords] = useState<PunchRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  
+  // Filtros
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [selectedEmployee, setSelectedEmployee] = useState('');
+  const [selectedPunchType, setSelectedPunchType] = useState('todos');
+  const [selectedTimeRange, setSelectedTimeRange] = useState('hoje');
 
   useEffect(() => {
     if (companyId) {
       loadPunchRecords();
     }
   }, [companyId]);
+
+  useEffect(() => {
+    // Aplicar filtros automaticamente
+    applyFilters();
+  }, [punchRecords, dateFrom, dateTo, selectedEmployee, selectedPunchType, selectedTimeRange]);
+
+  useEffect(() => {
+    // Definir datas baseadas no período selecionado
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    switch (selectedTimeRange) {
+      case 'hoje':
+        setDateFrom(todayStr);
+        setDateTo(todayStr);
+        break;
+      case 'ontem':
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        setDateFrom(yesterdayStr);
+        setDateTo(yesterdayStr);
+        break;
+      case 'semana':
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        setDateFrom(startOfWeek.toISOString().split('T')[0]);
+        setDateTo(todayStr);
+        break;
+      case 'mes':
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        setDateFrom(startOfMonth.toISOString().split('T')[0]);
+        setDateTo(todayStr);
+        break;
+      case 'personalizado':
+        // Manter datas atuais para período personalizado
+        break;
+    }
+  }, [selectedTimeRange]);
 
   const loadPunchRecords = async () => {
     try {
@@ -97,8 +145,7 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
 
       // Combinar todos os registros e ordenar por timestamp
       const allRecords = [...normalizedUserRecords, ...normalizedEmployeeRecords]
-        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-        .slice(0, 50); // Limitar a 50 registros mais recentes
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
       setPunchRecords(allRecords);
     } catch (error) {
@@ -108,10 +155,59 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
     }
   };
 
+  const applyFilters = () => {
+    let filtered = [...punchRecords];
+
+    // Filtro por data
+    if (dateFrom) {
+      filtered = filtered.filter(record => {
+        const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
+        return recordDate >= dateFrom;
+      });
+    }
+
+    if (dateTo) {
+      filtered = filtered.filter(record => {
+        const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
+        return recordDate <= dateTo;
+      });
+    }
+
+    // Filtro por funcionário
+    if (selectedEmployee.trim()) {
+      filtered = filtered.filter(record =>
+        record.users.name.toLowerCase().includes(selectedEmployee.toLowerCase())
+      );
+    }
+
+    // Filtro por tipo de registro
+    if (selectedPunchType !== 'todos') {
+      filtered = filtered.filter(record => record.punch_type === selectedPunchType);
+    }
+
+    setFilteredRecords(filtered);
+  };
+
+  const handleSearch = () => {
+    applyFilters();
+    toast({
+      title: "Filtros aplicados",
+      description: `${filteredRecords.length} registros encontrados.`,
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSelectedEmployee('');
+    setSelectedPunchType('todos');
+    setSelectedTimeRange('hoje');
+    setDateFrom('');
+    setDateTo('');
+  };
+
   const handleExport = () => {
     try {
       const csvHeaders = ['Nome', 'Data/Hora', 'Tipo', 'Confiança (%)'];
-      const csvData = punchRecords.map(record => [
+      const csvData = filteredRecords.map(record => [
         record.users.name,
         new Date(record.timestamp).toLocaleString('pt-BR'),
         record.punch_type === 'entrada' || record.punch_type === 'entry' || record.punch_type === 'clock_in' ? 'Entrada' :
@@ -241,17 +337,40 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
   };
 
   return (
-    <>
+    <div className="space-y-6">
+      {/* Filtros */}
+      <PunchRecordsFilters
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+        selectedEmployee={selectedEmployee}
+        selectedPunchType={selectedPunchType}
+        selectedTimeRange={selectedTimeRange}
+        loading={loading}
+        onDateFromChange={setDateFrom}
+        onDateToChange={setDateTo}
+        onEmployeeChange={setSelectedEmployee}
+        onPunchTypeChange={setSelectedPunchType}
+        onTimeRangeChange={setSelectedTimeRange}
+        onSearch={handleSearch}
+        onClear={handleClearFilters}
+      />
+
+      {/* Tabela de registros */}
       <Card className="border-0 shadow-lg">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5" />
-              Registros de Ponto - PontoDom
+              Registros de Ponto ({filteredRecords.length})
             </CardTitle>
-            <Button onClick={handleExport} variant="outline" className="flex items-center gap-2">
-              <Download className="w-4 h-4" />
-              Exportar CSV
+            <Button 
+              onClick={handleExport} 
+              variant="outline" 
+              className="flex items-center gap-2"
+              disabled={filteredRecords.length === 0}
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              Exportar ({filteredRecords.length})
             </Button>
           </div>
         </CardHeader>
@@ -260,11 +379,19 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
             <div className="text-center py-8">
               <p className="text-gray-500">Carregando registros...</p>
             </div>
-          ) : punchRecords.length === 0 ? (
+          ) : filteredRecords.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500">Nenhum registro de ponto encontrado.</p>
-              <p className="text-sm text-gray-400 mt-2">
-                Os registros aparecerão aqui quando os funcionários começarem a bater ponto.
+              <p className="text-muted-foreground">
+                {punchRecords.length === 0 
+                  ? "Nenhum registro de ponto encontrado." 
+                  : "Nenhum registro encontrado com os filtros aplicados."
+                }
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                {punchRecords.length === 0 
+                  ? "Os registros aparecerão aqui quando os funcionários começarem a bater ponto."
+                  : "Tente ajustar os filtros para encontrar os registros desejados."
+                }
               </p>
             </div>
           ) : (
@@ -280,7 +407,7 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {punchRecords.map((record) => (
+                  {filteredRecords.map((record) => (
                     <tr key={record.id} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
@@ -343,7 +470,7 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
           )}
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 
