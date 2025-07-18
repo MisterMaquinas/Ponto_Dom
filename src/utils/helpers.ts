@@ -189,15 +189,32 @@ export const getPunchTypeColor = (type: PunchType): string => {
 /**
  * Verifica se o horário está atrasado
  */
-export const isLate = (timestamp: string, punchType: PunchType): boolean => {
-  if (punchType !== 'entrada') return false;
+export const isLate = (timestamp: string, punchType: PunchType, employeeSchedule?: {
+  work_start_time?: string | null;
+  work_end_time?: string | null;
+  break_start_time?: string | null;
+  break_end_time?: string | null;
+}): boolean => {
+  // Se não há dados de horário do funcionário, não pode determinar atraso
+  if (!employeeSchedule?.work_start_time) return false;
   
   const punchTime = new Date(timestamp);
-  const hour = punchTime.getHours();
-  const minute = punchTime.getMinutes();
+  const punchHour = punchTime.getHours();
+  const punchMinute = punchTime.getMinutes();
   
-  // Considerando 8:00 como horário padrão de entrada
-  return hour > 8 || (hour === 8 && minute > 0);
+  // Converter horário de trabalho para horas e minutos
+  const [workStartHour, workStartMinute] = employeeSchedule.work_start_time.split(':').map(Number);
+  
+  // Verificar atraso apenas para entrada
+  if (punchType === 'entrada') {
+    const punchTimeInMinutes = punchHour * 60 + punchMinute;
+    const workStartTimeInMinutes = workStartHour * 60 + workStartMinute;
+    
+    return punchTimeInMinutes > workStartTimeInMinutes;
+  }
+  
+  // Para outros tipos de ponto, não considera atraso por enquanto
+  return false;
 };
 
 /**

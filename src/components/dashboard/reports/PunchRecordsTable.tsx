@@ -19,6 +19,12 @@ interface PunchRecord {
   users: {
     name: string;
   };
+  employee_schedule?: {
+    work_start_time?: string | null;
+    work_end_time?: string | null;
+    break_start_time?: string | null;
+    break_end_time?: string | null;
+  };
 }
 
 interface PunchRecordsTableProps {
@@ -107,7 +113,7 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
         .from('employee_punch_records')
         .select(`
           *,
-          employees!inner(name, branch_id),
+          employees!inner(name, branch_id, work_start_time, work_end_time, break_start_time, break_end_time),
           branches!inner(company_id)
         `)
         .eq('branches.company_id', companyId)
@@ -140,6 +146,12 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
         face_image_url: record.photo_url,
         users: {
           name: record.employees.name
+        },
+        employee_schedule: {
+          work_start_time: record.employees.work_start_time,
+          work_end_time: record.employees.work_end_time,
+          break_start_time: record.employees.break_start_time,
+          break_end_time: record.employees.break_end_time
         }
       })) || [];
 
@@ -324,15 +336,31 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
     }
   };
 
-  const isLate = (timestamp: string, punchType: string) => {
-    const punchTime = new Date(timestamp);
-    const hour = punchTime.getHours();
-    const minute = punchTime.getMinutes();
+  const isLate = (timestamp: string, punchType: string, employeeSchedule?: {
+    work_start_time?: string | null;
+    work_end_time?: string | null;
+    break_start_time?: string | null;
+    break_end_time?: string | null;
+  }) => {
+    // Se não há dados de horário do funcionário, não pode determinar atraso
+    if (!employeeSchedule?.work_start_time) return false;
     
+    const punchTime = new Date(timestamp);
+    const punchHour = punchTime.getHours();
+    const punchMinute = punchTime.getMinutes();
+    
+    // Converter horário de trabalho para horas e minutos
+    const [workStartHour, workStartMinute] = employeeSchedule.work_start_time.split(':').map(Number);
+    
+    // Verificar atraso apenas para entrada
     if (punchType === 'entrada' || punchType === 'entry' || punchType === 'clock_in') {
-      // Considerando 8:00 como horário padrão de entrada
-      return hour > 8 || (hour === 8 && minute > 0);
+      const punchTimeInMinutes = punchHour * 60 + punchMinute;
+      const workStartTimeInMinutes = workStartHour * 60 + workStartMinute;
+      
+      return punchTimeInMinutes > workStartTimeInMinutes;
     }
+    
+    // Para outros tipos de ponto, não considera atraso por enquanto
     return false;
   };
 
@@ -426,10 +454,14 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
                         {getStatusBadge(record.punch_type, record.confidence_score)}
                       </td>
                       <td className="py-3 px-4">
-                        {isLate(record.timestamp, record.punch_type) ? (
-                          <Badge variant="destructive">Atrasado</Badge>
+                        {record.employee_schedule?.work_start_time ? (
+                          isLate(record.timestamp, record.punch_type, record.employee_schedule) ? (
+                            <Badge variant="destructive">Atrasado</Badge>
+                          ) : (
+                            <Badge className="bg-green-100 text-green-800">No Horário</Badge>
+                          )
                         ) : (
-                          <Badge className="bg-green-100 text-green-800">No Horário</Badge>
+                          <Badge variant="outline" className="text-gray-500">-</Badge>
                         )}
                       </td>
                       <td className="py-3 px-4">

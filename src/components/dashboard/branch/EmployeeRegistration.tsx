@@ -31,7 +31,11 @@ const EmployeeRegistration = ({ branchData, onBack }: EmployeeRegistrationProps)
     position: '',
     custom_position: '',
     reference_photo_url: '',
-    face_encoding: ''
+    face_encoding: '',
+    work_start_time: '',
+    work_end_time: '',
+    break_start_time: '',
+    break_end_time: ''
   });
 
   const positions = [
@@ -122,7 +126,11 @@ const EmployeeRegistration = ({ branchData, onBack }: EmployeeRegistrationProps)
             branch_id: branchData.id,
             reference_photo_url: publicUrlData.publicUrl,
             face_encoding: formData.face_encoding,
-            created_by: branchData.manager_username || 'branch_manager'
+            created_by: branchData.manager_username || 'branch_manager',
+            work_start_time: formData.work_start_time || null,
+            work_end_time: formData.work_end_time || null,
+            break_start_time: formData.break_start_time || null,
+            break_end_time: formData.break_end_time || null
           }
         ]);
 
@@ -149,7 +157,11 @@ const EmployeeRegistration = ({ branchData, onBack }: EmployeeRegistrationProps)
         position: '',
         custom_position: '',
         reference_photo_url: '',
-        face_encoding: ''
+        face_encoding: '',
+        work_start_time: '',
+        work_end_time: '',
+        break_start_time: '',
+        break_end_time: ''
       });
 
     } catch (error: any) {
@@ -348,6 +360,54 @@ const EmployeeRegistration = ({ branchData, onBack }: EmployeeRegistrationProps)
                       />
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Horários de Trabalho (Opcional) */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Horários de Trabalho (Opcional)</h3>
+                <p className="text-sm text-gray-600">Configure os horários para controle de atrasos. Se não preenchido, o status de atraso não será calculado.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="work_start_time">Horário de Entrada</Label>
+                    <Input
+                      id="work_start_time"
+                      type="time"
+                      value={formData.work_start_time || ''}
+                      onChange={(e) => handleInputChange('work_start_time', e.target.value)}
+                      placeholder="08:00"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="work_end_time">Horário de Saída</Label>
+                    <Input
+                      id="work_end_time"
+                      type="time"
+                      value={formData.work_end_time || ''}
+                      onChange={(e) => handleInputChange('work_end_time', e.target.value)}
+                      placeholder="17:00"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="break_start_time">Início do Intervalo</Label>
+                    <Input
+                      id="break_start_time"
+                      type="time"
+                      value={formData.break_start_time || ''}
+                      onChange={(e) => handleInputChange('break_start_time', e.target.value)}
+                      placeholder="12:00"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="break_end_time">Fim do Intervalo</Label>
+                    <Input
+                      id="break_end_time"
+                      type="time"
+                      value={formData.break_end_time || ''}
+                      onChange={(e) => handleInputChange('break_end_time', e.target.value)}
+                      placeholder="13:00"
+                    />
+                  </div>
                 </div>
               </div>
 

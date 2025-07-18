@@ -185,17 +185,6 @@ const Index = () => {
           </Card>
         </div>
 
-        <div className="mt-8 text-center">
-          <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
-            <h4 className="font-semibold text-gray-900 mb-2">Como funciona?</h4>
-            <div className="text-sm text-gray-600 space-y-1">
-              <p><strong>Master:</strong> Cria e gerencia empresas</p>
-              <p><strong>Empresa:</strong> Cria e gerencia filiais</p>
-              <p><strong>Filial:</strong> Registra funcionários e controla ponto por biometria</p>
-              <p><strong>Funcionários:</strong> Fazem ponto apenas com reconhecimento facial</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

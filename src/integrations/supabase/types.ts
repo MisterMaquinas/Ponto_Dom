@@ -354,6 +354,8 @@ export type Database = {
         Row: {
           birth_date: string
           branch_id: string
+          break_end_time: string | null
+          break_start_time: string | null
           city: string
           contact: string
           cpf: string
@@ -372,11 +374,15 @@ export type Database = {
           state: string
           street: string
           updated_at: string
+          work_end_time: string | null
+          work_start_time: string | null
           zip_code: string
         }
         Insert: {
           birth_date: string
           branch_id: string
+          break_end_time?: string | null
+          break_start_time?: string | null
           city: string
           contact: string
           cpf: string
@@ -395,11 +401,15 @@ export type Database = {
           state: string
           street: string
           updated_at?: string
+          work_end_time?: string | null
+          work_start_time?: string | null
           zip_code: string
         }
         Update: {
           birth_date?: string
           branch_id?: string
+          break_end_time?: string | null
+          break_start_time?: string | null
           city?: string
           contact?: string
           cpf?: string
@@ -418,6 +428,8 @@ export type Database = {
           state?: string
           street?: string
           updated_at?: string
+          work_end_time?: string | null
+          work_start_time?: string | null
           zip_code?: string
         }
         Relationships: [
