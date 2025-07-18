@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BarChart3, FileText, Users, Building2 } from 'lucide-react';
+import BranchReport from './BranchReport';
+import EmployeeReport from './EmployeeReport';
+import ProductivityReport from './ProductivityReport';
 
 interface CompanyReportsProps {
   onBack: () => void;
@@ -10,6 +13,28 @@ interface CompanyReportsProps {
 }
 
 const CompanyReports = ({ onBack, onLogout, userData }: CompanyReportsProps) => {
+  const [currentView, setCurrentView] = useState<'main' | 'branches' | 'employees' | 'productivity'>('main');
+
+  const handleBack = () => {
+    if (currentView === 'main') {
+      onBack();
+    } else {
+      setCurrentView('main');
+    }
+  };
+
+  if (currentView === 'branches') {
+    return <BranchReport onBack={handleBack} onLogout={onLogout} userData={userData} />;
+  }
+
+  if (currentView === 'employees') {
+    return <EmployeeReport onBack={handleBack} onLogout={onLogout} userData={userData} />;
+  }
+
+  if (currentView === 'productivity') {
+    return <ProductivityReport onBack={handleBack} onLogout={onLogout} userData={userData} />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="bg-white shadow-sm border-b">
@@ -45,8 +70,11 @@ const CompanyReports = ({ onBack, onLogout, userData }: CompanyReportsProps) => 
               <p className="text-gray-600 mb-4">
                 Visualize informações detalhadas sobre todas as filiais
               </p>
-              <Button className="w-full bg-blue-500 hover:bg-blue-600" disabled>
-                Em Breve
+              <Button 
+                className="w-full bg-blue-500 hover:bg-blue-600"
+                onClick={() => setCurrentView('branches')}
+              >
+                Acessar
               </Button>
             </CardContent>
           </Card>
@@ -62,8 +90,11 @@ const CompanyReports = ({ onBack, onLogout, userData }: CompanyReportsProps) => 
               <p className="text-gray-600 mb-4">
                 Dados consolidados de todos os funcionários da empresa
               </p>
-              <Button className="w-full bg-green-500 hover:bg-green-600" disabled>
-                Em Breve
+              <Button 
+                className="w-full bg-green-500 hover:bg-green-600"
+                onClick={() => setCurrentView('employees')}
+              >
+                Acessar
               </Button>
             </CardContent>
           </Card>
@@ -79,8 +110,11 @@ const CompanyReports = ({ onBack, onLogout, userData }: CompanyReportsProps) => 
               <p className="text-gray-600 mb-4">
                 Análise de produtividade por filial e funcionário
               </p>
-              <Button className="w-full bg-purple-500 hover:bg-purple-600" disabled>
-                Em Breve
+              <Button 
+                className="w-full bg-purple-500 hover:bg-purple-600"
+                onClick={() => setCurrentView('productivity')}
+              >
+                Acessar
               </Button>
             </CardContent>
           </Card>

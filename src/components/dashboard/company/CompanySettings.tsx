@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Settings, Shield, Users, Building } from 'lucide-react';
+import CompanyDataForm from './CompanyDataForm';
+import CompanySecurityForm from './CompanySecurityForm';
 
 interface CompanySettingsProps {
   onBack: () => void;
@@ -10,6 +12,24 @@ interface CompanySettingsProps {
 }
 
 const CompanySettings = ({ onBack, onLogout, userData }: CompanySettingsProps) => {
+  const [currentView, setCurrentView] = useState<'main' | 'data' | 'security'>('main');
+
+  const handleBack = () => {
+    if (currentView === 'main') {
+      onBack();
+    } else {
+      setCurrentView('main');
+    }
+  };
+
+  if (currentView === 'data') {
+    return <CompanyDataForm onBack={handleBack} onLogout={onLogout} userData={userData} />;
+  }
+
+  if (currentView === 'security') {
+    return <CompanySecurityForm onBack={handleBack} onLogout={onLogout} userData={userData} />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="bg-white shadow-sm border-b">
@@ -45,8 +65,11 @@ const CompanySettings = ({ onBack, onLogout, userData }: CompanySettingsProps) =
               <p className="text-gray-600 mb-4">
                 Atualize informações básicas da empresa
               </p>
-              <Button className="w-full bg-blue-500 hover:bg-blue-600" disabled>
-                Em Breve
+              <Button 
+                className="w-full bg-blue-500 hover:bg-blue-600"
+                onClick={() => setCurrentView('data')}
+              >
+                Acessar
               </Button>
             </CardContent>
           </Card>
@@ -62,8 +85,11 @@ const CompanySettings = ({ onBack, onLogout, userData }: CompanySettingsProps) =
               <p className="text-gray-600 mb-4">
                 Configurações de segurança e senha
               </p>
-              <Button className="w-full bg-green-500 hover:bg-green-600" disabled>
-                Em Breve
+              <Button 
+                className="w-full bg-green-500 hover:bg-green-600"
+                onClick={() => setCurrentView('security')}
+              >
+                Acessar
               </Button>
             </CardContent>
           </Card>
