@@ -13,6 +13,7 @@ interface ReceiptActionsProps {
     position?: string;
     branch?: string;
     confidence?: number;
+    type?: string;
   };
 }
 

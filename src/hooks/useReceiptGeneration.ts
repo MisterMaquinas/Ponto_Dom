@@ -5,6 +5,7 @@ interface PunchData {
   position?: string;
   branch?: string;
   confidence?: number;
+  type?: string;
 }
 
 export const useReceiptGeneration = () => {
@@ -13,10 +14,21 @@ export const useReceiptGeneration = () => {
     const formattedDate = date.toLocaleDateString('pt-BR');
     const formattedTime = date.toLocaleTimeString('pt-BR');
     
+    const getActionType = (type?: string) => {
+      switch (type) {
+        case 'entrada': return 'ENTRADA';
+        case 'saida': return 'SAÍDA';
+        case 'intervalo_inicio': return 'SAÍDA (INTERVALO)';
+        case 'intervalo_fim': return 'VOLTA (INTERVALO)';
+        default: return type ? type.toUpperCase() : 'ENTRADA';
+      }
+    };
+    
     return `
 COMPROVANTE DE PONTO
 ════════════════════
 Funcionário: ${punchData.name}${punchData.position ? `\nCargo: ${punchData.position}` : ''}${punchData.branch ? `\nFilial: ${punchData.branch}` : ''}
+Ação: ${getActionType(punchData.type)}
 Data: ${formattedDate}
 Horário: ${formattedTime}${punchData.confidence ? `\nConfiança: ${punchData.confidence}%` : ''}
 Hash: ${punchData.hash}

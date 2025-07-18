@@ -341,7 +341,8 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
                       hash: lastPunchRecord.hash,
                       position: lastPunchRecord.position,
                       branch: lastPunchRecord.branch,
-                      confidence: lastPunchRecord.confidence
+                      confidence: lastPunchRecord.confidence,
+                      type: lastPunchRecord.type
                     }} />
                   </div>
                 </div>

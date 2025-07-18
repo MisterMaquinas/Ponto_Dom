@@ -492,7 +492,8 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
                       hash: lastPunchData.hash,
                       position: lastPunchData.position,
                       branch: lastPunchData.branch,
-                      confidence: lastPunchData.confidence
+                      confidence: lastPunchData.confidence,
+                      type: lastPunchData.type
                     }} />
                   </div>
                 )}
