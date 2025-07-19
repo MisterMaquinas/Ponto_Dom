@@ -1,5 +1,5 @@
 import React from 'react';
-import SimplifiedProductivityReport from '../reports/SimplifiedProductivityReport';
+import SimpleProductivityReport from '../reports/SimpleProductivityReport';
 
 interface ProductivityReportProps {
   onBack: () => void;
@@ -9,7 +9,7 @@ interface ProductivityReportProps {
 
 const ProductivityReport = ({ onBack, onLogout, userData }: ProductivityReportProps) => {
   return (
-    <SimplifiedProductivityReport 
+    <SimpleProductivityReport 
       onBack={onBack} 
       onLogout={onLogout} 
       userData={userData} 
