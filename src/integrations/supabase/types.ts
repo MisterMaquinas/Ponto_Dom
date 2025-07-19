@@ -238,6 +238,9 @@ export type Database = {
           auto_suspend: boolean | null
           company_id: string
           created_at: string
+          custom_max_branches: number | null
+          custom_max_users: number | null
+          custom_price: number | null
           expires_at: string
           grace_period_days: number | null
           id: string
@@ -254,6 +257,9 @@ export type Database = {
           auto_suspend?: boolean | null
           company_id: string
           created_at?: string
+          custom_max_branches?: number | null
+          custom_max_users?: number | null
+          custom_price?: number | null
           expires_at: string
           grace_period_days?: number | null
           id?: string
@@ -270,6 +276,9 @@ export type Database = {
           auto_suspend?: boolean | null
           company_id?: string
           created_at?: string
+          custom_max_branches?: number | null
+          custom_max_users?: number | null
+          custom_price?: number | null
           expires_at?: string
           grace_period_days?: number | null
           id?: string

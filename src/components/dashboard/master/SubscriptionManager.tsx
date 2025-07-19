@@ -51,6 +51,9 @@ interface CompanySubscription {
   grace_period_days: number;
   auto_suspend: boolean;
   notes: string | null;
+  custom_max_users?: number | null;
+  custom_max_branches?: number | null;
+  custom_price?: number | null;
   plan: any;
   company: any;
 }
@@ -81,6 +84,11 @@ const SubscriptionManager = ({ onBack, onLogout, userData }: SubscriptionManager
     payment_method: 'manual',
     reference_number: '',
     notes: ''
+  });
+  const [customPlanData, setCustomPlanData] = useState({
+    max_users: '',
+    max_branches: '',
+    price: ''
   });
 
   useEffect(() => {
@@ -136,7 +144,7 @@ const SubscriptionManager = ({ onBack, onLogout, userData }: SubscriptionManager
     }
   };
 
-  const createSubscription = async (companyId: string, planId: string, months: number = 1) => {
+  const createSubscription = async (companyId: string, planId: string, months: number = 1, isCustom: boolean = false) => {
     try {
       const plan = plans.find(p => p.id === planId);
       if (!plan) return;
@@ -144,22 +152,34 @@ const SubscriptionManager = ({ onBack, onLogout, userData }: SubscriptionManager
       const now = new Date();
       const expiresAt = addMonths(now, months);
       
+      const subscriptionData: any = {
+        company_id: companyId,
+        plan_id: planId,
+        expires_at: expiresAt.toISOString(),
+        next_payment_due: expiresAt.toISOString(),
+        payment_amount: plan.price_monthly,
+        status: 'active'
+      };
+
+      // Adicionar valores customizados se for plano personalizado
+      if (isCustom && plan.name === 'Plano Personalizado') {
+        subscriptionData.custom_max_users = customPlanData.max_users ? parseInt(customPlanData.max_users) : null;
+        subscriptionData.custom_max_branches = customPlanData.max_branches ? parseInt(customPlanData.max_branches) : null;
+        subscriptionData.custom_price = customPlanData.price ? parseFloat(customPlanData.price) : null;
+        subscriptionData.payment_amount = parseFloat(customPlanData.price) || 0;
+      }
+
       const { error } = await supabase
         .from('company_subscriptions')
-        .insert({
-          company_id: companyId,
-          plan_id: planId,
-          expires_at: expiresAt.toISOString(),
-          next_payment_due: expiresAt.toISOString(),
-          payment_amount: plan.price_monthly,
-          status: 'active'
-        });
+        .insert(subscriptionData);
 
       if (error) throw error;
       
       toast.success('Assinatura criada com sucesso!');
       loadData();
       setShowNewSubscription(false);
+      setSelectedCompany('');
+      setCustomPlanData({ max_users: '', max_branches: '', price: '' });
     } catch (error) {
       console.error('Erro ao criar assinatura:', error);
       toast.error('Erro ao criar assinatura');
@@ -372,22 +392,93 @@ const SubscriptionManager = ({ onBack, onLogout, userData }: SubscriptionManager
                     <div className="grid grid-cols-1 gap-2">
                       {plans.map(plan => (
                         <Card key={plan.id} className="cursor-pointer hover:bg-accent" 
-                              onClick={() => selectedCompany && createSubscription(selectedCompany, plan.id)}>
+                              onClick={() => {
+                                if (selectedCompany) {
+                                  if (plan.name === 'Plano Personalizado') {
+                                    // Para plano personalizado, mostrar campos de configuração
+                                    return;
+                                  } else {
+                                    createSubscription(selectedCompany, plan.id);
+                                  }
+                                }
+                              }}>
                           <CardContent className="p-4">
                             <div className="flex justify-between items-center">
                               <div>
                                 <h4 className="font-medium">{plan.name}</h4>
                                 <p className="text-sm text-muted-foreground">{plan.description}</p>
+                                {plan.name !== 'Plano Personalizado' && (
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {plan.max_users} usuários • {plan.max_branches} filial(is)
+                                  </p>
+                                )}
                               </div>
                               <div className="text-right">
-                                <p className="font-bold">{formatCurrency(plan.price_monthly)}</p>
-                                <p className="text-xs text-muted-foreground">por mês</p>
+                                <p className="font-bold">
+                                  {plan.name === 'Plano Personalizado' ? 'Personalizado' : formatCurrency(plan.price_monthly)}
+                                </p>
+                                {plan.name !== 'Plano Personalizado' && (
+                                  <p className="text-xs text-muted-foreground">por mês</p>
+                                )}
                               </div>
                             </div>
                           </CardContent>
                         </Card>
                       ))}
                     </div>
+                    
+                    {/* Configuração do Plano Personalizado */}
+                    {plans.find(p => p.name === 'Plano Personalizado') && (
+                      <div className="border-t pt-4 space-y-4">
+                        <h4 className="font-medium">Configuração Personalizada</h4>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <Label>Máx. Usuários</Label>
+                            <Input
+                              type="number"
+                              placeholder="Ex: 100"
+                              value={customPlanData.max_users}
+                              onChange={(e) => setCustomPlanData(prev => ({ ...prev, max_users: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <Label>Máx. Filiais</Label>
+                            <Input
+                              type="number"
+                              placeholder="Ex: 10"
+                              value={customPlanData.max_branches}
+                              onChange={(e) => setCustomPlanData(prev => ({ ...prev, max_branches: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <Label>Valor Mensal (R$)</Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="Ex: 750.00"
+                              value={customPlanData.price}
+                              onChange={(e) => setCustomPlanData(prev => ({ ...prev, price: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+                        <Button 
+                          onClick={() => {
+                            if (selectedCompany && customPlanData.max_users && customPlanData.max_branches && customPlanData.price) {
+                              const customPlan = plans.find(p => p.name === 'Plano Personalizado');
+                              if (customPlan) {
+                                createSubscription(selectedCompany, customPlan.id, 1, true);
+                              }
+                            } else {
+                              toast.error('Preencha todos os campos do plano personalizado');
+                            }
+                          }}
+                          className="w-full"
+                          disabled={!selectedCompany || !customPlanData.max_users || !customPlanData.max_branches || !customPlanData.price}
+                        >
+                          Criar Assinatura Personalizada
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </DialogContent>
               </Dialog>
@@ -409,15 +500,20 @@ const SubscriptionManager = ({ onBack, onLogout, userData }: SubscriptionManager
                   <div className="space-y-4">
                     <div>
                       <Label>Empresa</Label>
-                      <Select value={paymentData.company_id} onValueChange={(value) => 
-                        setPaymentData(prev => ({ ...prev, company_id: value }))}>
+                      <Select value={paymentData.company_id} onValueChange={(value) => {
+                        const subscription = subscriptions.find(s => s.company_id === value);
+                        const amount = subscription ? (
+                          subscription.custom_price || subscription.plan.price_monthly
+                        ).toString() : '';
+                        setPaymentData(prev => ({ ...prev, company_id: value, amount }));
+                      }}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione uma empresa" />
                         </SelectTrigger>
                         <SelectContent>
                           {subscriptions.map(subscription => (
                             <SelectItem key={subscription.company_id} value={subscription.company_id}>
-                              {subscription.company.name}
+                              {subscription.company.name} - {formatCurrency(subscription.custom_price || subscription.plan.price_monthly)}/mês
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -427,10 +523,16 @@ const SubscriptionManager = ({ onBack, onLogout, userData }: SubscriptionManager
                       <Label>Valor</Label>
                       <Input
                         type="number"
+                        step="0.01"
                         placeholder="0,00"
                         value={paymentData.amount}
                         onChange={(e) => setPaymentData(prev => ({ ...prev, amount: e.target.value }))}
                       />
+                      {paymentData.company_id && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Valor padrão da assinatura preenchido automaticamente
+                        </p>
+                      )}
                     </div>
                     <div>
                       <Label>Método de Pagamento</Label>
