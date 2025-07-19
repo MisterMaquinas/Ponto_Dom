@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building, Users, BarChart3, Crown, Eye, Settings, UserPlus } from 'lucide-react';
+import { Building, Users, BarChart3, Crown, Eye, Settings, UserPlus, CreditCard } from 'lucide-react';
 import MasterReports from './MasterReports';
 import CompanyManagement from './master/CompanyManagement';
 import CompanyDetails from './master/CompanyDetails';
 import SystemSettings from './master/SystemSettings';
+import SubscriptionManager from './master/SubscriptionManager';
 import { useMasterData } from './master/useMasterData';
 
 interface MasterDashboardProps {
@@ -34,6 +35,10 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
 
   if (activeTab === 'system-settings') {
     return <SystemSettings onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} />;
+  }
+
+  if (activeTab === 'subscriptions') {
+    return <SubscriptionManager onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} />;
   }
 
   const mainStats = [
@@ -153,6 +158,13 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
                   >
                     <Building className="w-5 h-5 mr-3" />
                     Gerenciar Empresas
+                  </Button>
+                  <Button
+                    onClick={() => setActiveTab('subscriptions')}
+                    className="w-full justify-start h-12 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                  >
+                    <CreditCard className="w-5 h-5 mr-3" />
+                    Controle de Pagamentos
                   </Button>
                   <Button
                     onClick={() => setActiveTab('system-settings')}

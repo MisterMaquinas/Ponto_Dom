@@ -46,11 +46,77 @@ const LoginForm = ({
             name
           )
         `).eq('username', formData.username).eq('password', formData.password).single();
+      
       if (user && !userError) {
+        // Verificar status da assinatura da empresa
+        const { data: subscription } = await supabase
+          .from('company_subscriptions')
+          .select('*')
+          .eq('company_id', user.company_id)
+          .single();
+
+        if (subscription) {
+          // Verificar se a assinatura está ativa
+          const now = new Date();
+          const expiresAt = new Date(subscription.expires_at);
+          const gracePeriodEnd = new Date(expiresAt.getTime() + subscription.grace_period_days * 24 * 60 * 60 * 1000);
+
+          if (subscription.status === 'suspended') {
+            toast({
+              title: "Acesso Bloqueado",
+              description: "A assinatura da sua empresa foi suspensa. Entre em contato com o suporte.",
+              variant: "destructive"
+            });
+            return;
+          }
+
+          if (subscription.status === 'cancelled') {
+            toast({
+              title: "Acesso Bloqueado",
+              description: "A assinatura da sua empresa foi cancelada. Entre em contato com o suporte.",
+              variant: "destructive"
+            });
+            return;
+          }
+
+          if (now > gracePeriodEnd && subscription.auto_suspend) {
+            // Auto-suspender se passou do período de graça
+            await supabase
+              .from('company_subscriptions')
+              .update({ status: 'suspended' })
+              .eq('id', subscription.id);
+
+            toast({
+              title: "Acesso Bloqueado",
+              description: "A assinatura da sua empresa expirou e foi suspensa automaticamente.",
+              variant: "destructive"
+            });
+            return;
+          }
+
+          if (now > expiresAt && now <= gracePeriodEnd) {
+            // Período de graça - mostrar aviso mas permitir login
+            toast({
+              title: "Assinatura Vencida",
+              description: `Sua assinatura venceu. Período de graça até ${gracePeriodEnd.toLocaleDateString('pt-BR')}`,
+              variant: "destructive"
+            });
+          }
+        } else {
+          // Sem assinatura - bloquear acesso
+          toast({
+            title: "Acesso Bloqueado",
+            description: "Sua empresa não possui uma assinatura ativa. Entre em contato com o suporte.",
+            variant: "destructive"
+          });
+          return;
+        }
+
         const userData = {
           ...user,
           companyName: user.companies?.name,
-          companyId: user.company_id
+          companyId: user.company_id,
+          subscription: subscription
         };
         onLogin(user.role, userData);
         toast({

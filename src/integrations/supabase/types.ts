@@ -233,6 +233,65 @@ export type Database = {
           },
         ]
       }
+      company_subscriptions: {
+        Row: {
+          auto_suspend: boolean | null
+          company_id: string
+          created_at: string
+          expires_at: string
+          grace_period_days: number | null
+          id: string
+          last_payment_date: string | null
+          next_payment_due: string
+          notes: string | null
+          payment_amount: number | null
+          plan_id: string | null
+          started_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          auto_suspend?: boolean | null
+          company_id: string
+          created_at?: string
+          expires_at: string
+          grace_period_days?: number | null
+          id?: string
+          last_payment_date?: string | null
+          next_payment_due: string
+          notes?: string | null
+          payment_amount?: number | null
+          plan_id?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_suspend?: boolean | null
+          company_id?: string
+          created_at?: string
+          expires_at?: string
+          grace_period_days?: number | null
+          id?: string
+          last_payment_date?: string | null
+          next_payment_due?: string
+          notes?: string | null
+          payment_amount?: number | null
+          plan_id?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_reports: {
         Row: {
           columns: Json | null
@@ -520,6 +579,60 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_history: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string | null
+          reference_number: string | null
+          subscription_id: string | null
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string | null
+          reference_number?: string | null
+          subscription_id?: string | null
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string | null
+          reference_number?: string | null
+          subscription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_history_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "master_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_history_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "company_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       punch_records: {
         Row: {
           confidence_score: number | null
@@ -620,6 +733,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          features: Json | null
+          id: string
+          is_active: boolean
+          max_branches: number | null
+          max_users: number | null
+          name: string
+          price_monthly: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean
+          max_branches?: number | null
+          max_users?: number | null
+          name: string
+          price_monthly: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean
+          max_branches?: number | null
+          max_users?: number | null
+          name?: string
+          price_monthly?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       system_logs: {
         Row: {
@@ -845,9 +997,17 @@ export type Database = {
       }
     }
     Functions: {
+      auto_suspend_expired_companies: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       cleanup_expired_cache: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      is_company_subscription_active: {
+        Args: { company_uuid: string }
+        Returns: boolean
       }
       log_system_action: {
         Args: {
