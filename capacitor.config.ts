@@ -22,7 +22,15 @@ const config: CapacitorConfig = {
     minWebViewVersion: 60,
     allowMixedContent: true,
     captureInput: true,
-    webContentsDebuggingEnabled: true
+    webContentsDebuggingEnabled: true,
+    minSdkVersion: 23,
+    compileSdkVersion: 34,
+    targetSdkVersion: 34,
+    buildOptions: {
+      keystorePath: undefined,
+      keystoreAlias: undefined,
+      releaseType: 'AAB'
+    }
   },
   ios: {
     scheme: 'PontoDom',
