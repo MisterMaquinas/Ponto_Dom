@@ -53,6 +53,7 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
   };
 
   const handleEditCompany = (company: any) => {
+    console.log('Edit company button clicked:', company);
     setEditingCompany(company);
   };
 
@@ -141,7 +142,10 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
                    </div>
                   <div className="flex gap-2">
                     <Button
-                      onClick={() => handleViewDetails(company)}
+                      onClick={() => {
+                        console.log('View details button clicked for company:', company);
+                        handleViewDetails(company);
+                      }}
                       className="flex-1 bg-blue-500 hover:bg-blue-600"
                       size="sm"
                     >
@@ -149,14 +153,20 @@ const CompanyManagement = ({ onBack, onLogout, userData }: CompanyManagementProp
                       Detalhes
                     </Button>
                     <Button
-                      onClick={() => handleEditCompany(company)}
+                      onClick={() => {
+                        console.log('Edit button clicked for company:', company);
+                        handleEditCompany(company);
+                      }}
                       variant="outline"
                       size="sm"
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
                     <Button
-                      onClick={() => handleDeleteCompany(company)}
+                      onClick={() => {
+                        console.log('Delete button clicked for company:', company);
+                        handleDeleteCompany(company);
+                      }}
                       variant="outline"
                       size="sm"
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"

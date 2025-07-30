@@ -14,6 +14,8 @@ interface EditCompanyDialogProps {
 }
 
 const EditCompanyDialog = ({ company, isOpen, onClose, onCompanyUpdated }: EditCompanyDialogProps) => {
+  console.log('EditCompanyDialog rendered:', { company, isOpen });
+  
   const [formData, setFormData] = useState({
     name: company?.name || '',
     adminName: company?.admin_name || '',
