@@ -47,6 +47,7 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
   ];
 
   const handleCompanyClick = (company: any) => {
+    console.log('Company clicked:', company);
     setSelectedCompany(company);
     setActiveTab('company-details');
   };
@@ -146,28 +147,40 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <Button
-                    onClick={() => setActiveTab('reports')}
+                    onClick={() => {
+                      console.log('Reports button clicked');
+                      setActiveTab('reports');
+                    }}
                     className="w-full justify-start h-12 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
                   >
                     <BarChart3 className="w-5 h-5 mr-3" />
                     Relatórios Gerais do Sistema
                   </Button>
                   <Button
-                    onClick={() => setActiveTab('company-management')}
+                    onClick={() => {
+                      console.log('Company management button clicked');
+                      setActiveTab('company-management');
+                    }}
                     className="w-full justify-start h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
                   >
                     <Building className="w-5 h-5 mr-3" />
                     Gerenciar Empresas
                   </Button>
                   <Button
-                    onClick={() => setActiveTab('subscriptions')}
+                    onClick={() => {
+                      console.log('Subscriptions button clicked');
+                      setActiveTab('subscriptions');
+                    }}
                     className="w-full justify-start h-12 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
                   >
                     <CreditCard className="w-5 h-5 mr-3" />
                     Controle de Pagamentos
                   </Button>
                   <Button
-                    onClick={() => setActiveTab('system-settings')}
+                    onClick={() => {
+                      console.log('System settings button clicked');
+                      setActiveTab('system-settings');
+                    }}
                     className="w-full justify-start h-12 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700"
                   >
                     <Settings className="w-5 h-5 mr-3" />
