@@ -140,9 +140,9 @@ const Index = () => {
               <p className="text-gray-600 mb-4">
                 Gerenciamento da empresa, criação de filiais e administração geral
               </p>
-              <Button className="w-full bg-blue-500 hover:bg-blue-600">
+              <div className="w-full h-12 bg-blue-500 hover:bg-blue-600 rounded-md flex items-center justify-center text-white font-medium transition-colors">
                 Entrar como Empresa
-              </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -159,9 +159,9 @@ const Index = () => {
               <p className="text-gray-600 mb-4">
                 Sistema de ponto por biometria facial, cadastro e gerenciamento de funcionários
               </p>
-              <Button className="w-full bg-green-500 hover:bg-green-600">
+              <div className="w-full h-12 bg-green-500 hover:bg-green-600 rounded-md flex items-center justify-center text-white font-medium transition-colors">
                 Entrar como Filial
-              </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -178,9 +178,9 @@ const Index = () => {
               <p className="text-gray-600 mb-4">
                 Acesso direto ao sistema de ponto por reconhecimento facial para funcionários
               </p>
-              <Button className="w-full bg-orange-500 hover:bg-orange-600">
+              <div className="w-full h-12 bg-orange-500 hover:bg-orange-600 rounded-md flex items-center justify-center text-white font-medium transition-colors">
                 Acessar Sistema de Ponto
-              </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
