@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Building, Users, UserPlus, MapPin, Plus, Edit } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
+import EditCompanyDialog from './EditCompanyDialog';
 
 interface CompanyDetailsProps {
   company: any;
@@ -23,6 +24,7 @@ const CompanyDetails = ({ company, onBack, onLogout, userData }: CompanyDetailsP
     branches: 0
   });
   const [loading, setLoading] = useState(true);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
     loadCompanyDetails();
@@ -143,7 +145,10 @@ const CompanyDetails = ({ company, onBack, onLogout, userData }: CompanyDetailsP
                     <label className="text-sm font-medium text-gray-600">Usuário do Administrador</label>
                     <p className="text-gray-900">@{company.admin_username}</p>
                   </div>
-                  <Button className="w-full bg-blue-500 hover:bg-blue-600">
+                  <Button 
+                    onClick={() => setIsEditDialogOpen(true)}
+                    className="w-full bg-blue-500 hover:bg-blue-600"
+                  >
                     <Edit className="w-4 h-4 mr-2" />
                     Editar Empresa
                   </Button>
@@ -173,6 +178,13 @@ const CompanyDetails = ({ company, onBack, onLogout, userData }: CompanyDetailsP
           </>
         )}
       </div>
+
+      <EditCompanyDialog
+        company={company}
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        onCompanyUpdated={loadCompanyDetails}
+      />
     </div>
   );
 };
