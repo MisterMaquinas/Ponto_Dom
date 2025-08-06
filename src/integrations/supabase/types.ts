@@ -14,1022 +14,462 @@ export type Database = {
   }
   public: {
     Tables: {
-      biometric_verification_logs: {
+      access_keys: {
         Row: {
-          attempt_photo_url: string
-          created_at: string
-          device_info: Json | null
-          error_message: string | null
-          id: string
-          reference_photo_url: string
-          similarity_score: number | null
-          user_id: string
-          verification_result: string
-        }
-        Insert: {
-          attempt_photo_url: string
-          created_at?: string
-          device_info?: Json | null
-          error_message?: string | null
-          id?: string
-          reference_photo_url: string
-          similarity_score?: number | null
-          user_id: string
-          verification_result: string
-        }
-        Update: {
-          attempt_photo_url?: string
-          created_at?: string
-          device_info?: Json | null
-          error_message?: string | null
-          id?: string
-          reference_photo_url?: string
-          similarity_score?: number | null
-          user_id?: string
-          verification_result?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "biometric_verification_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      branches: {
-        Row: {
-          address: string
-          city: string
-          company_id: string
-          contact: string
-          created_at: string
-          id: string
-          is_active: boolean
-          manager_password: string | null
-          manager_username: string | null
-          name: string
-          state: string
-          updated_at: string
-          zip_code: string
-        }
-        Insert: {
-          address: string
-          city: string
-          company_id: string
-          contact: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          manager_password?: string | null
-          manager_username?: string | null
-          name: string
-          state: string
-          updated_at?: string
-          zip_code: string
-        }
-        Update: {
-          address?: string
-          city?: string
-          company_id?: string
-          contact?: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          manager_password?: string | null
-          manager_username?: string | null
-          name?: string
-          state?: string
-          updated_at?: string
-          zip_code?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "branches_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      companies: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
-      company_branches: {
-        Row: {
-          address: string
-          city: string
-          company_id: string
-          contact: string
-          created_at: string
-          id: string
-          is_active: boolean
-          manager_id: string | null
-          name: string
-          state: string
-          updated_at: string
-          zip_code: string
-        }
-        Insert: {
-          address: string
-          city: string
-          company_id: string
-          contact: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          manager_id?: string | null
-          name: string
-          state: string
-          updated_at?: string
-          zip_code: string
-        }
-        Update: {
-          address?: string
-          city?: string
-          company_id?: string
-          contact?: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          manager_id?: string | null
-          name?: string
-          state?: string
-          updated_at?: string
-          zip_code?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_branches_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_branches_manager_id_fkey"
-            columns: ["manager_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      company_limits: {
-        Row: {
-          company_id: string
-          created_at: string
-          id: string
-          max_admins: number | null
-          max_managers: number | null
-          max_supervisors: number | null
-          max_users: number | null
-          updated_at: string
-        }
-        Insert: {
-          company_id: string
-          created_at?: string
-          id?: string
-          max_admins?: number | null
-          max_managers?: number | null
-          max_supervisors?: number | null
-          max_users?: number | null
-          updated_at?: string
-        }
-        Update: {
-          company_id?: string
-          created_at?: string
-          id?: string
-          max_admins?: number | null
-          max_managers?: number | null
-          max_supervisors?: number | null
-          max_users?: number | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_limits_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      company_subscriptions: {
-        Row: {
-          auto_suspend: boolean | null
-          company_id: string
-          created_at: string
-          custom_max_branches: number | null
-          custom_max_users: number | null
-          custom_price: number | null
-          expires_at: string
-          grace_period_days: number | null
-          id: string
-          last_payment_date: string | null
-          next_payment_due: string
-          notes: string | null
-          payment_amount: number | null
-          plan_id: string | null
-          started_at: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          auto_suspend?: boolean | null
-          company_id: string
-          created_at?: string
-          custom_max_branches?: number | null
-          custom_max_users?: number | null
-          custom_price?: number | null
-          expires_at: string
-          grace_period_days?: number | null
-          id?: string
-          last_payment_date?: string | null
-          next_payment_due: string
-          notes?: string | null
-          payment_amount?: number | null
-          plan_id?: string | null
-          started_at?: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          auto_suspend?: boolean | null
-          company_id?: string
-          created_at?: string
-          custom_max_branches?: number | null
-          custom_max_users?: number | null
-          custom_price?: number | null
-          expires_at?: string
-          grace_period_days?: number | null
-          id?: string
-          last_payment_date?: string | null
-          next_payment_due?: string
-          notes?: string | null
-          payment_amount?: number | null
-          plan_id?: string | null
-          started_at?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_subscriptions_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      custom_reports: {
-        Row: {
-          columns: Json | null
-          company_id: string
-          created_at: string
-          created_by: string
-          filters: Json | null
-          id: string
-          is_scheduled: boolean | null
-          name: string
-          report_type: string
-          schedule_config: Json | null
-          updated_at: string
-        }
-        Insert: {
-          columns?: Json | null
-          company_id: string
-          created_at?: string
-          created_by: string
-          filters?: Json | null
-          id?: string
-          is_scheduled?: boolean | null
-          name: string
-          report_type: string
-          schedule_config?: Json | null
-          updated_at?: string
-        }
-        Update: {
-          columns?: Json | null
-          company_id?: string
-          created_at?: string
-          created_by?: string
-          filters?: Json | null
-          id?: string
-          is_scheduled?: boolean | null
-          name?: string
-          report_type?: string
-          schedule_config?: Json | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "custom_reports_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "custom_reports_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      employee_punch_records: {
-        Row: {
-          branch_id: string
-          confirmed_by_employee: boolean | null
-          created_at: string
-          device_info: Json | null
-          employee_id: string
-          face_confidence: number | null
-          id: string
-          location: Json | null
-          photo_url: string | null
-          punch_type: string
-          receipt_sent: boolean | null
-          timestamp: string
-        }
-        Insert: {
-          branch_id: string
-          confirmed_by_employee?: boolean | null
-          created_at?: string
-          device_info?: Json | null
-          employee_id: string
-          face_confidence?: number | null
-          id?: string
-          location?: Json | null
-          photo_url?: string | null
-          punch_type: string
-          receipt_sent?: boolean | null
-          timestamp?: string
-        }
-        Update: {
-          branch_id?: string
-          confirmed_by_employee?: boolean | null
-          created_at?: string
-          device_info?: Json | null
-          employee_id?: string
-          face_confidence?: number | null
-          id?: string
-          location?: Json | null
-          photo_url?: string | null
-          punch_type?: string
-          receipt_sent?: boolean | null
-          timestamp?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "employee_punch_records_branch_id_fkey"
-            columns: ["branch_id"]
-            isOneToOne: false
-            referencedRelation: "branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_punch_records_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      employees: {
-        Row: {
-          birth_date: string
-          branch_id: string
-          break_end_time: string | null
-          break_start_time: string | null
-          city: string
-          contact: string
-          cpf: string
-          created_at: string
-          created_by: string
-          custom_position: string | null
-          face_encoding: string | null
-          id: string
-          is_active: boolean
-          name: string
-          neighborhood: string
-          number: string
-          position: string
-          reference_photo_url: string | null
-          rg: string
-          state: string
-          street: string
-          updated_at: string
-          work_end_time: string | null
-          work_start_time: string | null
-          zip_code: string
-        }
-        Insert: {
-          birth_date: string
-          branch_id: string
-          break_end_time?: string | null
-          break_start_time?: string | null
-          city: string
-          contact: string
-          cpf: string
-          created_at?: string
-          created_by: string
-          custom_position?: string | null
-          face_encoding?: string | null
-          id?: string
-          is_active?: boolean
-          name: string
-          neighborhood: string
-          number: string
-          position: string
-          reference_photo_url?: string | null
-          rg: string
-          state: string
-          street: string
-          updated_at?: string
-          work_end_time?: string | null
-          work_start_time?: string | null
-          zip_code: string
-        }
-        Update: {
-          birth_date?: string
-          branch_id?: string
-          break_end_time?: string | null
-          break_start_time?: string | null
-          city?: string
-          contact?: string
-          cpf?: string
-          created_at?: string
-          created_by?: string
-          custom_position?: string | null
-          face_encoding?: string | null
-          id?: string
-          is_active?: boolean
-          name?: string
-          neighborhood?: string
-          number?: string
-          position?: string
-          reference_photo_url?: string | null
-          rg?: string
-          state?: string
-          street?: string
-          updated_at?: string
-          work_end_time?: string | null
-          work_start_time?: string | null
-          zip_code?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "employees_branch_id_fkey"
-            columns: ["branch_id"]
-            isOneToOne: false
-            referencedRelation: "branches"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      face_recognition_logs: {
-        Row: {
-          confidence_score: number
-          created_at: string
-          device_info: Json | null
-          face_image_url: string
-          id: string
-          location: Json | null
-          punch_record_id: string | null
-          recognition_status: string
-          recognition_timestamp: string
-          user_id: string
-        }
-        Insert: {
-          confidence_score: number
-          created_at?: string
-          device_info?: Json | null
-          face_image_url: string
-          id?: string
-          location?: Json | null
-          punch_record_id?: string | null
-          recognition_status: string
-          recognition_timestamp?: string
-          user_id: string
-        }
-        Update: {
-          confidence_score?: number
-          created_at?: string
-          device_info?: Json | null
-          face_image_url?: string
-          id?: string
-          location?: Json | null
-          punch_record_id?: string | null
-          recognition_status?: string
-          recognition_timestamp?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "face_recognition_logs_punch_record_id_fkey"
-            columns: ["punch_record_id"]
-            isOneToOne: false
-            referencedRelation: "punch_records"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "face_recognition_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      master_users: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          password: string
-          username: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          password: string
-          username: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          password?: string
-          username?: string
-        }
-        Relationships: []
-      }
-      payment_history: {
-        Row: {
-          amount: number
-          company_id: string
-          created_at: string
-          created_by: string | null
-          id: string
-          notes: string | null
-          payment_date: string
-          payment_method: string | null
-          reference_number: string | null
-          subscription_id: string | null
-        }
-        Insert: {
-          amount: number
-          company_id: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          notes?: string | null
-          payment_date?: string
-          payment_method?: string | null
-          reference_number?: string | null
-          subscription_id?: string | null
-        }
-        Update: {
-          amount?: number
-          company_id?: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          notes?: string | null
-          payment_date?: string
-          payment_method?: string | null
-          reference_number?: string | null
-          subscription_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payment_history_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "master_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payment_history_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
-            referencedRelation: "company_subscriptions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      punch_records: {
-        Row: {
-          confidence_score: number | null
-          created_at: string
-          device_info: Json | null
-          face_image_url: string | null
-          id: string
-          location: Json | null
-          punch_type: string
-          timestamp: string
-          updated_at: string
-          user_id: string
-          verification_log_id: string | null
-        }
-        Insert: {
-          confidence_score?: number | null
-          created_at?: string
-          device_info?: Json | null
-          face_image_url?: string | null
-          id?: string
-          location?: Json | null
-          punch_type: string
-          timestamp?: string
-          updated_at?: string
-          user_id: string
-          verification_log_id?: string | null
-        }
-        Update: {
-          confidence_score?: number | null
-          created_at?: string
-          device_info?: Json | null
-          face_image_url?: string | null
-          id?: string
-          location?: Json | null
-          punch_type?: string
-          timestamp?: string
-          updated_at?: string
-          user_id?: string
-          verification_log_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "punch_records_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "punch_records_verification_log_id_fkey"
-            columns: ["verification_log_id"]
-            isOneToOne: false
-            referencedRelation: "biometric_verification_logs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      report_cache: {
-        Row: {
-          cache_key: string
-          company_id: string
           created_at: string | null
-          data: Json
-          expires_at: string
-          filters: Json | null
           id: string
-          report_type: string
+          is_active: boolean
+          key_value: string
           updated_at: string | null
         }
         Insert: {
-          cache_key: string
-          company_id: string
           created_at?: string | null
-          data: Json
-          expires_at: string
-          filters?: Json | null
           id?: string
-          report_type: string
+          is_active?: boolean
+          key_value: string
           updated_at?: string | null
         }
         Update: {
-          cache_key?: string
-          company_id?: string
           created_at?: string | null
-          data?: Json
-          expires_at?: string
-          filters?: Json | null
           id?: string
-          report_type?: string
+          is_active?: boolean
+          key_value?: string
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "report_cache_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      subscription_plans: {
+      admins: {
         Row: {
-          created_at: string
-          description: string | null
-          features: Json | null
+          created_at: string | null
           id: string
-          is_active: boolean
-          max_branches: number | null
-          max_users: number | null
-          name: string
-          price_monthly: number
-          updated_at: string
+          password: string
+          username: string
         }
         Insert: {
-          created_at?: string
-          description?: string | null
-          features?: Json | null
+          created_at?: string | null
           id?: string
-          is_active?: boolean
-          max_branches?: number | null
-          max_users?: number | null
-          name: string
-          price_monthly: number
-          updated_at?: string
+          password: string
+          username: string
         }
         Update: {
-          created_at?: string
-          description?: string | null
-          features?: Json | null
+          created_at?: string | null
           id?: string
-          is_active?: boolean
-          max_branches?: number | null
-          max_users?: number | null
+          password?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      apks: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          download_count: number | null
+          file_path: string | null
+          file_size: string
+          icon_url: string | null
+          id: string
+          name: string
+          status: string
+          storage_path: string | null
+          updated_at: string | null
+          uploaded_by: string
+          version: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          download_count?: number | null
+          file_path?: string | null
+          file_size: string
+          icon_url?: string | null
+          id?: string
+          name: string
+          status: string
+          storage_path?: string | null
+          updated_at?: string | null
+          uploaded_by: string
+          version?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          download_count?: number | null
+          file_path?: string | null
+          file_size?: string
+          icon_url?: string | null
+          id?: string
           name?: string
-          price_monthly?: number
-          updated_at?: string
+          status?: string
+          storage_path?: string | null
+          updated_at?: string | null
+          uploaded_by?: string
+          version?: string | null
         }
         Relationships: []
       }
-      system_logs: {
+      chat_messages: {
         Row: {
-          action: string
+          apelido: string
+          content_encrypted: string
           created_at: string
-          details: Json | null
-          entity_id: string | null
-          entity_type: string
+          deleted_at: string | null
           id: string
-          ip_address: unknown | null
-          master_user_id: string | null
-          user_agent: string | null
-          user_id: string | null
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          details?: Json | null
-          entity_id?: string | null
-          entity_type: string
-          id?: string
-          ip_address?: unknown | null
-          master_user_id?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          details?: Json | null
-          entity_id?: string | null
-          entity_type?: string
-          id?: string
-          ip_address?: unknown | null
-          master_user_id?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "system_logs_master_user_id_fkey"
-            columns: ["master_user_id"]
-            isOneToOne: false
-            referencedRelation: "master_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "system_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      system_settings: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          setting_key: string
-          setting_value: Json
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          setting_key: string
-          setting_value: Json
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          setting_key?: string
-          setting_value?: Json
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      user_biometric_photos: {
-        Row: {
-          created_at: string
-          face_encoding: string | null
-          id: string
-          is_active: boolean
-          reference_photo_url: string
+          is_pinned: boolean | null
+          message_type: string | null
+          pinned_at: string | null
+          pinned_by: string | null
+          reply_to_message_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          apelido: string
+          content_encrypted: string
           created_at?: string
-          face_encoding?: string | null
+          deleted_at?: string | null
           id?: string
-          is_active?: boolean
-          reference_photo_url: string
+          is_pinned?: boolean | null
+          message_type?: string | null
+          pinned_at?: string | null
+          pinned_by?: string | null
+          reply_to_message_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          apelido?: string
+          content_encrypted?: string
           created_at?: string
-          face_encoding?: string | null
+          deleted_at?: string | null
           id?: string
-          is_active?: boolean
-          reference_photo_url?: string
+          is_pinned?: boolean | null
+          message_type?: string | null
+          pinned_at?: string | null
+          pinned_by?: string | null
+          reply_to_message_id?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "user_biometric_photos_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "chat_messages_reply_to_message_id_fkey"
+            columns: ["reply_to_message_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "chat_messages"
             referencedColumns: ["id"]
           },
         ]
       }
-      users: {
+      chat_rooms: {
         Row: {
-          birth_date: string
-          city: string
-          company_id: string
-          contact: string
-          cpf: string
           created_at: string
           created_by: string
-          face_data: string | null
+          description: string | null
           id: string
+          is_public: boolean | null
           name: string
-          neighborhood: string
-          number: string
-          password: string
-          rg: string
-          role: string
-          state: string
-          street: string
-          updated_at: string
-          username: string
-          zip_code: string
         }
         Insert: {
-          birth_date: string
-          city: string
-          company_id: string
-          contact: string
-          cpf: string
           created_at?: string
           created_by: string
-          face_data?: string | null
+          description?: string | null
           id?: string
+          is_public?: boolean | null
           name: string
-          neighborhood: string
-          number: string
-          password: string
-          rg: string
-          role: string
-          state: string
-          street: string
-          updated_at?: string
-          username: string
-          zip_code: string
         }
         Update: {
-          birth_date?: string
-          city?: string
-          company_id?: string
-          contact?: string
-          cpf?: string
           created_at?: string
           created_by?: string
-          face_data?: string | null
+          description?: string | null
           id?: string
+          is_public?: boolean | null
           name?: string
-          neighborhood?: string
-          number?: string
-          password?: string
-          rg?: string
-          role?: string
-          state?: string
-          street?: string
-          updated_at?: string
-          username?: string
-          zip_code?: string
+        }
+        Relationships: []
+      }
+      installation_logs: {
+        Row: {
+          apk_id: string | null
+          created_at: string | null
+          device_info: string | null
+          id: string
+          status: string
+        }
+        Insert: {
+          apk_id?: string | null
+          created_at?: string | null
+          device_info?: string | null
+          id?: string
+          status: string
+        }
+        Update: {
+          apk_id?: string | null
+          created_at?: string | null
+          device_info?: string | null
+          id?: string
+          status?: string
         }
         Relationships: [
           {
-            foreignKeyName: "users_company_id_fkey"
-            columns: ["company_id"]
+            foreignKeyName: "installation_logs_apk_id_fkey"
+            columns: ["apk_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "apks"
             referencedColumns: ["id"]
           },
         ]
       }
-    }
-    Views: {
-      unified_punch_records: {
+      news: {
         Row: {
-          branch_id: string | null
-          branch_name: string | null
-          company_id: string | null
-          company_name: string | null
-          confirmed_by_employee: boolean | null
+          conteudo: string
+          created_at: string
+          id: string
+          imagem_url: string | null
+          prioridade: string | null
+          status: string
+          tags: string[] | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          conteudo: string
+          created_at?: string
+          id?: string
+          imagem_url?: string | null
+          prioridade?: string | null
+          status?: string
+          tags?: string[] | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          conteudo?: string
+          created_at?: string
+          id?: string
+          imagem_url?: string | null
+          prioridade?: string | null
+          status?: string
+          tags?: string[] | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      partners: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          id: string
+          imagem_url: string
+          instagram: string | null
+          nome_empresa: string
+          site: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          imagem_url: string
+          instagram?: string | null
+          nome_empresa: string
+          site?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          imagem_url?: string
+          instagram?: string | null
+          nome_empresa?: string
+          site?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          apelido: string | null
+          avatar_url: string | null
+          created_at: string
+          id: string
+          is_online: boolean | null
+          last_seen: string | null
+          nome_completo: string
+          patente: string | null
+          pode_usar_mapa: boolean
+          primeiro_nome: string | null
+          role: string | null
+          status_aprovacao: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          apelido?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          is_online?: boolean | null
+          last_seen?: string | null
+          nome_completo: string
+          patente?: string | null
+          pode_usar_mapa?: boolean
+          primeiro_nome?: string | null
+          role?: string | null
+          status_aprovacao?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          apelido?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          is_online?: boolean | null
+          last_seen?: string | null
+          nome_completo?: string
+          patente?: string | null
+          pode_usar_mapa?: boolean
+          primeiro_nome?: string | null
+          role?: string | null
+          status_aprovacao?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      uploads: {
+        Row: {
+          created_at: string
+          file_url: string
+          id: string
+          legenda: string | null
+          nome_usuario: string
+          status: string
+          titulo: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_url: string
+          id?: string
+          legenda?: string | null
+          nome_usuario: string
+          status?: string
+          titulo: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_url?: string
+          id?: string
+          legenda?: string | null
+          nome_usuario?: string
+          status?: string
+          titulo?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_encryption_keys: {
+        Row: {
+          created_at: string
+          id: string
+          private_key_encrypted: string
+          public_key: string
+          salt: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          private_key_encrypted: string
+          public_key: string
+          salt: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          private_key_encrypted?: string
+          public_key?: string
+          salt?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_locations: {
+        Row: {
+          ativo_mapa: boolean
+          created_at: string
+          id: string
+          latitude: number
+          longitude: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo_mapa?: boolean
+          created_at?: string
+          id?: string
+          latitude: number
+          longitude: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo_mapa?: boolean
+          created_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
           created_at: string | null
-          device_info: Json | null
-          employee_id: string | null
-          employee_name: string | null
-          employee_position: string | null
-          employee_role: string | null
-          face_confidence: number | null
-          id: string | null
-          location: Json | null
-          photo_url: string | null
-          punch_type: string | null
-          receipt_sent: boolean | null
-          record_source: string | null
-          timestamp: string | null
+          id: string
+          is_admin: boolean
+          password: string
+          updated_at: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_admin?: boolean
+          password: string
+          updated_at?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_admin?: boolean
+          password?: string
+          updated_at?: string | null
+          username?: string
         }
         Relationships: []
       }
     }
+    Views: {
+      [_ in never]: never
+    }
     Functions: {
-      auto_suspend_expired_companies: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      cleanup_expired_cache: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      is_company_subscription_active: {
-        Args: { company_uuid: string }
+      delete_apk_completely: {
+        Args: { apk_id: string }
         Returns: boolean
-      }
-      log_system_action: {
-        Args: {
-          p_action: string
-          p_entity_type: string
-          p_user_id?: string
-          p_master_user_id?: string
-          p_entity_id?: string
-          p_details?: Json
-          p_ip_address?: unknown
-          p_user_agent?: string
-        }
-        Returns: string
       }
     }
     Enums: {
