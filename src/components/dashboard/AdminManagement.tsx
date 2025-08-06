@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Edit, Trash2, Building, Crown } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, User, Crown } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,37 +14,32 @@ interface AdminManagementProps {
   userData: any;
 }
 
-interface Company {
+interface Admin {
   id: string;
-  name: string;
+  username: string;
   created_at: string;
 }
 
-interface Admin {
+interface UserProfile {
   id: string;
-  company_id: string;
-  name: string;
   username: string;
-  companies?: Company;
+  is_admin: boolean;
+  created_at: string;
 }
 
 const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) => {
   const [showForm, setShowForm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
-  const [companies, setCompanies] = useState<Company[]>([]);
   const [admins, setAdmins] = useState<Admin[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    companyName: '',
-    adminName: '',
-    adminUser: '',
-    adminPassword: ''
+    username: '',
+    password: ''
   });
   const [editFormData, setEditFormData] = useState({
-    companyName: '',
-    adminName: '',
-    adminUser: ''
+    username: ''
   });
 
   useEffect(() => {
@@ -55,37 +50,11 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
     try {
       setLoading(true);
       
-      // Carregar empresas
-      const { data: companiesData, error: companiesError } = await supabase
-        .from('companies')
-        .select('*')
-        .order('name');
-
-      if (companiesError) {
-        console.error('Erro ao carregar empresas:', companiesError);
-        toast({
-          title: "Erro",
-          description: "Erro ao carregar empresas",
-          variant: "destructive",
-        });
-        setCompanies([]);
-      } else {
-        setCompanies(companiesData || []);
-      }
-
-      // Carregar administradores
+      // Carregar administradores da tabela admins
       const { data: adminsData, error: adminsError } = await supabase
-        .from('users')
-        .select(`
-          *,
-          companies (
-            id,
-            name,
-            created_at
-          )
-        `)
-        .eq('role', 'admin')
-        .order('name');
+        .from('admins')
+        .select('*')
+        .order('username');
 
       if (adminsError) {
         console.error('Erro ao carregar administradores:', adminsError);
@@ -98,6 +67,24 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
       } else {
         setAdmins(adminsData || []);
       }
+
+      // Carregar usuários regulares
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
+        .select('*')
+        .order('username');
+
+      if (usersError) {
+        console.error('Erro ao carregar usuários:', usersError);
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar usuários",
+          variant: "destructive",
+        });
+        setUsers([]);
+      } else {
+        setUsers(usersData || []);
+      }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast({
@@ -105,8 +92,8 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
         description: "Erro inesperado ao carregar dados",
         variant: "destructive",
       });
-      setCompanies([]);
       setAdmins([]);
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -115,7 +102,7 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.companyName || !formData.adminName || !formData.adminUser || !formData.adminPassword) {
+    if (!formData.username || !formData.password) {
       toast({
         title: "Erro",
         description: "Todos os campos são obrigatórios",
@@ -125,67 +112,19 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
     }
 
     try {
-      // Primeiro, criar a empresa
-      const { data: companyData, error: companyError } = await supabase
-        .from('companies')
-        .insert([
-          { name: formData.companyName }
-        ])
-        .select()
-        .single();
-
-      if (companyError) {
-        console.error('Erro ao criar empresa:', companyError);
-        toast({
-          title: "Erro",
-          description: "Erro ao criar empresa: " + companyError.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Log da criação da empresa
-      await supabase.rpc('log_system_action', {
-        p_action: 'create',
-        p_entity_type: 'company',
-        p_master_user_id: userData?.id || null,
-        p_entity_id: companyData.id,
-        p_details: {
-          company_name: formData.companyName,
-          admin_name: formData.adminName,
-          admin_username: formData.adminUser
-        }
-      });
-
-      // Depois, criar o administrador
+      // Criar novo administrador
       const { data: adminData, error: adminError } = await supabase
-        .from('users')
+        .from('admins')
         .insert([
           {
-            company_id: companyData.id,
-            name: formData.adminName,
-            cpf: '000.000.000-00', // CPF temporário
-            rg: '0000000',
-            birth_date: '1990-01-01',
-            street: 'Rua Principal',
-            number: '123',
-            neighborhood: 'Centro',
-            city: 'Cidade',
-            state: 'SP',
-            zip_code: '00000-000',
-            contact: 'admin@empresa.com',
-            username: formData.adminUser,
-            password: formData.adminPassword,
-            role: 'admin',
-            created_by: 'master'
+            username: formData.username,
+            password: formData.password
           }
         ])
         .select();
 
       if (adminError) {
         console.error('Erro ao criar administrador:', adminError);
-        // Se houve erro ao criar o admin, remover a empresa criada
-        await supabase.from('companies').delete().eq('id', companyData.id);
         toast({
           title: "Erro",
           description: "Erro ao criar administrador: " + adminError.message,
@@ -194,30 +133,19 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
         return;
       }
 
-      // Criar limites padrão para a empresa
-      await supabase
-        .from('company_limits')
-        .insert([{
-          company_id: companyData.id,
-          max_admins: 1,
-          max_managers: 5,
-          max_supervisors: 10,
-          max_users: 50
-        }]);
-
       await loadData();
-      setFormData({ companyName: '', adminName: '', adminUser: '', adminPassword: '' });
+      setFormData({ username: '', password: '' });
       setShowForm(false);
       
       toast({
-        title: "Empresa cadastrada com sucesso!",
-        description: `${formData.companyName} foi cadastrada com o administrador ${formData.adminUser}`,
+        title: "Administrador cadastrado com sucesso!",
+        description: `Usuário ${formData.username} foi criado`,
       });
     } catch (error) {
       console.error('Erro ao cadastrar:', error);
       toast({
         title: "Erro",
-        description: "Erro inesperado ao cadastrar empresa",
+        description: "Erro inesperado ao cadastrar administrador",
         variant: "destructive",
       });
     }
@@ -226,9 +154,7 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
   const handleEditClick = (admin: Admin) => {
     setEditingAdmin(admin);
     setEditFormData({
-      companyName: admin.companies?.name || '',
-      adminName: admin.name,
-      adminUser: admin.username
+      username: admin.username
     });
     setShowEditModal(true);
   };
@@ -236,38 +162,21 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!editingAdmin || !editFormData.companyName || !editFormData.adminName || !editFormData.adminUser) {
+    if (!editingAdmin || !editFormData.username) {
       toast({
         title: "Erro",
-        description: "Todos os campos são obrigatórios",
+        description: "Nome de usuário é obrigatório",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      // Atualizar a empresa
-      const { error: companyError } = await supabase
-        .from('companies')
-        .update({ name: editFormData.companyName })
-        .eq('id', editingAdmin.company_id);
-
-      if (companyError) {
-        console.error('Erro ao atualizar empresa:', companyError);
-        toast({
-          title: "Erro",
-          description: "Erro ao atualizar empresa: " + companyError.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
       // Atualizar o administrador
       const { error: adminError } = await supabase
-        .from('users')
+        .from('admins')
         .update({
-          name: editFormData.adminName,
-          username: editFormData.adminUser
+          username: editFormData.username
         })
         .eq('id', editingAdmin.id);
 
@@ -281,26 +190,13 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
         return;
       }
 
-      // Log da atualização
-      await supabase.rpc('log_system_action', {
-        p_action: 'update',
-        p_entity_type: 'company',
-        p_master_user_id: userData?.id || null,
-        p_entity_id: editingAdmin.company_id,
-        p_details: {
-          company_name: editFormData.companyName,
-          admin_name: editFormData.adminName,
-          admin_username: editFormData.adminUser
-        }
-      });
-
       await loadData();
       setShowEditModal(false);
       setEditingAdmin(null);
       
       toast({
         title: "Dados atualizados com sucesso!",
-        description: `As informações de ${editFormData.companyName} foram atualizadas`,
+        description: `As informações do usuário ${editFormData.username} foram atualizadas`,
       });
     } catch (error) {
       console.error('Erro ao atualizar:', error);
@@ -312,72 +208,38 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
     }
   };
 
-  const deleteAdmin = async (adminId: string, companyId: string) => {
-    if (!confirm('Tem certeza que deseja remover esta empresa? Esta ação não pode ser desfeita.')) {
+  const deleteAdmin = async (adminId: string, username: string) => {
+    if (!confirm(`Tem certeza que deseja remover o administrador ${username}? Esta ação não pode ser desfeita.`)) {
       return;
     }
 
     try {
-      // Buscar dados da empresa para o log
-      const { data: companyData } = await supabase
-        .from('companies')
-        .select('name')
-        .eq('id', companyId)
-        .single();
-
-      // Primeiro, deletar todos os usuários da empresa
-      const { error: usersError } = await supabase
-        .from('users')
+      // Deletar o administrador
+      const { error: adminError } = await supabase
+        .from('admins')
         .delete()
-        .eq('company_id', companyId);
+        .eq('id', adminId);
 
-      if (usersError) {
-        console.error('Erro ao deletar usuários:', usersError);
+      if (adminError) {
+        console.error('Erro ao deletar administrador:', adminError);
         toast({
           title: "Erro",
-          description: "Erro ao remover usuários da empresa",
+          description: "Erro ao remover administrador",
           variant: "destructive",
         });
         return;
       }
-
-      // Depois, deletar a empresa
-      const { error: companyError } = await supabase
-        .from('companies')
-        .delete()
-        .eq('id', companyId);
-
-      if (companyError) {
-        console.error('Erro ao deletar empresa:', companyError);
-        toast({
-          title: "Erro",
-          description: "Erro ao remover empresa",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Log da exclusão
-      await supabase.rpc('log_system_action', {
-        p_action: 'delete',
-        p_entity_type: 'company',
-        p_master_user_id: userData?.id || null,
-        p_entity_id: companyId,
-        p_details: {
-          company_name: companyData?.name || 'Unknown'
-        }
-      });
 
       await loadData();
       toast({
-        title: "Empresa removida",
-        description: "A empresa e todos os seus usuários foram removidos do sistema",
+        title: "Administrador removido",
+        description: `O administrador ${username} foi removido do sistema`,
       });
     } catch (error) {
       console.error('Erro ao deletar:', error);
       toast({
         title: "Erro",
-        description: "Erro inesperado ao remover empresa",
+        description: "Erro inesperado ao remover administrador",
         variant: "destructive",
       });
     }
@@ -396,15 +258,15 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                   <Crown className="w-6 h-6 text-purple-600" />
-                  Cadastrar Empresas
+                  Gerenciar Administradores
                 </h1>
-                <p className="text-gray-600">Gerencie empresas e administradores</p>
+                <p className="text-gray-600">Gerencie administradores do sistema</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
                 <Crown className="w-3 h-3 mr-1" />
-                Master
+                Admin
               </Badge>
               <Button onClick={onLogout} variant="outline">
                 Sair
@@ -421,7 +283,7 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
             className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Nova Empresa
+            Novo Administrador
           </Button>
         </div>
 
@@ -429,8 +291,8 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
           <Card className="mb-8 border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Building className="w-5 h-5" />
-                Cadastrar Nova Empresa
+                <User className="w-5 h-5" />
+                Cadastrar Novo Administrador
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -438,55 +300,31 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nome da Empresa *
+                      Nome de Usuário *
                     </label>
                     <Input
-                      value={formData.companyName}
-                      onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                      placeholder="Ex: RaioX, TechCorp, etc."
+                      value={formData.username}
+                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                      placeholder="Digite o nome de usuário"
                       required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nome do Administrador *
-                    </label>
-                    <Input
-                      value={formData.adminName}
-                      onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
-                      placeholder="Nome completo do administrador"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Login do Administrador *
-                    </label>
-                    <Input
-                      value={formData.adminUser}
-                      onChange={(e) => setFormData({ ...formData, adminUser: e.target.value })}
-                      placeholder="Ex: admin_raiox, tech_admin, etc."
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Senha do Administrador *
+                      Senha *
                     </label>
                     <Input
                       type="password"
-                      value={formData.adminPassword}
-                      onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
-                      placeholder="Digite a senha para o administrador"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="Digite a senha"
                       required
                     />
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <Button type="submit" className="bg-green-500 hover:bg-green-600">
-                    Cadastrar Empresa
+                    Cadastrar Administrador
                   </Button>
                   <Button type="button" onClick={() => setShowForm(false)} variant="outline">
                     Cancelar
@@ -497,131 +335,139 @@ const AdminManagement = ({ onBack, onLogout, userData }: AdminManagementProps) =
           </Card>
         )}
 
-        <Card className="border-0 shadow-lg">
-          <CardHeader>
-            <CardTitle>Empresas Cadastradas ({admins.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="text-center py-8">
-                <div className="text-gray-500">Carregando empresas...</div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {admins.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Building className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500 mb-2 text-lg">Nenhuma empresa cadastrada ainda</p>
-                    <p className="text-sm text-gray-400 mb-4">Use o botão "Nova Empresa" para começar</p>
-                    <Button
-                      onClick={() => setShowForm(true)}
-                      className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Administradores */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-purple-600" />
+                Administradores ({admins.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">Carregando...</p>
+                </div>
+              ) : admins.length === 0 ? (
+                <div className="text-center py-8">
+                  <User className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500">Nenhum administrador cadastrado</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {admins.map((admin) => (
+                    <div
+                      key={admin.id}
+                      className="bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-lg border border-purple-100"
                     >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Cadastrar Primeira Empresa
-                    </Button>
-                  </div>
-                ) : (
-                  admins.map((admin) => (
-                    <div key={admin.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
-                          <Building className="w-6 h-6 text-white" />
-                        </div>
+                      <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-gray-900">{admin.companies?.name}</p>
-                          <p className="text-sm text-gray-600">Admin: {admin.name}</p>
-                          <p className="text-sm text-gray-600">Login: @{admin.username}</p>
-                          <p className="text-xs text-gray-500">
-                            Criada em {new Date(admin.companies?.created_at || '').toLocaleDateString('pt-BR')}
+                          <h3 className="font-semibold text-gray-900">{admin.username}</h3>
+                          <p className="text-sm text-gray-500">
+                            Criado em: {new Date(admin.created_at).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <Badge className="bg-green-100 text-green-800">
-                          Ativa
-                        </Badge>
                         <div className="flex gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-blue-600 hover:text-blue-700"
+                          <Button
                             onClick={() => handleEditClick(admin)}
+                            size="sm"
+                            variant="outline"
+                            className="bg-white"
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => deleteAdmin(admin.id, admin.company_id)}
+                          <Button
+                            onClick={() => deleteAdmin(admin.id, admin.username)}
+                            size="sm"
+                            variant="outline"
+                            className="bg-white text-red-600 hover:bg-red-50"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Usuários Regulares */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5 text-blue-600" />
+                Usuários Regulares ({users.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">Carregando...</p>
+                </div>
+              ) : users.length === 0 ? (
+                <div className="text-center py-8">
+                  <User className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500">Nenhum usuário cadastrado</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {users.map((user) => (
+                    <div
+                      key={user.id}
+                      className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-100"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                            {user.username}
+                            {user.is_admin && (
+                              <Badge variant="secondary" className="text-xs">
+                                Admin
+                              </Badge>
+                            )}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            Criado em: {new Date(user.created_at).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Modal de Edição */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Edit className="w-5 h-5" />
-              Editar Empresa
-            </DialogTitle>
+            <DialogTitle>Editar Administrador</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEditSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nome da Empresa *
+                Nome de Usuário *
               </label>
               <Input
-                value={editFormData.companyName}
-                onChange={(e) => setEditFormData({ ...editFormData, companyName: e.target.value })}
-                placeholder="Nome da empresa"
+                value={editFormData.username}
+                onChange={(e) => setEditFormData({ ...editFormData, username: e.target.value })}
+                placeholder="Digite o nome de usuário"
                 required
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nome do Administrador *
-              </label>
-              <Input
-                value={editFormData.adminName}
-                onChange={(e) => setEditFormData({ ...editFormData, adminName: e.target.value })}
-                placeholder="Nome do administrador"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Login do Administrador *
-              </label>
-              <Input
-                value={editFormData.adminUser}
-                onChange={(e) => setEditFormData({ ...editFormData, adminUser: e.target.value })}
-                placeholder="Login do administrador"
-                required
-              />
-            </div>
-            <div className="flex gap-4 pt-4">
-              <Button type="submit" className="bg-blue-500 hover:bg-blue-600 flex-1">
+            <div className="flex gap-4">
+              <Button type="submit" className="bg-blue-500 hover:bg-blue-600">
                 Salvar Alterações
               </Button>
-              <Button 
-                type="button" 
-                onClick={() => setShowEditModal(false)} 
-                variant="outline"
-                className="flex-1"
-              >
+              <Button type="button" onClick={() => setShowEditModal(false)} variant="outline">
                 Cancelar
               </Button>
             </div>
