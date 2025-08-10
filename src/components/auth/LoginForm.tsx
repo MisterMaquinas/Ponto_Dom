@@ -26,10 +26,18 @@ const LoginForm = ({ onLogin, onBack }: LoginFormProps) => {
       const {
         data: adminUser,
         error: adminError
-      } = await supabase.from('admins').select('*').eq('username', formData.username).eq('password', formData.password).maybeSingle();
+      } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('username', formData.username)
+        .eq('password', formData.password)
+        .maybeSingle();
 
       if (adminUser && !adminError) {
-        onLogin('admin', adminUser);
+        const isMaster = adminUser.username?.toLowerCase() === 'master';
+        const userType = isMaster ? 'master' : 'admin';
+        const userData = { ...adminUser, name: adminUser.username };
+        onLogin(userType, userData);
         toast({
           title: "Login realizado com sucesso!",
           description: `Bem-vindo, ${adminUser.username}`
