@@ -187,6 +187,53 @@ export type Database = {
         }
         Relationships: []
       }
+      face_recognition_logs: {
+        Row: {
+          confidence_score: number
+          created_at: string
+          device_info: Json | null
+          face_image_url: string
+          id: string
+          location: string | null
+          recognition_status: string
+          recognition_timestamp: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          confidence_score: number
+          created_at?: string
+          device_info?: Json | null
+          face_image_url: string
+          id?: string
+          location?: string | null
+          recognition_status: string
+          recognition_timestamp?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          confidence_score?: number
+          created_at?: string
+          device_info?: Json | null
+          face_image_url?: string
+          id?: string
+          location?: string | null
+          recognition_status?: string
+          recognition_timestamp?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_logs_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       installation_logs: {
         Row: {
           apk_id: string | null
@@ -342,6 +389,60 @@ export type Database = {
         }
         Relationships: []
       }
+      punch_records: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          device_info: Json | null
+          id: string
+          location: string | null
+          punch_type: string
+          timestamp: string
+          updated_at: string
+          user_id: string
+          verification_log_id: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          device_info?: Json | null
+          id?: string
+          location?: string | null
+          punch_type: string
+          timestamp?: string
+          updated_at?: string
+          user_id: string
+          verification_log_id?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          device_info?: Json | null
+          id?: string
+          location?: string | null
+          punch_type?: string
+          timestamp?: string
+          updated_at?: string
+          user_id?: string
+          verification_log_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_punch_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "punch_records_verification_log_id_fkey"
+            columns: ["verification_log_id"]
+            isOneToOne: false
+            referencedRelation: "face_recognition_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       uploads: {
         Row: {
           created_at: string
@@ -377,6 +478,41 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      user_biometric_photos: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          photo_url: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          photo_url: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          photo_url?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_bio_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_encryption_keys: {
         Row: {
