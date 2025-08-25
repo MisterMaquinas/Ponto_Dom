@@ -83,7 +83,7 @@ const LoginForm = ({ onLogin, onBack }: LoginFormProps) => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gray-900">PontoDom ✅</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900">PONTO VERIFICADO ✅</CardTitle>
           <p className="text-gray-600">
             Sistema de Controle de Ponto com Biometria
           </p>

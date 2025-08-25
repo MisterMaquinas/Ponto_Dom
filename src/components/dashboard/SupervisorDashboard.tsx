@@ -36,7 +36,7 @@ const SupervisorDashboard = ({ userData, onLogout }: SupervisorDashboardProps) =
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">PontoDom - Painel de Supervisão</h1>
+              <h1 className="text-2xl font-bold text-gray-900">PONTO VERIFICADO - Painel de Supervisão</h1>
               <p className="text-gray-600">Bem-vindo, {userData.name}</p>
               <div className="flex items-center gap-2 mt-1">
                 <Building className="w-4 h-4 text-orange-600" />

@@ -212,7 +212,7 @@ export const NOTIFICATION_TYPES = {
 
 export const THEME_CONFIG = {
   DEFAULT_THEME: 'light',
-  STORAGE_KEY: 'pontodom_theme',
+  STORAGE_KEY: 'ponto_verificado_theme',
   TRANSITION_DURATION: '300ms'
 } as const;
 
@@ -221,10 +221,10 @@ export const THEME_CONFIG = {
 // =====================================
 
 export const SYSTEM_CONFIG = {
-  APP_NAME: 'PontoDom',
+  APP_NAME: 'PONTO VERIFICADO',
   VERSION: '1.0.0',
   API_VERSION: 'v1',
-  COMPANY_NAME: 'PontoDom Solutions'
+  COMPANY_NAME: 'PONTO VERIFICADO Solutions'
 } as const;
 
 // =====================================

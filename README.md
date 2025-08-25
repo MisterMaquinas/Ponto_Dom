@@ -1,8 +1,8 @@
-# PontoDom – Sistema de Ponto Eletrônico com Biometria Facial
+# PONTO VERIFICADO – Sistema de Ponto Eletrônico com Biometria Facial
 
 ## Visão Geral
 
-O **PontoDom** é um sistema moderno de controle de ponto eletrônico, desenvolvido para empresas que desejam gerenciar a jornada de trabalho de seus funcionários de forma segura, eficiente e inovadora. O grande diferencial é o uso de **biometria facial** para o registro de ponto, além de uma arquitetura multiempresa e multifilial.
+O **PONTO VERIFICADO** é um sistema moderno de controle de ponto eletrônico, desenvolvido para empresas que desejam gerenciar a jornada de trabalho de seus funcionários de forma segura, eficiente e inovadora. O grande diferencial é o uso de **biometria facial** para o registro de ponto, além de uma arquitetura multiempresa e multifilial.
 
 ---
 

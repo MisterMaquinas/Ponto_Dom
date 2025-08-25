@@ -109,15 +109,15 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
-          {/* Logo PontoDom - clicável para Master */}
+          {/* Logo PONTO VERIFICADO - clicável para Master */}
           <div 
             className="flex justify-center mb-6 cursor-pointer pulse-gold"
             onClick={() => setCurrentView('master')}
             title="Acesso Master"
           >
             <img 
-              src="/lovable-uploads/742e8fa5-50c1-4bab-b53b-c82b18f8eebd.png" 
-              alt="PontoDom Biometria Facial" 
+              src="/lovable-uploads/3aa9dedc-d36d-4dcf-9d6d-bdee0123e04c.png" 
+              alt="PONTO VERIFICADO Biometria Facial" 
               className="w-64 h-64 object-contain filter drop-shadow-lg hover:drop-shadow-2xl transition-all duration-300"
             />
           </div>

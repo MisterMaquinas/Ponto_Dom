@@ -20,7 +20,7 @@ const ReportsHeader = ({ onBack, onLogout, userData }: ReportsHeaderProps) => {
               Voltar
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Relatórios Detalhados - PontoDom</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Relatórios Detalhados - PONTO VERIFICADO</h1>
               <p className="text-gray-600">Registros de ponto e reconhecimento facial</p>
               {userData?.companyName && (
                 <div className="flex items-center gap-2 mt-1">

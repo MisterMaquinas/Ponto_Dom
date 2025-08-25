@@ -65,7 +65,7 @@ const MasterDashboard = ({ userData, onLogout }: MasterDashboardProps) => {
             <div>
               <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                 <Crown className="w-6 h-6 text-purple-600" />
-                PontoDom - Master Dashboard
+                PONTO VERIFICADO - Master Dashboard
               </h1>
               <p className="text-gray-600">Painel de controle do sistema</p>
             </div>
