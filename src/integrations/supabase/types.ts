@@ -306,6 +306,60 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_punch_records: {
+        Row: {
+          branch_id: string
+          confirmed_by_employee: boolean | null
+          created_at: string
+          device_info: Json | null
+          employee_id: string
+          face_confidence: number | null
+          id: string
+          photo_url: string | null
+          punch_type: string
+          updated_at: string
+        }
+        Insert: {
+          branch_id: string
+          confirmed_by_employee?: boolean | null
+          created_at?: string
+          device_info?: Json | null
+          employee_id: string
+          face_confidence?: number | null
+          id?: string
+          photo_url?: string | null
+          punch_type: string
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string
+          confirmed_by_employee?: boolean | null
+          created_at?: string
+          device_info?: Json | null
+          employee_id?: string
+          face_confidence?: number | null
+          id?: string
+          photo_url?: string | null
+          punch_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_punch_records_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_punch_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           birth_date: string | null
