@@ -105,21 +105,17 @@ const EmployeePunchSystem = ({ branchData, onLogout }: EmployeePunchSystemProps)
     try {
       // Registrar ponto com o tipo selecionado pelo funcionário
       const { data: punchRecord, error } = await supabase
-        .from('employee_punch_records')
-        .insert([
-          {
-            employee_id: recognizedEmployee.employee.id,
-            branch_id: branchData.id,
-            punch_type: selectedPunchType,
-            face_confidence: recognizedEmployee.confidence,
-            photo_url: recognizedEmployee.imageData,
-            confirmed_by_employee: true,
-            device_info: {
-              userAgent: navigator.userAgent,
-              timestamp: new Date().toISOString()
-            }
+        .from('punch_records')
+        .insert({
+          user_id: recognizedEmployee.employee.id,
+          punch_type: selectedPunchType,
+          confidence_score: recognizedEmployee.confidence,
+          location: branchData.name,
+          device_info: {
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString()
           }
-        ])
+        })
         .select()
         .single();
 

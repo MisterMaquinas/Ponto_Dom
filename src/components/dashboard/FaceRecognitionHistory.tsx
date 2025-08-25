@@ -50,7 +50,7 @@ const FaceRecognitionHistory = ({ companyId, userId, showUserFilter = true }: Fa
         .from('face_recognition_logs')
         .select(`
           *,
-          users!fk_face_recognition_logs_user (
+          users!user_id (
             name,
             username,
             company_id

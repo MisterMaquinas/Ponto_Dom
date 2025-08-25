@@ -191,21 +191,17 @@ const LiveFaceRecognition = ({ branchData, onBack }: LiveFaceRecognitionProps) =
       const punchType = selectedPunchType || 'entrada';
 
       const { data: punchRecord, error } = await supabase
-        .from('employee_punch_records')
-        .insert([
-          {
-            employee_id: employee.id,
-            branch_id: branchData.id,
-            punch_type: punchType,
-            face_confidence: confidence,
-            photo_url: imageData,
-            confirmed_by_employee: true,
-            device_info: {
-              userAgent: navigator.userAgent,
-              timestamp: new Date().toISOString()
-            }
+        .from('punch_records')
+        .insert({
+          user_id: employee.id,
+          punch_type: punchType,
+          confidence_score: confidence,
+          location: branchData.name,
+          device_info: {
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString()
           }
-        ])
+        })
         .select()
         .single();
 

@@ -173,10 +173,9 @@ export const useBiometricCapture = ({ mode, userData, onCapture }: UseBiometricC
           .from('biometric_verification_logs')
           .insert({
             user_id: userData.id,
-            attempt_photo_url: capturedImage,
-            reference_photo_url: referencePhotos[0].reference_photo_url,
-            similarity_score: similarity,
-            verification_result: isMatch ? 'success' : 'failed',
+            reference_photo_url: referencePhotos[0].photo_url,
+            confidence_score: similarity,
+            verification_result: isMatch,
             device_info: {
               userAgent: navigator.userAgent,
               timestamp: new Date().toISOString()

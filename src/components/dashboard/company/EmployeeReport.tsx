@@ -29,8 +29,8 @@ interface Employee {
   branch: {
     id: string;
     name: string;
-    city: string;
-    state: string;
+    address: string;
+    phone: string;
   };
 }
 
@@ -65,7 +65,7 @@ const EmployeeReport = ({ onBack, onLogout, userData }: EmployeeReportProps) => 
       // Carregar filiais
       const { data: branchesData, error: branchesError } = await supabase
         .from('branches')
-        .select('id, name, city, state')
+        .select('id, name, address, phone')
         .eq('company_id', userData.companyId)
         .order('name');
 
@@ -80,8 +80,8 @@ const EmployeeReport = ({ onBack, onLogout, userData }: EmployeeReportProps) => 
           branch:branches!employees_branch_id_fkey(
             id,
             name,
-            city,
-            state
+            address,
+            phone
           )
         `)
         .eq('branch.company_id', userData.companyId)
@@ -308,7 +308,7 @@ const EmployeeReport = ({ onBack, onLogout, userData }: EmployeeReportProps) => 
 
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <MapPin className="w-4 h-4" />
-                    <span>{employee.branch?.name} - {employee.branch?.city}/{employee.branch?.state}</span>
+                    <span>{employee.branch?.name} - {employee.branch?.address}</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm text-gray-600">

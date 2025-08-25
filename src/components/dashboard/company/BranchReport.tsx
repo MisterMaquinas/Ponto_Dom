@@ -19,11 +19,15 @@ interface Branch {
   id: string;
   name: string;
   address: string;
-  city: string;
-  state: string;
-  contact: string;
+  phone: string;
+  code: string;
+  company_id: string;
+  manager_username: string;
+  manager_password: string;
+  status: string;
   is_active: boolean;
   created_at: string;
+  updated_at: string;
   employee_count: number;
 }
 
@@ -98,8 +102,8 @@ const BranchReport = ({ onBack, onLogout, userData }: BranchReportProps) => {
 
     const filtered = branches.filter(branch =>
       branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      branch.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      branch.state.toLowerCase().includes(searchTerm.toLowerCase())
+      branch.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      branch.phone.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     setFilteredBranches(filtered);
@@ -192,12 +196,12 @@ const BranchReport = ({ onBack, onLogout, userData }: BranchReportProps) => {
           <CardContent className="p-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Buscar por nome, cidade ou estado..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+                <Input
+                  placeholder="Buscar por nome ou endereço..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
             </div>
           </CardContent>
         </Card>
@@ -240,7 +244,7 @@ const BranchReport = ({ onBack, onLogout, userData }: BranchReportProps) => {
                 <CardContent className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <MapPin className="w-4 h-4" />
-                    <span>{branch.address}, {branch.city} - {branch.state}</span>
+                    <span>{branch.address}</span>
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -257,7 +261,7 @@ const BranchReport = ({ onBack, onLogout, userData }: BranchReportProps) => {
 
                   <div className="pt-2 border-t">
                     <p className="text-sm text-gray-600">
-                      <strong>Contato:</strong> {branch.contact}
+                      <strong>Telefone:</strong> {branch.phone || 'Não informado'}
                     </p>
                   </div>
                 </CardContent>
