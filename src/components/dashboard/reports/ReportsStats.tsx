@@ -44,15 +44,15 @@ const ReportsStats = ({ companyId }: ReportsStatsProps) => {
         .select(`
           employee_id,
           punch_type,
-          timestamp,
+          created_at,
           employees!inner(
             branches!inner(company_id)
           )
         `)
         .eq('employees.branches.company_id', companyId)
         .eq('punch_type', 'entrada')
-        .gte('timestamp', `${today}T00:00:00`)
-        .lt('timestamp', `${today}T23:59:59`);
+        .gte('created_at', `${today}T00:00:00`)
+        .lt('created_at', `${today}T23:59:59`);
 
       if (entriesError) throw entriesError;
 
@@ -71,8 +71,8 @@ const ReportsStats = ({ companyId }: ReportsStatsProps) => {
           )
         `)
         .eq('employees.branches.company_id', companyId)
-        .gte('timestamp', `${today}T00:00:00`)
-        .lt('timestamp', `${today}T23:59:59`);
+        .gte('created_at', `${today}T00:00:00`)
+        .lt('created_at', `${today}T23:59:59`);
 
       if (recordsError) throw recordsError;
 

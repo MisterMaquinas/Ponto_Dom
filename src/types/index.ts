@@ -141,6 +141,22 @@ export interface BiometricPhoto extends BaseEntity {
   is_active: boolean;
 }
 
+export interface VerificationLog {
+  id: string;
+  user_id: string;
+  reference_photo_url: string;
+  attempt_photo_url?: string;
+  verification_result: 'success' | 'failed' | 'error';
+  confidence_score: number;
+  similarity_score?: number;
+  error_message?: string;
+  created_at: string;
+  updated_at: string;
+  users?: {
+    name: string;
+  };
+}
+
 export interface BiometricVerificationLog extends BaseEntity {
   user_id: string;
   reference_photo_url: string;

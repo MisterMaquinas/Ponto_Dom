@@ -7,7 +7,7 @@ interface ProductivityReportProps {
 
 const ProductivityReport = ({ onBack }: ProductivityReportProps) => {
   return (
-    <SimpleProductivityReport onBack={onBack} />
+    <SimpleProductivityReport />
   );
 };
 

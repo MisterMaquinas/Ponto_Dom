@@ -10,9 +10,7 @@ interface ProductivityReportProps {
 const ProductivityReport = ({ onBack, onLogout, userData }: ProductivityReportProps) => {
   return (
     <SimpleProductivityReport 
-      onBack={onBack} 
-      onLogout={onLogout} 
-      userData={userData} 
+      companyId={userData?.companyId}
     />
   );
 };
