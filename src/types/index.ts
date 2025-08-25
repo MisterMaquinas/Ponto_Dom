@@ -69,7 +69,7 @@ export interface Employee extends BaseEntity {
   is_active: boolean;
   face_encoding?: string;
   reference_photo_url?: string;
-  created_by: string;
+  created_by?: string; // Made optional to match database schema
 }
 
 // =====================================

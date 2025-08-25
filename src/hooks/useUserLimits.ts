@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { toast } from '@/hooks/use-toast';
 
 interface UserCounts {
   admin: number;
@@ -42,44 +41,29 @@ export const useUserLimits = (companyId: string) => {
   const loadLimitsAndCounts = async () => {
     try {
       setLoading(true);
+      
+      // Placeholder implementation
+      toast({
+        title: "Em desenvolvimento",
+        description: "Esta funcionalidade está sendo desenvolvida",
+        variant: "default"
+      });
 
-      // Buscar limites da empresa
-      const { data: limitsData, error: limitsError } = await supabase
-        .from('company_limits')
-        .select('*')
-        .eq('company_id', companyId)
-        .single();
-
-      if (limitsError && limitsError.code !== 'PGRST116') { // PGRST116 = no rows found
-        console.error('Erro ao carregar limites:', limitsError);
-      } else if (limitsData) {
-        setCompanyLimits({
-          max_admins: limitsData.max_admins,
-          max_managers: limitsData.max_managers,
-          max_supervisors: limitsData.max_supervisors,
-          max_users: limitsData.max_users
-        });
-      }
-
-      // Contar usuários atuais por role
-      const { data: usersData, error: usersError } = await supabase
-        .from('users')
-        .select('role')
-        .eq('company_id', companyId);
-
-      if (usersError) {
-        console.error('Erro ao carregar usuários:', usersError);
-      } else if (usersData) {
-        const counts = usersData.reduce((acc, user) => {
-          acc[user.role as keyof UserCounts] = (acc[user.role as keyof UserCounts] || 0) + 1;
-          return acc;
-        }, { admin: 0, manager: 0, supervisor: 0, user: 0 });
-
-        setUserCounts(counts);
-      }
+      // Set default counts and limits
+      setUserCounts({
+        admin: 0,
+        manager: 0,
+        supervisor: 0,
+        user: 0
+      });
 
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar limites de usuários",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }

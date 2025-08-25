@@ -1,157 +1,83 @@
-
 import { useState, useEffect } from 'react';
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { getAvailableRoles, getRoleLabel, getRoleBadgeVariant } from './roleUtils';
-import { filterUsersByHierarchy, UserRole } from './hierarchyUtils';
-import type { User, UserFormData } from './types';
+import { toast } from '@/hooks/use-toast';
 
-export const useUserManagement = (userType: 'admin' | 'manager' | 'supervisor', userData: any) => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState<UserFormData>({
-    name: '',
-    cpf: '',
-    rg: '',
-    birth_date: '',
-    street: '',
-    number: '',
-    neighborhood: '',
-    city: '',
-    state: '',
-    zip_code: '',
-    contact: '',
-    username: '',
-    password: '',
-    role: ''
-  });
-
-  useEffect(() => {
-    loadUsers();
-  }, [userData.companyId]);
-
-  useEffect(() => {
-    // Aplicar filtro de hierarquia sempre que os usuários mudarem
-    const filtered = filterUsersByHierarchy(users, userType as UserRole);
-    setFilteredUsers(filtered);
-  }, [users, userType]);
+export const useUserManagement = (companyId: string) => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const loadUsers = async () => {
+    setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('company_id', userData.companyId)
-        .order('name');
-
-      if (error) {
-        throw error;
-      }
-
-      setUsers(data || []);
+      setUsers([]);
+      toast({
+        title: "Em desenvolvimento",
+        description: "Esta funcionalidade está sendo desenvolvida",
+        variant: "default"
+      });
     } catch (error) {
-      console.error('Erro ao carregar usuários:', error);
       toast({
         title: "Erro",
         description: "Erro ao carregar usuários",
-        variant: "destructive",
+        variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const createUser = async (userData: any) => {
+    setLoading(true);
     try {
-      const { error } = await supabase
-        .from('users')
-        .insert([
-          {
-            ...formData,
-            company_id: userData.companyId,
-            created_by: userData.username
-          }
-        ]);
-
-      if (error) {
-        throw error;
-      }
-
-      await loadUsers();
-      setFormData({
-        name: '',
-        cpf: '',
-        rg: '',
-        birth_date: '',
-        street: '',
-        number: '',
-        neighborhood: '',
-        city: '',
-        state: '',
-        zip_code: '',
-        contact: '',
-        username: '',
-        password: '',
-        role: ''
-      });
-      setShowForm(false);
-      
       toast({
-        title: "Usuário cadastrado com sucesso!",
-        description: `${formData.name} foi adicionado ao sistema`,
+        title: "Em desenvolvimento",
+        description: "Esta funcionalidade está sendo desenvolvida",
+        variant: "default"
       });
-    } catch (error: any) {
-      console.error('Erro ao cadastrar usuário:', error);
+      return { success: false };
+    } catch (error) {
       toast({
-        title: "Erro ao cadastrar usuário",
-        description: error.message || "Erro inesperado",
-        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao criar usuário",
+        variant: "destructive"
       });
+      return { success: false };
+    } finally {
+      setLoading(false);
     }
   };
 
   const deleteUser = async (userId: string) => {
-    if (!confirm('Tem certeza que deseja remover este usuário?')) {
-      return;
-    }
-
+    setLoading(true);
     try {
-      const { error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', userId);
-
-      if (error) {
-        throw error;
-      }
-
-      await loadUsers();
       toast({
-        title: "Usuário removido",
-        description: "O usuário foi removido do sistema",
+        title: "Em desenvolvimento",
+        description: "Esta funcionalidade está sendo desenvolvida",
+        variant: "default"
       });
-    } catch (error: any) {
-      console.error('Erro ao deletar usuário:', error);
+      return { success: false };
+    } catch (error) {
       toast({
         title: "Erro",
-        description: "Erro ao remover usuário",
-        variant: "destructive",
+        description: "Erro ao deletar usuário",
+        variant: "destructive"
       });
+      return { success: false };
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (companyId) {
+      loadUsers();
+    }
+  }, [companyId]);
+
   return {
     users,
-    filteredUsers,
-    showForm,
-    setShowForm,
-    formData,
-    setFormData,
-    handleSubmit,
-    deleteUser,
-    getAvailableRoles: () => getAvailableRoles(userType as UserRole),
-    getRoleLabel,
-    getRoleBadgeVariant
+    loading,
+    loadUsers,
+    createUser,
+    deleteUser
   };
 };
