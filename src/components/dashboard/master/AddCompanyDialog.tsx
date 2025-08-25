@@ -38,44 +38,62 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
     setLoading(true);
 
     try {
+      console.log('Iniciando cadastro da empresa...');
+      
       // Criar empresa
+      const companyData = { 
+        name: formData.name,
+        fantasy_name: formData.fantasyName,
+        cnpj: formData.cnpj,
+        state_registration: formData.stateRegistration,
+        phone: formData.phone,
+        email: formData.email,
+        street: formData.street,
+        number: formData.number,
+        neighborhood: formData.neighborhood,
+        city: formData.city,
+        state: formData.state,
+        zip_code: formData.zipCode
+      };
+      
+      console.log('Dados da empresa:', companyData);
+      
       const { data: company, error: companyError } = await supabase
         .from('companies')
-        .insert([{ 
-          name: formData.name,
-          fantasy_name: formData.fantasyName,
-          cnpj: formData.cnpj,
-          state_registration: formData.stateRegistration,
-          phone: formData.phone,
-          email: formData.email,
-          street: formData.street,
-          number: formData.number,
-          neighborhood: formData.neighborhood,
-          city: formData.city,
-          state: formData.state,
-          zip_code: formData.zipCode
-        }])
+        .insert([companyData])
         .select()
         .single();
 
+      console.log('Resultado da criação da empresa:', { company, companyError });
+
       if (companyError) throw companyError;
 
-      // Criar usuário admin padrão
-      const adminName = formData.adminName || 'Administrador';
-      const adminUsername = formData.adminUsername || company.name.toLowerCase().replace(/\s+/g, '');
-      const adminPassword = formData.adminPassword || '123456';
+      // Criar usuário admin apenas se dados foram fornecidos
+      if (formData.adminName || formData.adminUsername || formData.adminPassword) {
+        console.log('Criando usuário admin...');
+        
+        const adminName = formData.adminName || 'Administrador';
+        const adminUsername = formData.adminUsername || company.name.toLowerCase().replace(/\s+/g, '');
+        const adminPassword = formData.adminPassword || '123456';
 
-      const { error: userError } = await supabase
-        .from('users')
-        .insert([{
+        const userData = {
           company_id: company.id,
           name: adminName,
           username: adminUsername,
           password: adminPassword,
           is_admin: true
-        }]);
+        };
+        
+        console.log('Dados do usuário admin:', userData);
 
-      if (userError) throw userError;
+        const { error: userError } = await supabase
+          .from('users')
+          .insert([userData]);
+
+        console.log('Resultado da criação do usuário:', { userError });
+
+        if (userError) throw userError;
+      }
 
       // TODO: Sistema de limites será implementado futuramente
       // Empresa criada com sucesso sem limites por enquanto
