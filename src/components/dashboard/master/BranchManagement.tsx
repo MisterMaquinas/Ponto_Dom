@@ -20,13 +20,19 @@ interface Branch {
   company_id: string;
   name: string;
   address: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  contact: string;
-  manager_id: string | null;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  contact?: string;
+  phone?: string;
+  code?: string;
+  status?: string;
+  manager_id?: string | null;
+  manager_username?: string;
+  manager_password?: string;
   is_active: boolean;
   created_at: string;
+  updated_at?: string;
   companies?: { name: string };
   users?: { name: string };
 }
@@ -65,22 +71,21 @@ const BranchManagement = ({ onBack, onLogout, userData }: BranchManagementProps)
       
       setCompanies(companiesData || []);
 
-      // Carregar gerentes
+      // Carregar gerentes (removendo filtro por role que não existe)
       const { data: managersData } = await supabase
         .from('users')
         .select('id, name, company_id')
-        .in('role', ['admin', 'manager'])
+        .eq('is_admin', true)
         .order('name');
       
       setManagers(managersData || []);
 
       // Carregar filiais
       const { data: branchesData } = await supabase
-        .from('company_branches')
+        .from('branches')
         .select(`
           *,
-          companies (name),
-          users (name)
+          companies!inner (name)
         `)
         .order('created_at', { ascending: false });
 
@@ -103,7 +108,7 @@ const BranchManagement = ({ onBack, onLogout, userData }: BranchManagementProps)
     try {
       if (editingBranch) {
         const { error } = await supabase
-          .from('company_branches')
+          .from('branches')
           .update({
             company_id: formData.company_id,
             name: formData.name,
@@ -120,7 +125,7 @@ const BranchManagement = ({ onBack, onLogout, userData }: BranchManagementProps)
         toast({ title: "Filial atualizada com sucesso!" });
       } else {
         const { error } = await supabase
-          .from('company_branches')
+          .from('branches')
           .insert([{
             company_id: formData.company_id,
             name: formData.name,
@@ -179,7 +184,7 @@ const BranchManagement = ({ onBack, onLogout, userData }: BranchManagementProps)
 
     try {
       const { error } = await supabase
-        .from('company_branches')
+        .from('branches')
         .delete()
         .eq('id', branchId);
 

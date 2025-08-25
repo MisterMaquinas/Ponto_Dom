@@ -59,7 +59,7 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
           name: adminName,
           username: adminUsername,
           password: adminPassword,
-          role: 'admin',
+          role: 'admin', // TODO: Remover quando campo role for removido da tabela
           contact: formData.phone || '',
           cpf: '',
           rg: '',
@@ -75,18 +75,8 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
 
       if (userError) throw userError;
 
-      // Criar limites padrão para a empresa
-      const { error: limitsError } = await supabase
-        .from('company_limits')
-        .insert([{
-          company_id: company.id,
-          max_admins: 1,
-          max_managers: 5,
-          max_supervisors: 10,
-          max_users: 50
-        }]);
-
-      if (limitsError) throw limitsError;
+      // TODO: Sistema de limites será implementado futuramente
+      // Empresa criada com sucesso sem limites por enquanto
 
       toast({
         title: "Empresa criada com sucesso!",

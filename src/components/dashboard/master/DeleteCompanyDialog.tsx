@@ -40,13 +40,8 @@ const DeleteCompanyDialog = ({ isOpen, onClose, company, onCompanyDeleted }: Del
 
       if (usersError) throw usersError;
 
-      // Deletar limites da empresa
-      const { error: limitsError } = await supabase
-        .from('company_limits')
-        .delete()
-        .eq('company_id', company.id);
-
-      if (limitsError) throw limitsError;
+      // TODO: Implementar exclusão de limites quando tabela existir
+      // if (limitsError) throw limitsError;
 
       // Deletar empresa
       const { error: companyError } = await supabase

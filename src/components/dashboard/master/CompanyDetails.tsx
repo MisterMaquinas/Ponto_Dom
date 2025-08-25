@@ -32,21 +32,21 @@ const CompanyDetails = ({ company, onBack, onLogout, userData }: CompanyDetailsP
 
   const loadCompanyDetails = async () => {
     try {
-      // Carregar usuários da empresa
+      // Carregar usuários da empresa (removendo role que não existe)
       const { data: users, error: usersError } = await supabase
         .from('users')
-        .select('role')
+        .select('is_admin')
         .eq('company_id', company.id);
 
       if (usersError) throw usersError;
 
-      // Contar por função
+      // Contar por função (usando is_admin por enquanto, pois não temos campo role)
       const stats = {
         totalUsers: users?.length || 0,
-        admins: users?.filter(u => u.role === 'admin').length || 0,
-        managers: users?.filter(u => u.role === 'manager').length || 0,
-        supervisors: users?.filter(u => u.role === 'supervisor').length || 0,
-        employees: users?.filter(u => u.role === 'user').length || 0,
+        admins: users?.filter(u => u.is_admin).length || 0,
+        managers: 0, // TODO: Implementar sistema de roles adequado
+        supervisors: 0, // TODO: Implementar sistema de roles adequado  
+        employees: users?.filter(u => !u.is_admin).length || 0,
         branches: 1 // Por enquanto assumindo 1 filial, pode ser expandido
       };
 
