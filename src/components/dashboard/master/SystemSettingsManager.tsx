@@ -34,22 +34,9 @@ const SystemSettingsManager = ({ onBack, onLogout, userData }: SystemSettingsMan
   const loadSettings = async () => {
     try {
       setLoading(true);
-      
-      const { data, error } = await supabase
-        .from('system_settings')
-        .select('*')
-        .order('setting_key');
-
-      if (error) throw error;
-      
-      setSettings(data || []);
-      
-      // Inicializar valores de edição
-      const initialEditingValues: {[key: string]: any} = {};
-      (data || []).forEach(setting => {
-        initialEditingValues[setting.setting_key] = setting.setting_value;
-      });
-      setEditingSettings(initialEditingValues);
+      // Placeholder: tabela 'system_settings' não existe neste schema
+      setSettings([]);
+      setEditingSettings({});
     } catch (error) {
       console.error('Erro ao carregar configurações:', error);
       toast({
@@ -63,30 +50,10 @@ const SystemSettingsManager = ({ onBack, onLogout, userData }: SystemSettingsMan
   };
 
   const handleSaveSetting = async (settingKey: string) => {
-    try {
-      const { error } = await supabase
-        .from('system_settings')
-        .update({ 
-          setting_value: editingSettings[settingKey],
-          updated_at: new Date().toISOString()
-        })
-        .eq('setting_key', settingKey);
-
-      if (error) throw error;
-      
-      await loadSettings();
-      toast({
-        title: "Configuração salva!",
-        description: `A configuração "${settingKey}" foi atualizada`,
-      });
-    } catch (error) {
-      console.error('Erro ao salvar configuração:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar configuração",
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Em desenvolvimento",
+      description: `Salvar configuração "${settingKey}" estará disponível futuramente`,
+    });
   };
 
   const handleInputChange = (settingKey: string, value: any) => {

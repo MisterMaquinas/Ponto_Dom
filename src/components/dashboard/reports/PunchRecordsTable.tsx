@@ -93,67 +93,47 @@ const PunchRecordsTable = ({ companyId }: PunchRecordsTableProps) => {
     try {
       console.log('Loading punch records for companyId:', companyId);
       
-      // Buscar registros da tabela punch_records
       const { data: userPunchRecords, error: userError } = await supabase
         .from('punch_records')
-        .select(`
-          *,
-          users!inner(name, company_id)
-        `)
-        .eq('users.company_id', companyId)
+        .select('*')
         .order('timestamp', { ascending: false });
-
-      console.log('User punch records:', userPunchRecords);
-      console.log('User error:', userError);
 
       if (userError) throw userError;
 
-      // Buscar registros da tabela employee_punch_records
       const { data: employeePunchRecords, error: employeeError } = await supabase
         .from('employee_punch_records')
-        .select(`
-          *,
-          employees!inner(name, branch_id, work_start_time, work_end_time, break_start_time, break_end_time),
-          branches!inner(company_id)
-        `)
-        .eq('branches.company_id', companyId)
-        .order('timestamp', { ascending: false });
+        .select('*')
+        .order('created_at', { ascending: false });
 
       console.log('Employee punch records:', employeePunchRecords);
       console.log('Employee error:', employeeError);
 
       if (employeeError) throw employeeError;
 
-      // Combinar e normalizar os dados
-      const normalizedUserRecords = userPunchRecords?.map(record => ({
+      const normalizedUserRecords = (userPunchRecords || []).map((record: any) => ({
         id: record.id,
         user_id: record.user_id,
         punch_type: record.punch_type,
         timestamp: record.timestamp,
         confidence_score: record.confidence_score,
-        face_image_url: record.face_image_url,
+        face_image_url: undefined,
         users: {
-          name: record.users.name
+          name: record.user_id
         }
-      })) || [];
+      }));
 
-      const normalizedEmployeeRecords = employeePunchRecords?.map(record => ({
+      const normalizedEmployeeRecords = (employeePunchRecords || []).map((record: any) => ({
         id: record.id,
         user_id: record.employee_id,
         punch_type: record.punch_type,
-        timestamp: record.timestamp,
+        timestamp: record.created_at,
         confidence_score: record.face_confidence,
         face_image_url: record.photo_url,
         users: {
-          name: record.employees.name
+          name: record.employee_id
         },
-        employee_schedule: {
-          work_start_time: record.employees.work_start_time,
-          work_end_time: record.employees.work_end_time,
-          break_start_time: record.employees.break_start_time,
-          break_end_time: record.employees.break_end_time
-        }
-      })) || [];
+        employee_schedule: undefined
+      }));
 
       // Combinar todos os registros e ordenar por timestamp
       const allRecords = [...normalizedUserRecords, ...normalizedEmployeeRecords]

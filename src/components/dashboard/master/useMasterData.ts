@@ -62,8 +62,8 @@ export const useMasterData = () => {
       // Carregar administradores separadamente
       const { data: adminsData, error: adminsError } = await supabase
         .from('users')
-        .select('id, name, username, company_id')
-        .eq('role', 'admin');
+        .select('id, name, username, company_id, is_admin')
+        .eq('is_admin', true);
 
       if (adminsError) {
         console.error('Erro ao carregar admins:', adminsError);
@@ -127,7 +127,7 @@ export const useMasterData = () => {
       const totalBranches = (branchesData || []).length;
       const newStats: CompanyStats = {
         totalCompanies: processedCompanies.length,
-        totalAdmins: processedCompanies.length,
+        totalAdmins: (adminsData || []).length,
         totalEmployees: totalEmployees,
         totalUsers: totalUsers,
         activeCompanies: processedCompanies.length,

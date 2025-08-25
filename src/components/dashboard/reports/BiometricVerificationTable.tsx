@@ -10,15 +10,10 @@ import { supabase } from "@/integrations/supabase/client";
 interface VerificationLog {
   id: string;
   user_id: string;
-  attempt_photo_url: string;
-  reference_photo_url: string;
-  similarity_score: number;
-  verification_result: 'success' | 'failed' | 'error';
-  error_message?: string;
+  reference_photo_url: string | null;
+  confidence_score: number | null;
+  verification_result: boolean | null;
   created_at: string;
-  users: {
-    name: string;
-  };
 }
 
 interface BiometricVerificationTableProps {
@@ -38,22 +33,20 @@ const BiometricVerificationTable = ({ companyId }: BiometricVerificationTablePro
     try {
       const { data, error } = await supabase
         .from('biometric_verification_logs')
-        .select(`
-          *,
-          users!inner(name, company_id)
-        `)
-        .eq('users.company_id', companyId)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) throw error;
-      
-      // Type assertion para garantir que verification_result seja do tipo correto
-      const typedData = (data || []).map(log => ({
-        ...log,
-        verification_result: log.verification_result as 'success' | 'failed' | 'error'
+
+      const typedData: VerificationLog[] = (data || []).map((log: any) => ({
+        id: log.id,
+        user_id: log.user_id,
+        reference_photo_url: log.reference_photo_url ?? null,
+        confidence_score: log.confidence_score ?? null,
+        verification_result: log.verification_result ?? null,
+        created_at: log.created_at,
       }));
-      
       setVerificationLogs(typedData);
     } catch (error) {
       console.error('Erro ao carregar logs:', error);
@@ -62,8 +55,9 @@ const BiometricVerificationTable = ({ companyId }: BiometricVerificationTablePro
     }
   };
 
-  const getStatusBadge = (result: string, score?: number) => {
-    switch (result) {
+  const getStatusBadge = (result: boolean | null, score?: number | null) => {
+    const label = result === true ? 'success' : result === false ? 'failed' : 'error';
+    switch (label) {
       case 'success':
         return (
           <div className="flex items-center gap-2">
@@ -71,7 +65,7 @@ const BiometricVerificationTable = ({ companyId }: BiometricVerificationTablePro
               <CheckCircle className="w-3 h-3 mr-1" />
               Sucesso
             </Badge>
-            {score && (
+            {typeof score === 'number' && (
               <Badge variant="outline" className="text-xs">
                 {Math.round(score * 100)}%
               </Badge>
@@ -85,22 +79,20 @@ const BiometricVerificationTable = ({ companyId }: BiometricVerificationTablePro
               <XCircle className="w-3 h-3 mr-1" />
               Falhou
             </Badge>
-            {score && (
+            {typeof score === 'number' && (
               <Badge variant="outline" className="text-xs">
                 {Math.round(score * 100)}%
               </Badge>
             )}
           </div>
         );
-      case 'error':
+      default:
         return (
           <Badge className="bg-yellow-100 text-yellow-800">
             <AlertCircle className="w-3 h-3 mr-1" />
             Erro
           </Badge>
         );
-      default:
-        return <Badge variant="secondary">Desconhecido</Badge>;
     }
   };
 
@@ -141,7 +133,7 @@ const BiometricVerificationTable = ({ companyId }: BiometricVerificationTablePro
                           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
                             <User className="w-4 h-4 text-white" />
                           </div>
-                          <span className="font-medium text-gray-900">{log.users.name}</span>
+                          <span className="font-medium text-gray-900">{log.user_id}</span>
                         </div>
                       </td>
                       <td className="py-3 px-4 text-gray-600">
@@ -158,7 +150,7 @@ const BiometricVerificationTable = ({ companyId }: BiometricVerificationTablePro
                         </div>
                       </td>
                       <td className="py-3 px-4">
-                        {getStatusBadge(log.verification_result, log.similarity_score)}
+                        {getStatusBadge(log.verification_result, log.confidence_score)}
                       </td>
                       <td className="py-3 px-4">
                         <Button
@@ -185,7 +177,7 @@ const BiometricVerificationTable = ({ companyId }: BiometricVerificationTablePro
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>
-              Verificação Biométrica - {selectedLog?.users.name}
+              Verificação Biométrica - {selectedLog?.user_id}
             </DialogTitle>
           </DialogHeader>
           

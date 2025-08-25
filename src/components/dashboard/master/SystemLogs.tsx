@@ -43,26 +43,8 @@ const SystemLogs = ({ onBack, onLogout, userData }: SystemLogsProps) => {
   const loadLogs = async () => {
     try {
       setLoading(true);
-      
-      const { data, error } = await supabase
-        .from('system_logs')
-        .select(`
-          *,
-          users (name),
-          master_users (name)
-        `)
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      if (error) throw error;
-      
-      // Converter os dados para o tipo correto
-      const formattedLogs: SystemLog[] = (data || []).map(log => ({
-        ...log,
-        ip_address: log.ip_address ? String(log.ip_address) : null
-      }));
-      
-      setLogs(formattedLogs);
+      // Placeholder: tabela 'system_logs' não existe no schema atual
+      setLogs([]);
     } catch (error) {
       console.error('Erro ao carregar logs:', error);
       toast({
