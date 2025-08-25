@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useCompanyData = (companyId: string) => {
+  console.log('useCompanyData - recebido companyId:', companyId);
   const [stats, setStats] = useState({
     totalBranches: 0,
     totalEmployees: 0,
@@ -12,6 +13,7 @@ export const useCompanyData = (companyId: string) => {
 
   const loadData = async () => {
     try {
+      console.log('useCompanyData - iniciando loadData para companyId:', companyId);
       setLoading(true);
 
       // Buscar filiais da empresa
@@ -24,6 +26,9 @@ export const useCompanyData = (companyId: string) => {
         .eq('company_id', companyId)
         .order('name');
 
+      console.log('useCompanyData - branchesData:', branchesData);
+      console.log('useCompanyData - branchesError:', branchesError);
+      
       if (branchesError) throw branchesError;
 
       // Calcular estatísticas
@@ -50,15 +55,20 @@ export const useCompanyData = (companyId: string) => {
       setBranches(branchesWithEmployeeCount);
 
     } catch (error) {
-      console.error('Erro ao carregar dados da empresa:', error);
+      console.error('useCompanyData - Erro ao carregar dados da empresa:', error);
     } finally {
+      console.log('useCompanyData - finalizando loadData');
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    console.log('useCompanyData - useEffect executado, companyId:', companyId);
     if (companyId) {
       loadData();
+    } else {
+      console.log('useCompanyData - companyId é undefined/null, não carregando dados');
+      setLoading(false);
     }
   }, [companyId]);
 

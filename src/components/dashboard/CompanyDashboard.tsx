@@ -15,7 +15,15 @@ interface CompanyDashboardProps {
 
 const CompanyDashboard = ({ userData, onLogout }: CompanyDashboardProps) => {
   const [activeTab, setActiveTab] = useState('overview');
+  
+  console.log('CompanyDashboard - userData:', userData);
+  console.log('CompanyDashboard - companyId:', userData.companyId);
+  
   const { stats, branches, loading } = useCompanyData(userData.companyId);
+  
+  console.log('CompanyDashboard - loading:', loading);
+  console.log('CompanyDashboard - stats:', stats);
+  console.log('CompanyDashboard - branches:', branches);
 
   if (activeTab === 'branch-management') {
     return <BranchManagement onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} />;
