@@ -163,7 +163,7 @@ const FacialBiometricCapture = ({
       .from('user_biometric_photos')
       .insert({
         user_id: userData.id,
-        reference_photo_url: uploadData.path,
+        photo_url: uploadData.path,
         is_active: true
       });
 
@@ -182,7 +182,7 @@ const FacialBiometricCapture = ({
     // Buscar foto de referência
     const { data: referenceData, error: refError } = await supabase
       .from('user_biometric_photos')
-      .select('reference_photo_url')
+      .select('photo_url')
       .eq('user_id', userData.id)
       .eq('is_active', true)
       .limit(1)
@@ -213,14 +213,9 @@ const FacialBiometricCapture = ({
       .from('biometric_verification_logs')
       .insert({
         user_id: userData.id,
-        reference_photo_url: referenceData.reference_photo_url,
-        attempt_photo_url: uploadData.path,
-        verification_result: verified ? 'success' : 'failure',
-        similarity_score: confidence,
-        device_info: {
-          userAgent: navigator.userAgent,
-          timestamp: new Date().toISOString()
-        }
+        reference_photo_url: referenceData.photo_url,
+        verification_result: verified,
+        confidence_score: confidence
       })
       .select()
       .single();

@@ -147,6 +147,9 @@ export type Database = {
           company_id: string
           created_at: string
           id: string
+          is_active: boolean | null
+          manager_password: string | null
+          manager_username: string | null
           name: string
           phone: string | null
           status: string | null
@@ -158,6 +161,9 @@ export type Database = {
           company_id: string
           created_at?: string
           id?: string
+          is_active?: boolean | null
+          manager_password?: string | null
+          manager_username?: string | null
           name: string
           phone?: string | null
           status?: string | null
@@ -169,6 +175,9 @@ export type Database = {
           company_id?: string
           created_at?: string
           id?: string
+          is_active?: boolean | null
+          manager_password?: string | null
+          manager_username?: string | null
           name?: string
           phone?: string | null
           status?: string | null
@@ -301,12 +310,16 @@ export type Database = {
         Row: {
           birth_date: string | null
           branch_id: string
+          break_end_time: string | null
+          break_start_time: string | null
           city: string | null
           contact: string | null
           cpf: string | null
           created_at: string
+          custom_position: string | null
           face_encoding: string | null
           id: string
+          is_active: boolean | null
           name: string
           neighborhood: string | null
           number: string | null
@@ -317,17 +330,23 @@ export type Database = {
           status: string | null
           street: string | null
           updated_at: string
+          work_end_time: string | null
+          work_start_time: string | null
           zip_code: string | null
         }
         Insert: {
           birth_date?: string | null
           branch_id: string
+          break_end_time?: string | null
+          break_start_time?: string | null
           city?: string | null
           contact?: string | null
           cpf?: string | null
           created_at?: string
+          custom_position?: string | null
           face_encoding?: string | null
           id?: string
+          is_active?: boolean | null
           name: string
           neighborhood?: string | null
           number?: string | null
@@ -338,17 +357,23 @@ export type Database = {
           status?: string | null
           street?: string | null
           updated_at?: string
+          work_end_time?: string | null
+          work_start_time?: string | null
           zip_code?: string | null
         }
         Update: {
           birth_date?: string | null
           branch_id?: string
+          break_end_time?: string | null
+          break_start_time?: string | null
           city?: string | null
           contact?: string | null
           cpf?: string | null
           created_at?: string
+          custom_position?: string | null
           face_encoding?: string | null
           id?: string
+          is_active?: boolean | null
           name?: string
           neighborhood?: string | null
           number?: string | null
@@ -359,6 +384,8 @@ export type Database = {
           status?: string | null
           street?: string | null
           updated_at?: string
+          work_end_time?: string | null
+          work_start_time?: string | null
           zip_code?: string | null
         }
         Relationships: [
@@ -409,6 +436,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_face_recognition_logs_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_logs_user"
             columns: ["user_id"]
@@ -792,6 +826,7 @@ export type Database = {
       }
       users: {
         Row: {
+          company_id: string | null
           created_at: string | null
           id: string
           is_admin: boolean
@@ -801,6 +836,7 @@ export type Database = {
           username: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string | null
           id?: string
           is_admin?: boolean
@@ -810,6 +846,7 @@ export type Database = {
           username: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string | null
           id?: string
           is_admin?: boolean
@@ -818,7 +855,15 @@ export type Database = {
           updated_at?: string | null
           username?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "users_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
