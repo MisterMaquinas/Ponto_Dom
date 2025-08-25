@@ -59,18 +59,7 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
           name: adminName,
           username: adminUsername,
           password: adminPassword,
-          role: 'admin', // TODO: Remover quando campo role for removido da tabela
-          contact: formData.phone || '',
-          cpf: '',
-          rg: '',
-          birth_date: '1990-01-01',
-          street: formData.street || '',
-          number: formData.number || '',
-          neighborhood: formData.neighborhood || '',
-          city: formData.city || '',
-          state: formData.state || '',
-          zip_code: formData.zipCode || '',
-          created_by: 'master'
+          is_admin: true
         }]);
 
       if (userError) throw userError;
@@ -81,6 +70,25 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
       toast({
         title: "Empresa criada com sucesso!",
         description: `A empresa ${formData.name} foi cadastrada.`,
+      });
+
+      // Resetar formulário
+      setFormData({
+        name: '',
+        fantasyName: '',
+        cnpj: '',
+        stateRegistration: '',
+        phone: '',
+        email: '',
+        adminName: '',
+        adminUsername: '',
+        adminPassword: '',
+        street: '',
+        number: '',
+        neighborhood: '',
+        city: '',
+        state: '',
+        zipCode: ''
       });
 
       onCompanyAdded();
