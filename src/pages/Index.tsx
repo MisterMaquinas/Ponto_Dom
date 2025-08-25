@@ -116,8 +116,8 @@ const Index = () => {
             title="Acesso Master"
           >
             <img 
-              src="/lovable-uploads/3aa9dedc-d36d-4dcf-9d6d-bdee0123e04c.png" 
-              alt="PONTO VERIFICADO Biometria Facial" 
+              src="/lovable-uploads/434f3082-8ca4-449c-ae21-2ed209d650e1.png" 
+              alt="PONTO VERIFICADO Biometria Facial"
               className="w-64 h-64 object-contain filter drop-shadow-lg hover:drop-shadow-2xl transition-all duration-300"
             />
           </div>
