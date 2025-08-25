@@ -276,33 +276,60 @@ export type Database = {
       companies: {
         Row: {
           address: string | null
+          city: string | null
+          cnpj: string | null
           created_at: string
           email: string | null
+          fantasy_name: string | null
           id: string
           name: string
+          neighborhood: string | null
+          number: string | null
           phone: string | null
+          state: string | null
+          state_registration: string | null
           status: string | null
+          street: string | null
           updated_at: string
+          zip_code: string | null
         }
         Insert: {
           address?: string | null
+          city?: string | null
+          cnpj?: string | null
           created_at?: string
           email?: string | null
+          fantasy_name?: string | null
           id?: string
           name: string
+          neighborhood?: string | null
+          number?: string | null
           phone?: string | null
+          state?: string | null
+          state_registration?: string | null
           status?: string | null
+          street?: string | null
           updated_at?: string
+          zip_code?: string | null
         }
         Update: {
           address?: string | null
+          city?: string | null
+          cnpj?: string | null
           created_at?: string
           email?: string | null
+          fantasy_name?: string | null
           id?: string
           name?: string
+          neighborhood?: string | null
+          number?: string | null
           phone?: string | null
+          state?: string | null
+          state_registration?: string | null
           status?: string | null
+          street?: string | null
           updated_at?: string
+          zip_code?: string | null
         }
         Relationships: []
       }

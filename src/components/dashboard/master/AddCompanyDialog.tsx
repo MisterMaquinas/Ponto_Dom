@@ -41,7 +41,20 @@ const AddCompanyDialog = ({ isOpen, onClose, onCompanyAdded }: AddCompanyDialogP
       // Criar empresa
       const { data: company, error: companyError } = await supabase
         .from('companies')
-        .insert([{ name: formData.name }])
+        .insert([{ 
+          name: formData.name,
+          fantasy_name: formData.fantasyName,
+          cnpj: formData.cnpj,
+          state_registration: formData.stateRegistration,
+          phone: formData.phone,
+          email: formData.email,
+          street: formData.street,
+          number: formData.number,
+          neighborhood: formData.neighborhood,
+          city: formData.city,
+          state: formData.state,
+          zip_code: formData.zipCode
+        }])
         .select()
         .single();
 
