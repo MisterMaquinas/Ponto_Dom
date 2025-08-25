@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -43,18 +43,21 @@ export type Database = {
           created_at: string | null
           id: string
           password: string
+          role: string
           username: string
         }
         Insert: {
           created_at?: string | null
           id?: string
           password: string
+          role?: string
           username: string
         }
         Update: {
           created_at?: string | null
           id?: string
           password?: string
+          role?: string
           username?: string
         }
         Relationships: []
@@ -106,6 +109,80 @@ export type Database = {
           version?: string | null
         }
         Relationships: []
+      }
+      biometric_verification_logs: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          id: string
+          reference_photo_url: string | null
+          updated_at: string
+          user_id: string
+          verification_result: boolean | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          reference_photo_url?: string | null
+          updated_at?: string
+          user_id: string
+          verification_result?: boolean | null
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          reference_photo_url?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_result?: boolean | null
+        }
+        Relationships: []
+      }
+      branches: {
+        Row: {
+          address: string | null
+          code: string | null
+          company_id: string
+          created_at: string
+          id: string
+          name: string
+          phone: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          code?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          name: string
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          code?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branches_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chat_messages: {
         Row: {
@@ -186,6 +263,113 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      companies: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      employees: {
+        Row: {
+          birth_date: string | null
+          branch_id: string
+          city: string | null
+          contact: string | null
+          cpf: string | null
+          created_at: string
+          face_encoding: string | null
+          id: string
+          name: string
+          neighborhood: string | null
+          number: string | null
+          position: string | null
+          reference_photo_url: string | null
+          rg: string | null
+          state: string | null
+          status: string | null
+          street: string | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          birth_date?: string | null
+          branch_id: string
+          city?: string | null
+          contact?: string | null
+          cpf?: string | null
+          created_at?: string
+          face_encoding?: string | null
+          id?: string
+          name: string
+          neighborhood?: string | null
+          number?: string | null
+          position?: string | null
+          reference_photo_url?: string | null
+          rg?: string | null
+          state?: string | null
+          status?: string | null
+          street?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          birth_date?: string | null
+          branch_id?: string
+          city?: string | null
+          contact?: string | null
+          cpf?: string | null
+          created_at?: string
+          face_encoding?: string | null
+          id?: string
+          name?: string
+          neighborhood?: string | null
+          number?: string | null
+          position?: string | null
+          reference_photo_url?: string | null
+          rg?: string | null
+          state?: string | null
+          status?: string | null
+          street?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       face_recognition_logs: {
         Row: {
@@ -571,11 +755,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string | null
           id: string
           is_admin: boolean
+          name: string | null
           password: string
           updated_at: string | null
           username: string
@@ -584,6 +804,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_admin?: boolean
+          name?: string | null
           password: string
           updated_at?: string | null
           username: string
@@ -592,6 +813,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_admin?: boolean
+          name?: string | null
           password?: string
           updated_at?: string | null
           username?: string
@@ -605,6 +827,10 @@ export type Database = {
     Functions: {
       delete_apk_completely: {
         Args: { apk_id: string }
+        Returns: boolean
+      }
+      is_admin_user: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
     }
