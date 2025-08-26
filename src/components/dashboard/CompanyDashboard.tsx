@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Users, BarChart3, Building, Eye, Settings, Plus } from 'lucide-react';
+import { Building2, Users, BarChart3, Building, Eye, Settings, Plus, UserPlus, Key } from 'lucide-react';
 import BranchManagement from './company/BranchManagement';
 import CompanyReports from './company/CompanyReports';
 import CompanySettings from './company/CompanySettings';
+import CompanyEmployeeRegistration from './company/CompanyEmployeeRegistration';
+import CompanyAccessKeys from './company/CompanyAccessKeys';
 import { useCompanyData } from './company/useCompanyData';
 
 interface CompanyDashboardProps {
@@ -35,6 +37,14 @@ const CompanyDashboard = ({ userData, onLogout }: CompanyDashboardProps) => {
 
   if (activeTab === 'settings') {
     return <CompanySettings onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} />;
+  }
+
+  if (activeTab === 'employee-registration') {
+    return <CompanyEmployeeRegistration onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} branches={branches} />;
+  }
+
+  if (activeTab === 'access-keys') {
+    return <CompanyAccessKeys onBack={() => setActiveTab('overview')} onLogout={onLogout} userData={userData} />;
   }
 
   const mainStats = [
@@ -147,6 +157,20 @@ const CompanyDashboard = ({ userData, onLogout }: CompanyDashboardProps) => {
                   >
                     <BarChart3 className="w-5 h-5 mr-3" />
                     Relatórios da Empresa
+                  </Button>
+                  <Button
+                    onClick={() => setActiveTab('employee-registration')}
+                    className="w-full justify-start h-12 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                  >
+                    <UserPlus className="w-5 h-5 mr-3" />
+                    Cadastrar Funcionário
+                  </Button>
+                  <Button
+                    onClick={() => setActiveTab('access-keys')}
+                    className="w-full justify-start h-12 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+                  >
+                    <Key className="w-5 h-5 mr-3" />
+                    Chave de Acesso
                   </Button>
                   <Button
                     onClick={() => setActiveTab('settings')}
