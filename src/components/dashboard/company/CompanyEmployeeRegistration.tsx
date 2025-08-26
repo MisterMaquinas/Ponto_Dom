@@ -18,6 +18,7 @@ interface CompanyEmployeeRegistrationProps {
 
 const CompanyEmployeeRegistration = ({ onBack, onLogout, userData, branches }: CompanyEmployeeRegistrationProps) => {
   const { toast } = useToast();
+  const companyId = userData?.companyId || userData?.company_id;
   const [showCamera, setShowCamera] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -115,7 +116,7 @@ const CompanyEmployeeRegistration = ({ onBack, onLogout, userData, branches }: C
           const { data: sedeData, error: sedeError } = await supabase
             .from('branches')
             .insert({
-              company_id: userData.companyId,
+              company_id: companyId,
               name: 'SEDE',
               code: 'SEDE',
               address: 'Endereço da Sede',
@@ -142,7 +143,7 @@ const CompanyEmployeeRegistration = ({ onBack, onLogout, userData, branches }: C
       let photoUrl = '';
       if (formData.reference_photo_url) {
         const photoBlob = dataURItoBlob(formData.reference_photo_url);
-        const fileName = `employee_${Date.now()}_${userData.companyId}.jpg`;
+        const fileName = `employee_${Date.now()}_${companyId}.jpg`;
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('biometric-photos')
@@ -286,7 +287,6 @@ const CompanyEmployeeRegistration = ({ onBack, onLogout, userData, branches }: C
                       <SelectValue placeholder="Selecione a filial ou deixe em branco para SEDE" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="sede">SEDE (Criada automaticamente)</SelectItem>
                       {branches.map((branch) => (
                         <SelectItem key={branch.id} value={branch.id}>
                           {branch.name} - {branch.city}

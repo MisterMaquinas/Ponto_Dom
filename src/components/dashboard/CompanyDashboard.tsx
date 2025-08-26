@@ -18,10 +18,11 @@ interface CompanyDashboardProps {
 const CompanyDashboard = ({ userData, onLogout }: CompanyDashboardProps) => {
   const [activeTab, setActiveTab] = useState('overview');
   
+  const companyId = userData?.companyId ?? userData?.company_id;
   console.log('CompanyDashboard - userData:', userData);
-  console.log('CompanyDashboard - companyId:', userData.companyId);
+  console.log('CompanyDashboard - companyId:', companyId);
   
-  const { stats, branches, loading } = useCompanyData(userData.companyId);
+  const { stats, branches, loading } = useCompanyData(companyId);
   
   console.log('CompanyDashboard - loading:', loading);
   console.log('CompanyDashboard - stats:', stats);
