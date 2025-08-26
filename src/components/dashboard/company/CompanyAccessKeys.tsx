@@ -26,11 +26,23 @@ const CompanyAccessKeys = ({ onBack, onLogout, userData }: CompanyAccessKeysProp
   }, []);
 
   const loadAccessKeys = async () => {
+    const companyId = userData?.companyId || userData?.company_id;
+    
+    if (!companyId) {
+      toast({
+        title: "Erro",
+        description: "ID da empresa não encontrado",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('access_keys')
         .select('*')
+        .eq('company_id', companyId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -60,6 +72,17 @@ const CompanyAccessKeys = ({ onBack, onLogout, userData }: CompanyAccessKeysProp
   const handleCreateKey = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    const companyId = userData?.companyId || userData?.company_id;
+    
+    if (!companyId) {
+      toast({
+        title: "Erro",
+        description: "ID da empresa não encontrado",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       const newKey = generateAccessKey();
       
@@ -67,6 +90,8 @@ const CompanyAccessKeys = ({ onBack, onLogout, userData }: CompanyAccessKeysProp
         .from('access_keys')
         .insert({
           key_value: newKey,
+          company_id: companyId,
+          description: newKeyDescription || 'Chave de acesso da empresa',
           is_active: true
         })
         .select()
@@ -273,6 +298,11 @@ const CompanyAccessKeys = ({ onBack, onLogout, userData }: CompanyAccessKeysProp
                               </Button>
                             </div>
                             <div className="text-sm text-gray-500">
+                              {key.description && (
+                                <div className="mb-1">
+                                  <strong>Descrição:</strong> {key.description}
+                                </div>
+                              )}
                               Criada em: {new Date(key.created_at).toLocaleDateString('pt-BR')}
                             </div>
                           </div>

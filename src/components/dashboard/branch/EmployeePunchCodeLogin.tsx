@@ -30,6 +30,48 @@ const EmployeePunchCodeLogin = ({ onSuccess, onBack }: EmployeePunchCodeLoginPro
     setLoading(true);
     
     try {
+      // Primeiro, tentar validar como chave de acesso
+      const { data: accessKey, error: keyError } = await supabase
+        .from('access_keys')
+        .select(`
+          *,
+          companies (
+            id,
+            name,
+            branches (
+              id,
+              name,
+              is_active
+            )
+          )
+        `)
+        .eq('key_value', code.trim())
+        .eq('is_active', true)
+        .single();
+
+      if (accessKey && accessKey.companies && Array.isArray(accessKey.companies.branches)) {
+        const activeBranch = accessKey.companies.branches.find((b: any) => b.is_active);
+        
+        if (activeBranch) {
+          const branchWithCompany = {
+            id: activeBranch.id,
+            name: activeBranch.name,
+            companies: {
+              id: accessKey.companies.id,
+              name: accessKey.companies.name
+            }
+          };
+
+          toast({
+            title: "Código salvo validado",
+            description: `Conectado à ${activeBranch.name}`,
+          });
+          onSuccess(branchWithCompany);
+          return true;
+        }
+      }
+
+      // Se não for chave de acesso, tentar como ID de filial (fallback)
       const { data: branch, error } = await supabase
         .from('branches')
         .select(`
@@ -74,6 +116,53 @@ const EmployeePunchCodeLogin = ({ onSuccess, onBack }: EmployeePunchCodeLoginPro
     setLoading(true);
     
     try {
+      // Primeiro, verificar se é uma chave de acesso válida
+      const { data: accessKey, error: keyError } = await supabase
+        .from('access_keys')
+        .select(`
+          *,
+          companies (
+            id,
+            name,
+            branches (
+              id,
+              name,
+              is_active
+            )
+          )
+        `)
+        .eq('key_value', branchCode.trim())
+        .eq('is_active', true)
+        .single();
+
+      if (accessKey && accessKey.companies && Array.isArray(accessKey.companies.branches)) {
+        // Usar primeira filial ativa da empresa
+        const activeBranch = accessKey.companies.branches.find((b: any) => b.is_active);
+        
+        if (activeBranch) {
+          const branchWithCompany = {
+            id: activeBranch.id,
+            name: activeBranch.name,
+            companies: {
+              id: accessKey.companies.id,
+              name: accessKey.companies.name
+            }
+          };
+
+          // Salvar código no localStorage para próximos acessos
+          localStorage.setItem('branch_code', branchCode.trim());
+          
+          toast({
+            title: "Acesso autorizado",
+            description: `Bem-vindo à ${activeBranch.name}`,
+          });
+
+          onSuccess(branchWithCompany);
+          return;
+        }
+      }
+
+      // Se não for chave de acesso, tentar buscar filial diretamente pelo ID (fallback)
       const { data: branch, error } = await supabase
         .from('branches')
         .select(`

@@ -16,27 +16,51 @@ export type Database = {
     Tables: {
       access_keys: {
         Row: {
+          branch_id: string | null
+          company_id: string | null
           created_at: string | null
+          description: string | null
           id: string
           is_active: boolean
           key_value: string
           updated_at: string | null
         }
         Insert: {
+          branch_id?: string | null
+          company_id?: string | null
           created_at?: string | null
+          description?: string | null
           id?: string
           is_active?: boolean
           key_value: string
           updated_at?: string | null
         }
         Update: {
+          branch_id?: string | null
+          company_id?: string | null
           created_at?: string | null
+          description?: string | null
           id?: string
           is_active?: boolean
           key_value?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "access_keys_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_keys_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       admins: {
         Row: {
