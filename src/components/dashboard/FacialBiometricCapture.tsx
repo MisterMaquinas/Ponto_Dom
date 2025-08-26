@@ -120,18 +120,32 @@ const FacialBiometricCapture = ({
         onCapture(capturedImage);
       } else if (mode === 'register') {
         // Modo registro: salvar foto de referência
-        if (!userData?.id) throw new Error('ID do usuário não encontrado');
+        if (!userData?.id) {
+          // Se não houver userData.id, apenas retornar a imagem capturada
+          console.warn('userData.id não encontrado, retornando apenas imagem');
+          onCapture(capturedImage);
+          return;
+        }
         await saveReferencePhoto(capturedImage);
         onCapture(capturedImage);
       } else {
         // Modo verificação: comparar com foto de referência
-        if (!userData?.id) throw new Error('ID do usuário não encontrado');
+        if (!userData?.id) {
+          // Se não houver userData.id, apenas retornar a imagem capturada
+          console.warn('userData.id não encontrado para verificação, retornando apenas imagem');
+          onCapture(capturedImage);
+          return;
+        }
         const verificationResult = await verifyFace(capturedImage);
         onCapture(capturedImage, verificationResult);
       }
     } catch (error) {
       console.error('Erro ao processar captura:', error);
-      setError('Erro ao processar a imagem. Tente novamente.');
+      toast({
+        title: "Erro no processamento",
+        description: "Erro ao processar a imagem. Tente novamente.",
+        variant: "destructive",
+      });
       setStep('captured');
     }
   };
