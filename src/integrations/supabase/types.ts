@@ -56,7 +56,7 @@ export type Database = {
           {
             foreignKeyName: "access_keys_company_id_fkey"
             columns: ["company_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -978,6 +978,10 @@ export type Database = {
       delete_apk_completely: {
         Args: { apk_id: string }
         Returns: boolean
+      }
+      generate_company_access_key: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       is_admin_user: {
         Args: Record<PropertyKey, never>
