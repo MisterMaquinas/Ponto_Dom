@@ -167,8 +167,10 @@ export type Database = {
       branches: {
         Row: {
           address: string | null
+          city: string | null
           code: string | null
           company_id: string
+          contact: string | null
           created_at: string
           id: string
           is_active: boolean | null
@@ -176,13 +178,17 @@ export type Database = {
           manager_username: string | null
           name: string
           phone: string | null
+          state: string | null
           status: string | null
           updated_at: string
+          zip_code: string | null
         }
         Insert: {
           address?: string | null
+          city?: string | null
           code?: string | null
           company_id: string
+          contact?: string | null
           created_at?: string
           id?: string
           is_active?: boolean | null
@@ -190,13 +196,17 @@ export type Database = {
           manager_username?: string | null
           name: string
           phone?: string | null
+          state?: string | null
           status?: string | null
           updated_at?: string
+          zip_code?: string | null
         }
         Update: {
           address?: string | null
+          city?: string | null
           code?: string | null
           company_id?: string
+          contact?: string | null
           created_at?: string
           id?: string
           is_active?: boolean | null
@@ -204,8 +214,10 @@ export type Database = {
           manager_username?: string | null
           name?: string
           phone?: string | null
+          state?: string | null
           status?: string | null
           updated_at?: string
+          zip_code?: string | null
         }
         Relationships: [
           {
