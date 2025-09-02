@@ -41,7 +41,7 @@ const CompanyAccessKeys = ({ onBack, onLogout, userData }: CompanyAccessKeysProp
         .from('access_keys')
         .select('*')
         .eq('company_id', companyId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       setAccessKey(data);
